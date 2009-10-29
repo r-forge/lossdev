@@ -230,7 +230,7 @@ setMethod('finalCumulativeDiff',
                    y=range(0, cumulative.resi.stats, na.rm=TRUE),
                    type='n',
                    xlab=getExposureYearLabel(object@input),
-                   ylab="Relative Difference Between Actual and Estimated Cumulative Payments",
+                   ylab="Relative Difference Between Actual and Estimated Cumulatives",
                    cex.axis=1.25,
                    cex.lab=1.25)
 
@@ -378,8 +378,8 @@ setMethod('triResi',
                       points(x=rep(i,K),
                              y=resi[,i])
 
-                  points(x=1:K, y=apply(resi, 2, median, na.rm=TRUE), lwd=3, type="h", col='red') #bars
-                  points(x=1:K, y=apply(resi, 2, median, na.rm=TRUE), pch=20, type="p", col='red') #pinheads
+                  points(x=1:K, y=apply(resi, 2, mean, na.rm=TRUE), lwd=3, type="h", col='red') #bars
+                  points(x=1:K, y=apply(resi, 2, mean, na.rm=TRUE), pch=20, type="p", col='red') #pinheads
               }
 
           } else if(identical(timeAxis, 'ey')) {
@@ -400,8 +400,8 @@ setMethod('triResi',
                       points(x=rep(exp.years[i],K),
                              y=resi[i,])
 
-                  points(x=exp.years, y=apply(resi, 1, median, na.rm=TRUE), lwd=3, type="h", col='red') #bars
-                  points(x=exp.years, y=apply(resi, 1, median, na.rm=TRUE), pch=20, type="p", col='red') #pinheads
+                  points(x=exp.years, y=apply(resi, 1, mean, na.rm=TRUE), lwd=3, type="h", col='red') #bars
+                  points(x=exp.years, y=apply(resi, 1, mean, na.rm=TRUE), pch=20, type="p", col='red') #pinheads
               }
 
           } else if(identical(timeAxis, 'cy')) {
@@ -429,13 +429,13 @@ setMethod('triResi',
                              y=sub)
 
                       points(x=cal.years[k],
-                             y=median(sub, na.rm=TRUE),
+                             y=mean(sub, na.rm=TRUE),
                              lwd=3,
                              type='h',
                              col='red')
 
                       points(x=cal.years[k],
-                             y=median(sub, na.rm=TRUE),
+                             y=mean(sub, na.rm=TRUE),
                              lwd=3,
                              type='p',
                              col='red')
@@ -450,7 +450,7 @@ setMethod('triResi',
           {
 
               legend('center',
-                     'Median Residual',
+                     'Mean of Residuals',
                      col=c('red'),
                      pch=c(20),
                      horiz=TRUE,
