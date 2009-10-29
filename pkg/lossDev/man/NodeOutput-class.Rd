@@ -6,8 +6,8 @@
 It is used to provide easy access to summary statistics.
 Current slots are:
 \describe{
-\item{\code{value}}{
-An S3 object of type \code{mcarray}.
+\item{\code{get.value.end}}{
+An environment containing a parameterless function called "get.value" which when called will return the mcarray for the node.
 }
 \item{\code{mean}}{
 An array that is the marginalized mean of slot \code{value}.

@@ -29,7 +29,7 @@
 NULL
 
 
-setOldClass('mcarray')
+
 
 ##' A class to hold \acronym{JAGS} output.  This class is only used internally.  No user-level function should return a class of this type.
 ##'
@@ -37,8 +37,8 @@ setOldClass('mcarray')
 ##' It is used to provide easy access to summary statistics.
 ##' Current slots are:
 ##' \describe{
-##'   \item{\code{value}}{
-##'     An S3 object of type \code{mcarray}.
+##'   \item{\code{get.value.end}}{
+##'     An environment containing a parameterless function called "get.value" which when called will return the mcarray for the node.
 ##'   }
 ##'   \item{\code{mean}}{
 ##'     An array that is the marginalized mean of slot \code{value}.
@@ -56,11 +56,15 @@ setOldClass('mcarray')
 setClass(
          'NodeOutput',
          representation(
-                        value='mcarray',
+                        get.value.env='environment',
                         mean='array',
                         median='array',
                         sd='array'
                         ))
+
+
+
+
 
 ##' A method to construct new object of type \code{NodeOutput}. Intended for internal use only.
 ##'
@@ -71,15 +75,63 @@ setClass(
 newNodeOutput <- function(mcarray)
 {
     ans <- new('NodeOutput')
+    force(mcarray)
 
     ans@mean <- as.array(summary(mcarray, mean)[[1]])
     ans@median <- as.array(summary(mcarray, median)[[1]])
     my.sd <- function(x) sd(as.vector(x))[[1]]
     ans@sd <- as.array(summary(mcarray, my.sd)[[1]])
-    slot(ans, 'value') <- mcarray
+
+
+
+    ##create a new name for this object
+    mutableState$CounterForCreatedCodas <- mutableState$CounterForCreatedCodas + 1
+    value.name <- paste('object', mutableState$CounterForCreatedCodas, sep='')
+
+    save.to.disk <- .lossDevOptions()[['keepCodaOnDisk']]
+    if(save.to.disk)
+    {
+        ans@get.value.env <-  new.env()
+        ans@get.value.env$get.value   <- function()
+        {
+            return(dbFetch(mutableState$fileHashDBForCodas, value.name))
+        }
+
+        reg.finalizer(ans@get.value.env,
+                      function(object){
+                          dbDelete(mutableState$fileHashDBForCodas, value.name)
+                      },
+                      onexit=TRUE)
+
+        dbInsert(mutableState$fileHashDBForCodas, value.name, mcarray)
+    } else {
+
+        ans@get.value.env <-  new.env()
+        ans@get.value.env$get.value   <- function()
+        {
+            return(mcarray)
+        }
+
+    }
+
+
+
+    #slot(ans, 'value') <- mcarray
 
     if(!validObject(ans))
         stop("could not create a valid")
     return(ans)
 }
+
+setMethod('slot',
+          signature(object='NodeOutput', name='character'),
+          function(object, name)
+      {
+          if(length(name) != 1 || name != 'value')
+              return(callNextMethod())
+
+          return(object@get.value.env$get.value())
+
+
+      })
 

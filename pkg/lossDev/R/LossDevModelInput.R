@@ -126,7 +126,8 @@ setMethod(
           ans@input <- object
           for(i in parameters.to.save.)
               slot(ans,i) <- newNodeOutput(output[[i]])
-              ##slot(ans,i) <- new('NodeOutput', value=new('safe.mcmc', value=output[[i]]))
+          ##slot(ans,i) <- new('NodeOutput', value=new('safe.mcmc', value=output[[i]]))
+          rm(output)
 
           if(!validObject(ans))
               stop('A valid output could not be created')
