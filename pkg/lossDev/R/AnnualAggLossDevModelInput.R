@@ -226,7 +226,7 @@ setMethod(
           ans$rho.prior <- c(2,4)
 
           ans$allow.for.skew <- ifelse(object@allowForSkew, 1, 0)
-          ans$precision.for.skewness <- 5.0E-2
+          ans$precision.for.skewness <- 0.1
 
           ans$precision.for.eta.mu <- 0.1
 
