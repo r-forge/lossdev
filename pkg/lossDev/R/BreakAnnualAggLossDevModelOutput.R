@@ -341,7 +341,7 @@ setMethod('tailFactor',
               {
                   y.range <- NA
                   for(i in names(tail.list))
-                      y.range <- range(y.range, tail.list[[i]][,attachment], na.rm=TRUE)
+                      y.range <- range(y.range, tail.list[[i]][,attachment.adj], na.rm=TRUE)
 
                   plot(x=range(total.exp.years),
                        y=y.range,
