@@ -1,8 +1,8 @@
 \name{CPI}
 \alias{CPI}
-\title{Consumer price index for the United States.}
+\title{Consumer price index (CPI-U) for the United States.}
 \usage{CPI}
-\description{Consumer price index for the United States.}
+\description{Consumer price index (CPI-U) for the United States.}
 \references{\emph{bls.gov} \cr
 \tabular{ll}{
 \bold{Not Seasonally Adjusted} \tab \cr
@@ -12,4 +12,3 @@
 \bold{Base Period:}            \tab 1982-84=100 \cr
 }}
 \docType{data}
-\section{TODO}{check}
