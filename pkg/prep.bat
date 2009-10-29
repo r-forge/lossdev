@@ -1,3 +1,3 @@
 rm lossDev/man/*
-rm -r lossDev/R*~
+rm lossDev/R*~
 Rcmd roxygen.sh -d lossDev
