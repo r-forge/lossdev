@@ -1449,7 +1449,7 @@ setGenericVerif('predictedPayments',
 ##' @seealso \code{\link{predictedPayments}}
 setMethod('predictedPayments',
           signature(object='AnnualAggLossDevModelOutput'),
-          f <- function(object, type, logScale, mergePredictedWithObserved, plotObservedValues, plotPredictedOnlyWhereObserved, quantiles, plot)
+          function(object, type, logScale, mergePredictedWithObserved, plotObservedValues, plotPredictedOnlyWhereObserved, quantiles, plot)
       {
           type <- match.arg(type)
 

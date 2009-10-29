@@ -43,7 +43,7 @@ setClass(
          'StandardAnnualAggLossDevModelOutputWithZeros',
          representation(
                         priorsForProbOfPayment='numeric',
-                        pred.non.zero.payment='NodeOutput'),
+                        prob.of.non.zero.payment='NodeOutput'),
          contains=c('StandardAnnualAggLossDevModelOutput'))
 
 ##' The class to handle incremental payments of zero.
@@ -57,7 +57,7 @@ setClass(
          'BreakAnnualAggLossDevModelOutputWithZeros',
          representation(
                         priorsForProbOfPayment='numeric',
-                        pred.non.zero.payment='NodeOutput'),
+                        prob.of.non.zero.payment='NodeOutput'),
          contains=c('BreakAnnualAggLossDevModelOutput'))
 
 setClassUnion('AnnualAggLossDevModelOutputWithZeros', c('StandardAnnualAggLossDevModelOutputWithZeros', 'BreakAnnualAggLossDevModelOutputWithZeros'))
@@ -110,7 +110,7 @@ accountForZeroPayments <- function(object)
 
 
 
-    parameters.to.save. <- 'pred.non.zero.payment'
+    parameters.to.save. <- 'prob.of.non.zero.payment'
     ##print(parameters.to.save.)
 
 
@@ -244,10 +244,157 @@ setMethod('finalCumulativeDiff',
           function(object, plot)
       {
 
-          tmp <- object@inc.pred@value * pred.non.zero.payment@value
+          tmp <- object@inc.pred@value * object@prob.of.non.zero.payment@value
           object@inc.pred <- newNodeOutput(tmp)
 
-          callNextMethod()
+          current.class <- class(object)
+          i <- match(current.class, is(object))
+          f <- selectMethod('finalCumulativeDiff', is(object)[i+1])
+          return(f(object, plot))
 
       })
+
+##' A method to plot and/or return the predicted tail factors for a specific attachment point.
+##'
+##' The tail factor is the ratio of the estimated ultimate loss to cumulative loss at some point in development time.
+##' This is a method to allow for the retrieval and illustration of the tail factor by exposure year.
+##'
+##' Because the model is Bayesian, each tail factor comes as a distribution.  To ease graphical interpretation, only the median for each factor is plotted/returned.
+##' See for more details \code{\link{tailFactor}}.
+##'
+##' For comparison purposes, the function returns three separated tail factors for three scenarios.  Theses three tail factors are returned as a list with the following names and meanings:
+##' \describe{
+##'   \item{\dQuote{Actual}}{
+##'     These are the tail factors estimated when taking the break into consideration.
+##'   }
+##'   \item{\dQuote{AsIfPostBreak}}{
+##'     These are the tail factors estimated when assuming all years where in the post-break regime.
+##'   }
+##'   \item{\dQuote{AsIfPreBreak}}{
+##'     These are the tail factors estimated when assuming all years where in the pre-break regime.
+##'   }
+##' }
+##'
+##' @name tailFactor,BreakAnnualAggLossDevModelOutputWithZeros-method
+##' @param object The object from which to plot the predicted tail factors and return tail factors for \emph{all} attachment points.
+##' @param attachment An integer value specifying the attachment point for the tail.  Must be at least 1. See Details for more info.
+##' @param useObservedValues A logical value.  If \code{TRUE}, observed values are substituted for predicted values whenever possible in the calculation.  If \code{FALSE}, only predicted values are used.
+##' @param firstIsHalfReport A logical value or \code{NA}.  See Details for more information.
+##' @param finalAttachment An integer value must be at least 1 default value is \code{attachment}.  A call to \code{tailFactor} returns (invisibly) a matrix of tail factors through this value.
+##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
+##' @return Mainly called for the side effect of plotting.  Also returns tail factors for \emph{all} attachment points through \code{finalAttachment}.  See Details. Returned invisibly.
+##' @docType methods
+##' @seealso \code{\link{tailFactor}}
+##' @seealso \code{\link[=tailFactor,StandardAnnualAggLossDevModelOutput-method]{tailFactor("StandardAnnualAggLossDevModelOutput")}}
+setMethod('tailFactor',
+          signature(object='BreakAnnualAggLossDevModelOutputWithZeros'),
+          function(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot)
+      {
+
+
+          tmp <- object@inc.pred@value * object@prob.of.non.zero.payment@value
+          object@inc.pred <- newNodeOutput(tmp)
+
+          tmp <- object@inc.brk@value
+          for(i in 1:2)
+              tmp[,,i,,] <- tmp[,,i,,] * object@prob.of.non.zero.payment@value
+
+          object@inc.brk <- newNodeOutput(tmp)
+
+          current.class <- class(object)
+          i <- match(current.class, is(object))
+          f <- selectMethod('tailFactor', is(object)[i+1])
+          return(f(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot))
+
+      })
+
+##' A method to plot and/or return the predicted tail factors for a specific attachment point.
+##'
+##' The tail factor is the ratio of the estimated ultimate loss to cumulative loss at some point in development time.
+##' This is a method to allow for the retrieval and illustration of the tail factor by exposure year.
+##'
+##' Because the model is Bayesian, each tail factor comes as a distribution.  To ease graphical interpretation, only the median for each factor is plotted/returned.
+##' See for more details \code{\link{tailFactor}}.
+##'
+##' For comparison purposes, the function returns three separated tail factors for three scenarios.  Theses three tail factors are returned as a list with the following names and meanings:
+##' \describe{
+##'   \item{\dQuote{Actual}}{
+##'     These are the tail factors estimated when taking the break into consideration.
+##'   }
+##'   \item{\dQuote{AsIfPostBreak}}{
+##'     These are the tail factors estimated when assuming all years where in the post-break regime.
+##'   }
+##'   \item{\dQuote{AsIfPreBreak}}{
+##'     These are the tail factors estimated when assuming all years where in the pre-break regime.
+##'   }
+##' }
+##'
+##' @name tailFactor,StandardAnnualAggLossDevModelOutputWithZeros-method
+##' @param object The object from which to plot the predicted tail factors and return tail factors for \emph{all} attachment points.
+##' @param attachment An integer value specifying the attachment point for the tail.  Must be at least 1. See Details for more info.
+##' @param useObservedValues A logical value.  If \code{TRUE}, observed values are substituted for predicted values whenever possible in the calculation.  If \code{FALSE}, only predicted values are used.
+##' @param firstIsHalfReport A logical value or \code{NA}.  See Details for more information.
+##' @param finalAttachment An integer value must be at least 1 default value is \code{attachment}.  A call to \code{tailFactor} returns (invisibly) a matrix of tail factors through this value.
+##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
+##' @return Mainly called for the side effect of plotting.  Also returns tail factors for \emph{all} attachment points through \code{finalAttachment}.  See Details. Returned invisibly.
+##' @docType methods
+##' @seealso \code{\link{tailFactor}}
+##' @seealso \code{\link[=tailFactor,StandardAnnualAggLossDevModelOutput-method]{tailFactor("StandardAnnualAggLossDevModelOutput")}}
+setMethod('tailFactor',
+          signature(object='StandardAnnualAggLossDevModelOutputWithZeros'),
+          function(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot)
+      {
+
+          tmp <- object@inc.pred@value * object@prob.of.non.zero.payment@value
+          object@inc.pred <- newNodeOutput(tmp)
+
+          current.class <- class(object)
+          i <- match(current.class, is(object))
+          f <- selectMethod('tailFactor', is(object)[i+1])
+          return(f(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot))
+
+      })
+
+##' A method to plot predicted vs actual payments for models from the \pkg{lossDev} package.
+##'
+##' Because the model is Bayesian, each estimated payment comes as a distribution.
+##' The median of this distribution is used as a point estimate when plotting and/or returning values.
+##' Note: One cannot calculate the estimated incremental payments from the estimated cumulative payments (and vice versa) since the median of sums need not be equal to the sum of medians.
+##'
+##' @name predictedPayments,AnnualAggLossDevModelOutputWithZeros-method
+##' @param object The object of type \code{AnnualAggLossDevModelOutput} from which to plot predicted vs actual payments and return predicted payments.
+##' @param type A singe character value specifying whether to plot/return the predicted incremental or cumulative payments. Valid values are "incremental" or "cumulative."  See details as to why these may not match up.
+##' @param logScale A logical value.  If \code{TRUE}, then values are plotted on a log scale.
+##' @param mergePredictedWithObserved A logical value.  If \code{TRUE}, then the returned values treat observed incremental payments at "face value"; otherwise predicted values are used in place of observed values.
+##' @param plotObservedValues A logical value.  If \code{FALSE}, then only the predicted values are plotted.
+##' @param plotPredictedOnlyWhereObserved A logical value.  If \code{TRUE}, then only the predicted incremental payments with valid corresponding observed (log) incremental payment are plotted. Ignored for \code{type="cumulative"}.
+##' @param quantiles A vector of quantiles for the predicted payments to return.  Usefull for constructing credible intervals.
+##' @param plot A logical value. If \code{TRUE}, then the plot is generated and the statistics are returned; otherwise only the statistics are returned.
+##' @return Mainly called for the side effect of plotting.  Also returns a named array (with the same structure as the input triangle) containing the predicted log incremental payments.  Returned invisibly.
+##' @docType methods
+##' @seealso \code{\link{predictedPayments}}
+setMethod('predictedPayments',
+          signature(object='AnnualAggLossDevModelOutputWithZeros'),
+          f <- function(object, type, logScale, mergePredictedWithObserved, plotObservedValues, plotPredictedOnlyWhereObserved, quantiles, plot)
+      {
+
+          current.class <- class(object)
+          i <- match(current.class, is(object))
+          f <- selectMethod('predictedPayments', is(object)[i+1])
+
+          type <- match.arg(type)
+          if(type == 'incremental' && plotPredictedOnlyWhereObserved && plotObservedValues)
+          {
+              f(object, type, logScale, mergePredictedWithObserved, plotObservedValues, plotPredictedOnlyWhereObserved, quantiles, plot)
+              plot <- FALSE
+          }
+           tmp <- object@inc.pred@value * object@prob.of.non.zero.payment@value
+           object@inc.pred <- newNodeOutput(tmp)
+
+
+           return(f(object, type, logScale, mergePredictedWithObserved, plotObservedValues, plotPredictedOnlyWhereObserved, quantiles, plot))
+
+      })
+
+
 

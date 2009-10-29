@@ -43,11 +43,11 @@ model
         {
         for(j in 1:L.vec[i])
             {
-            pred.non.zero.payment[i,j] ~ dbern(p[i,j])
+            prob.of.non.zero.payment[i,j] <- p[i,j]
             }
         for(j in (L.vec[i] + 1):(max(L.vec[i]) + 1))
             {
-            pred.non.zero.payment[i,j] <- 0
+            prob.of.non.zero.payment[i,j] <- 0
             }
         }
          
@@ -63,11 +63,11 @@ model
     scale <- exp(scale.log)
     fifty.fifty <- exp(fifty.fifty.log)
     
-    scale.log.tau[2] ~ dgamma(1.0E+1,1.0E-1)
-    fifty.fifty.log.tau[3] ~ dgamma(1.0E+1,1.0E-1)
+    scale.log.tau ~ dgamma(1.0E+1,1.0E-1)
+    fifty.fifty.log.tau ~ dgamma(1.0E+1,1.0E-1)
     
     b <- scale
-    c[1] <- -log(-log(0.5)) / b.prior - fifty.fifty
+    c[1] <- -log(-log(0.5)) / b - fifty.fifty
     for(j in 1:L.vec[1])
         {
         p[1,j] <- 1 - exp(-exp(-b * (j + c[1])))
