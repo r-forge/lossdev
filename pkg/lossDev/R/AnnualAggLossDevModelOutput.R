@@ -1564,7 +1564,9 @@ setMethod('predictedPayments',
                       tmp <- inc.pred.for.plot[i,]
                       lines(x=1:length(tmp),
                             y=tmp,
-                            col=get.color(i))
+                            col=get.color(i),
+                            type='o',
+                            pch=20)
                   }
 
                   if(plotObservedValues)
@@ -1574,7 +1576,7 @@ setMethod('predictedPayments',
                           tmp <- inc.obs.for.plot[i,]
                           lines(x=1:length(tmp),
                                 y=tmp,
-                                type='b',
+                                type='o',
                                 col=get.color(i))
                       }
                   }
@@ -1638,7 +1640,7 @@ setMethod('predictedPayments',
                          col='black',
                          lwd=2,
                          lty=1,
-                         pch=c(NA, 1),
+                         pch=c(ifelse(type=='incremental', 20, NA), 1),
                          horiz=TRUE,
                          bty='n',
                          xpd=NA)
