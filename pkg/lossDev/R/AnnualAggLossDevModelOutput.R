@@ -1565,7 +1565,7 @@ setMethod('predictedPayments',
                       lines(x=1:length(tmp),
                             y=tmp,
                             col=get.color(i),
-                            type='o',
+                            type=ifelse(plotPredictedOnlyWhereObserved, 'o', 'l'),
                             pch=20)
                   }
 
@@ -1640,7 +1640,7 @@ setMethod('predictedPayments',
                          col='black',
                          lwd=2,
                          lty=1,
-                         pch=c(ifelse(type=='incremental', 20, NA), 1),
+                         pch=c(ifelse(type=='incremental' && plotPredictedOnlyWhereObserved, 20, NA), 1),
                          horiz=TRUE,
                          bty='n',
                          xpd=NA)
