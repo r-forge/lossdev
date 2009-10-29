@@ -42,7 +42,6 @@ NULL
 setClass(
          'StandardAnnualAggLossDevModelOutputWithZeros',
          representation(
-                        priorsForProbOfPayment='numeric',
                         prob.of.non.zero.payment='NodeOutput'),
          contains=c('StandardAnnualAggLossDevModelOutput'))
 
@@ -56,7 +55,6 @@ setClass(
 setClass(
          'BreakAnnualAggLossDevModelOutputWithZeros',
          representation(
-                        priorsForProbOfPayment='numeric',
                         prob.of.non.zero.payment='NodeOutput'),
          contains=c('BreakAnnualAggLossDevModelOutput'))
 
@@ -71,7 +69,7 @@ gompertz <- function(x, scale, fifty.fifty)
 }
 
 ##' @export
-accountForZeroPayments <- function(object)
+accountForZeroPayments <- function(object, nAddapt=1000, burnIn=1000)
 {
     time.begin <- Sys.time()
 
@@ -97,15 +95,15 @@ accountForZeroPayments <- function(object)
     if(all(p.emp == 1))
         stop('This function can only be called on triangles with "zero" payments.')
 
-    ans@priorsForProbOfPayment <- estimate.priors(p.emp)
+    priorsForProbOfPayment <- estimate.priors(p.emp)
 
     jags.data <- getJagsData(ans@input)
     if(dim(u)[1] != jags.data$K)
         stop('error "dim(u)[1] != jags.data$K"')
 
     jags.data$u <- u
-    jags.data$scale.prior <- ans@priorsForProbOfPayment['scale']
-    jags.data$fifty.fifty.prior <- ans@priorsForProbOfPayment['fifty.fifty']
+    jags.data$scale.prior <- priorsForProbOfPayment['scale']
+    jags.data$fifty.fifty.prior <- priorsForProbOfPayment['fifty.fifty']
 
 
 
@@ -120,10 +118,10 @@ accountForZeroPayments <- function(object)
     ##ans@thin <- as.integer(thin)
     ##ans@nChains <- as.integer(nChains)
 
-    warning('figure out how to set "nAddapt", "burnIn," and "thin"')
-    nAddapt <- 1000
+    ##warning('figure out how to set "nAddapt", "burnIn," and "thin"')
+    ##nAddapt <- 1000
     nChains <- dim(ans@inc.pred@value)['chain']
-    burnIn <- 1000
+    ##burnIn <- 1000
     sampleSize <- dim(ans@inc.pred@value)['iteration']
     thin <- 1
 
@@ -291,15 +289,20 @@ setMethod('tailFactor',
           function(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot)
       {
 
+          tmp <- object@inc.brk@value
+          for(i in 1:2)
+          {
+              tmp[,,i,,] <- tmp[,,i,,] * object@prob.of.non.zero.payment@value
+          }
+
+          object@inc.brk <- newNodeOutput(tmp)
+          rm(tmp)
 
           tmp <- object@inc.pred@value * object@prob.of.non.zero.payment@value
           object@inc.pred <- newNodeOutput(tmp)
+          rm(tmp)
 
-          tmp <- object@inc.brk@value
-          for(i in 1:2)
-              tmp[,,i,,] <- tmp[,,i,,] * object@prob.of.non.zero.payment@value
 
-          object@inc.brk <- newNodeOutput(tmp)
 
           current.class <- class(object)
           i <- match(current.class, is(object))
@@ -378,23 +381,90 @@ setMethod('predictedPayments',
           f <- function(object, type, logScale, mergePredictedWithObserved, plotObservedValues, plotPredictedOnlyWhereObserved, quantiles, plot)
       {
 
+
+          tmp <- object@inc.pred@value * object@prob.of.non.zero.payment@value
+          object@inc.pred <- newNodeOutput(tmp)
+
           current.class <- class(object)
           i <- match(current.class, is(object))
           f <- selectMethod('predictedPayments', is(object)[i+1])
 
-          type <- match.arg(type)
-          if(type == 'incremental' && plotPredictedOnlyWhereObserved && plotObservedValues)
-          {
-              f(object, type, logScale, mergePredictedWithObserved, plotObservedValues, plotPredictedOnlyWhereObserved, quantiles, plot)
-              plot <- FALSE
-          }
-           tmp <- object@inc.pred@value * object@prob.of.non.zero.payment@value
-           object@inc.pred <- newNodeOutput(tmp)
-
-
-           return(f(object, type, logScale, mergePredictedWithObserved, plotObservedValues, plotPredictedOnlyWhereObserved, quantiles, plot))
+          return(f(object, type, logScale, mergePredictedWithObserved, plotObservedValues, plotPredictedOnlyWhereObserved, quantiles, plot))
 
       })
 
+
+##' @name probablityOfPayment
+##' @exportMethod probablityOfPayment
+setGenericVerif('probablityOfPayment',
+                function(object, plot=TRUE)
+            {
+                standardGeneric('probablityOfPayment')
+            })
+
+##' A method to plot predicted vs actual payments for models from the \pkg{lossDev} package.
+##'
+##' Because the model is Bayesian, each estimated payment comes as a distribution.
+##' The median of this distribution is used as a point estimate when plotting and/or returning values.
+##' Note: One cannot calculate the estimated incremental payments from the estimated cumulative payments (and vice versa) since the median of sums need not be equal to the sum of medians.
+##'
+##' @name probablityOfPayment,AnnualAggLossDevModelOutputWithZeros-method
+##' @param object The object of type \code{AnnualAggLossDevModelOutput} from which to plot predicted vs actual payments and return predicted payments.
+##' @param plot A logical value. If \code{TRUE}, then the plot is generated and the statistics are returned; otherwise only the statistics are returned.
+##' @return Mainly called for the side effect of plotting.  Also returns a named array (with the same structure as the input triangle) containing the predicted log incremental payments.  Returned invisibly.
+##' @docType methods
+##' @seealso \code{\link{predictedPayments}}
+setMethod('probablityOfPayment',
+          signature(object='AnnualAggLossDevModelOutputWithZeros'),
+          f <- function(object,  plot)
+      {
+
+          if(plot)
+          {
+
+
+              f.plot <- function()
+              {
+                  u <- getPaymentNoPaymentMatrix(object@input)
+
+                  p.emp <- calculateProbOfPayment(u)
+
+
+                  matplot(t(object@prob.of.non.zero.payment@median),
+                          type='l',
+                          lty=1,
+                          col=1,
+                          xlab='Development Year',
+                          ylab='Probability of Payment',
+                          lwd=2,
+                          cex.axis=1.25,
+                          cex.lab=1.25)
+
+                  points(p.emp)
+              }
+              f.legend <- function()
+              {
+
+                  legend('center',
+                         c("Fitted","Empirical"),
+                         col = c('black','black'),
+                         lwd=c(1),
+                         lty=c(1, NA),
+                         pch=c(NA, 1),
+                         horiz=TRUE,
+                         bty='n',
+                         xpd=NA)
+              }
+
+              plot.top.bottom(f.plot, f.legend)
+          }
+
+          ans <- object@prob.of.non.zero.payment@median
+
+          dimnames(ans)[[1]] <- object@input@exposureYears[1] - 1 + 1:dim(ans)[1]
+
+          return(invisible(ans))
+
+      })
 
 
