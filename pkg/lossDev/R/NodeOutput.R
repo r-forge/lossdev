@@ -76,7 +76,7 @@ newNodeOutput <- function(mcarray)
     ans@median <- as.array(summary(mcarray, median)[[1]])
     my.sd <- function(x) sd(as.vector(x))[[1]]
     ans@sd <- as.array(summary(mcarray, my.sd)[[1]])
-    ans@value <- mcarray
+    slot(ans, 'value') <- mcarray
 
     if(!validObject(ans))
         stop("could not create a valid")

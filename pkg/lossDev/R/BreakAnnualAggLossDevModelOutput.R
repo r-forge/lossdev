@@ -158,8 +158,9 @@ setMethod('rateOfDecay',
           K.trim <- jd$K.trim
 
 
-          pre.delta.obs <- apply(exp(object@R@value[1,-1,,] - object@R@value[1,-K,,]) - 1, 1, median)
-          post.delta.obs <- apply(exp(object@R@value[2,-1,,] - object@R@value[2,-K,,]) - 1, 1, median)
+          R <- slot(object@R, 'value')
+          pre.delta.obs <- apply(exp(R[1,-1,,] - R[1,-K,,]) - 1, 1, median)
+          post.delta.obs <- apply(exp(R[2,-1,,] - R[2,-K,,]) - 1, 1, median)
           delta.tail <- object@delta.tail@median
           last.non.zero.payment <- object@input@lastNonZeroPayment
 
@@ -294,9 +295,9 @@ setMethod('tailFactor',
           n.columns <- max(attachment.adj, finalAttachment)
 
           inc.pred <- list()
-          inc.pred[['Actual']] <- object@inc.pred@value
-          inc.pred[['AsIfPreBreak']] <-  object@inc.brk@value[,,1,,]
-          inc.pred[['AsIfPostBreak']] <- object@inc.brk@value[,,2,,]
+          inc.pred[['Actual']] <- slot(object@inc.pred, 'value')
+          inc.pred[['AsIfPreBreak']] <-  slot(object@inc.brk, 'value')[,,1,,]
+          inc.pred[['AsIfPostBreak']] <- slot(object@inc.brk, 'value')[,,2,,]
 
           total.col <- dim(inc.pred[[1]])[2]
           total.rows <- dim(inc.pred[[1]])[1]
@@ -418,7 +419,7 @@ setMethod('numberOfKnots',
 
 
 
-          k <- object@k@value
+          k <- slot(object@k, 'value')
           k.vector <- list()
           breaks <- list()
           h <- list()
@@ -518,7 +519,8 @@ setMethod('rateOfDecayTracePlot',
 
           K <- ub
           R.i <- ifelse(preBreak, 1, 2)
-          delta.obs <- exp(object@R@value[R.i,-1,,] - object@R@value[R.i,-K,,]) - 1
+          R <- slot(object@R, 'value')
+          delta.obs <- exp(R[R.i,-1,,] - R[R.i,-K,,]) - 1
           plot.trace.plots(delta.obs[elements-1,,], paste(ifelse(preBreak, 'Pre-Break', 'Post-Break'), ' Rate of Decay :', elements, sep=''))
       })
 
@@ -558,7 +560,7 @@ setMethod('consumptionPathTracePlot',
           }
 
           R.i <- ifelse(preBreak, 1, 2)
-          plot.trace.plots(object@R@value[R.i,elements,,], paste(ifelse(preBreak, 'Pre-Break', 'Post-Break'), ' Consumption Path :', elements, sep=''))
+          plot.trace.plots(slot(object@R, 'value')[R.i,elements,,], paste(ifelse(preBreak, 'Pre-Break', 'Post-Break'), ' Consumption Path :', elements, sep=''))
       })
 
 
@@ -579,7 +581,7 @@ setMethod('mcmcACF',
       {
           ##Autocorrelation
 
-          n.chain <- dim(object@df@value)['chain']
+          n.chain <- dim(slot(object@df, 'value'))['chain']
           K <- getTriDim(object@input)[1]
 
           op <- par(no.readonly=TRUE)
@@ -587,8 +589,9 @@ setMethod('mcmcACF',
 
           par(mfcol=c(4,n.chain))
 
-          delta.1 <- object@R@value[1,-1, , ] - object@R@value[1,-K, , ]
-          delta.2 <- object@R@value[2,-1, , ] - object@R@value[2,-K, , ]
+          R <- slot(object@R, 'value')
+          delta.1 <- R[1,-1, , ] - R[1,-K, , ]
+          delta.2 <- R[2,-1, , ] - R[2,-K, , ]
 
 
 
@@ -605,12 +608,12 @@ setMethod('mcmcACF',
                   main=paste('First Post-Break Rate Of Decay\nChain:', i))
 
 
-              acf(object@kappa.log.error@value[3,,i],
+              acf(slot(object@kappa.log.error, 'value')[3,,i],
                   cex.axis=1.25,
                   cex.lab=1.25,
                   main=paste('First Calendar Year Effect Error\nChain:', i))
 
-              acf(object@eta@value[2,,i],
+              acf(slot(object@eta, 'value')[2,,i],
                   cex.axis=1.25,
                   cex.lab=1.25,
                   main=paste('First Exposure Year Growth\nChain:', i))
@@ -657,7 +660,7 @@ setMethod('firstYearInNewRegime',
           breaks <- seq(from=exposure.years[1] - 0.5,
                         to=max(exposure.years) + 0.5,
                         by=1)
-          first.year.in.post.vec <- as.vector(object@first.row.in.post@value) + exposure.years[1] - 1
+          first.year.in.post.vec <- as.vector(slot(object@first.row.in.post, 'value')) + exposure.years[1] - 1
 
           if(plot)
           {
@@ -760,7 +763,7 @@ setMethod('firstYearInNewRegimeTracePlot',
           function(object)
       {
           exposure.years <- object@input@exposureYears
-          first.year.in.post <- object@first.row.in.post@value + exposure.years[1] - 1
+          first.year.in.post <- slot(object@first.row.in.post, 'value') + exposure.years[1] - 1
           plot.trace.plots(first.year.in.post, 'First Year in Post-Structural Break Regime')
 
       })

@@ -194,7 +194,7 @@ setMethod('finalCumulativeDiff',
       {
 
           K <- getTriDim(object@input)[1]
-          inc.pred.coda <- object@inc.pred@value[1:K, 1:K,,]
+          inc.pred.coda <- slot(object@inc.pred, 'value')[1:K, 1:K,,]
           cumulatives <- object@input@cumulatives
           exp.years <- object@input@exposureYears
 
@@ -325,10 +325,10 @@ setMethod('triResi',
           log.inc[log.inc <= 0] <- NA
           log.inc <- log(log.inc)
 
-          mu <- object@mu.upper.left@value
-          beta <- object@beta@value[1,,]
-          v <- object@df@value[1,,]
-          h <- object@h@value
+          mu <- slot(object@mu.upper.left, 'value')
+          beta <- slot(object@beta, 'value')[1,,]
+          v <- slot(object@df, 'value')[1,,]
+          h <- slot(object@h, 'value')
 
 
           resi <- array(NA, c(K, K), list(object@input@exposureYears, NULL))
@@ -503,7 +503,7 @@ setMethod('QQPlot',
           {
               K <- getTriDim(object@input)[1]
               inc.obs <- object@input@incrementals
-              inc.pred <- object@inc.pred@value[1:K, 1:K, , ]
+              inc.pred <- slot(object@inc.pred, 'value')[1:K, 1:K, , ]
 
               log.inc.obs <- inc.obs
               log.inc.obs[log.inc.obs <= 0] <- NA
@@ -605,7 +605,7 @@ setMethod('skewnessParameter',
               return(invisible(NULL))
           }
 
-          ans <- plot.density.and.or.trace(coda=object@beta@value[1,,],
+          ans <- plot.density.and.or.trace(coda=slot(object@beta, 'value')[1,,],
                                            plotDensity = plotDensity ,
                                            plotTrace =   plotTrace,
                                            d.prior=function(x) dnorm(x, 0, sqrt(1/getJagsData(object@input)$precision.for.skewness)),
@@ -659,7 +659,7 @@ setMethod('autoregressiveParameter',
           }
 
           jd <- getJagsData(object@input)
-          ans <- plot.density.and.or.trace(coda=object@rho@value[1,,],
+          ans <- plot.density.and.or.trace(coda=slot(object@rho, 'value')[1,,],
                                            plotDensity = plotDensity ,
                                            plotTrace =   plotTrace,
                                            d.prior=function(x) dbeta(x, jd$rho.prior[1], jd$rho.prior[2]),
@@ -703,7 +703,7 @@ setMethod('meanExposureGrowth',
           signature(object='AnnualAggLossDevModelOutput'),
           function(object,  plotDensity, plotTrace)
       {
-          ans <- plot.density.and.or.trace(coda=object@eta.mu@value[1,,],
+          ans <- plot.density.and.or.trace(coda=slot(object@eta.mu, 'value')[1,,],
                                            plotDensity = plotDensity ,
                                            plotTrace =   plotTrace,
                                            d.prior=function(x) dnorm(x, 0, sqrt(1/getJagsData(object@input)$precision.for.eta.mu)),
@@ -748,7 +748,7 @@ setMethod('degreesOfFreedom',
           function(object,  plotDensity, plotTrace)
       {
           jd <- getJagsData(object@input)
-          ans <- plot.density.and.or.trace(coda=object@df@value[1,,],
+          ans <- plot.density.and.or.trace(coda=slot(object@df, 'value')[1,,],
                                            plotDensity = plotDensity ,
                                            plotTrace =   plotTrace,
                                            d.prior=function(x) dchisq(x, df=jd$df.k) / (pchisq(jd$df.bounds[2], jd$df.k) - pchisq(jd$df.bounds[1], jd$df.k)),
@@ -791,7 +791,7 @@ setMethod('standardDeviationOfExposureGrowth',
       {
 
           jd <- getJagsData(object@input)
-          ans <- plot.density.and.or.trace(coda=object@sigma.eta@value[1,,],
+          ans <- plot.density.and.or.trace(coda=slot(object@sigma.eta, 'value')[1,,],
                                            plotDensity = plotDensity ,
                                            plotTrace =   plotTrace,
                                            d.prior=function(x) dunif(x, jd$sigma.eta.bounds[1], jd$sigma.eta.bounds[2]),
@@ -837,7 +837,7 @@ setMethod('standardDeviationOfCalendarYearEffect',
       {
 
           jd <- getJagsData(object@input)
-          ans <- plot.density.and.or.trace(coda=object@sigma.kappa@value[1,,],
+          ans <- plot.density.and.or.trace(coda=slot(object@sigma.kappa, 'value')[1,,],
                                            plotDensity = plotDensity ,
                                            plotTrace =   plotTrace,
                                            d.prior=function(x) dunif(x, jd$sigma.kappa.bounds[1], jd$sigma.kappa.bounds[2]),
@@ -889,7 +889,7 @@ setMethod('standardDeviationForScaleInnovation',
           }
 
           jd <- getJagsData(object@input)
-          ans <- plot.density.and.or.trace(coda=object@sigma.h.2.log.innov@value[1,,],
+          ans <- plot.density.and.or.trace(coda=slot(object@sigma.h.2.log.innov, 'value')[1,,],
                                            plotDensity = plotDensity,
                                            plotTrace =   plotTrace,
                                            draw.prior = FALSE,
@@ -944,7 +944,7 @@ setMethod('scaleParameter',
               stop('"column" must be greater than 0 and less than the number of columns in the supplied incremental triangle.')
 
           jd <- getJagsData(object@input)
-          ans <- plot.density.and.or.trace(coda=object@h@value[column,,],
+          ans <- plot.density.and.or.trace(coda=slot(object@h, 'value')[column,,],
                                            plotDensity = plotDensity ,
                                            plotTrace =   plotTrace,
                                            draw.prior=FALSE,
@@ -999,7 +999,7 @@ setMethod('stochasticInflationRhoParameter',
           }
 
           jd <- getJagsData(object@input)
-          ans <- plot.density.and.or.trace(coda=object@a.ou@value[1,,],
+          ans <- plot.density.and.or.trace(coda=slot(object@a.ou, 'value')[1,,],
                                            plotDensity = plotDensity ,
                                            plotTrace =   plotTrace,
                                            d.prior = function(x) dbeta(x, jd$a.ou.prior[1], jd$a.ou.prior[2]),
@@ -1056,7 +1056,7 @@ setMethod('stochasticInflationStationaryMean',
           }
 
 
-          coda <- object@b.ou@value[1,,] / (1 - object@a.ou@value[1,,])
+          coda <- slot(object@b.ou, 'value')[1,,] / (1 - slot(object@a.ou, 'value')[1,,])
           ans <- plot.density.and.or.trace(coda=coda,
                                            plotDensity = plotDensity ,
                                            plotTrace =   plotTrace,
@@ -1458,7 +1458,7 @@ setMethod('predictedPayments',
           inc.obs <- object@input@incrementals
           cumul.obs <- object@input@cumulatives
 
-          inc.pred.coda <- object@inc.pred@value
+          inc.pred.coda <- slot(object@inc.pred, 'value')
           inc.pred.median <- object@inc.pred@median
 
           if(type == 'cumulative')
@@ -1686,9 +1686,9 @@ setMethod('standardDeviationVsDevelopmentTime',
       {
           K <- getTriDim(object@input)[1]
 
-          beta <- object@beta@value[1,,]
-          v <- object@df@value[1,,]
-          h <- object@h@value
+          beta <- slot(object@beta, 'value')[1,,]
+          v <- slot(object@df, 'value')[1,,]
+          h <- slot(object@h, 'value')
 
           st.d <- array(NA, c(3, K), list(c('95%', '50%', '5%'), NULL))
 
@@ -1783,7 +1783,7 @@ setMethod('exposureGrowthTracePlot',
                   stop(paste('"elements" must be at most the total number of exposure years (', ub,') and at least 2', sep=''))
           }
 
-          plot.trace.plots(object@eta@value[elements,,], paste('Exposure Growth :', elements, sep=''))
+          plot.trace.plots(slot(object@eta, 'value')[elements,,], paste('Exposure Growth :', elements, sep=''))
 
 
       })
@@ -1838,7 +1838,7 @@ setMethod('calendarYearEffectErrorTracePlot',
 
 
           elements <- elements + 1 #in the model file, the first identifiable calendar year effect is numbered 3
-          plot.trace.plots(exp(object@kappa.log.error@value[elements,,]) - 1, paste('Calendar Year Effect Error :', elements, sep=''))
+          plot.trace.plots(exp(slot(object@kappa.log.error, 'value')[elements,,]) - 1, paste('Calendar Year Effect Error :', elements, sep=''))
 
 
       })
@@ -1904,7 +1904,7 @@ setMethod('lossDevelopmentFactors',
           ldf.pred <- array(NA, dim(obs.ldf))
 
 
-          inc.pred <- object@inc.pred@value
+          inc.pred <- slot(object@inc.pred, 'value')
           current.loss <- inc.pred[, 1, , ]
           for(j in 1:dim(ldf.pred)[2])
           {

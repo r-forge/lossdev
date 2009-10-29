@@ -120,9 +120,10 @@ accountForZeroPayments <- function(object, nAddapt=1000, burnIn=1000)
 
     ##warning('figure out how to set "nAddapt", "burnIn," and "thin"')
     ##nAddapt <- 1000
-    nChains <- dim(ans@inc.pred@value)['chain']
+    eta.mu <- slot(ans@inc.pred, 'value')
+    nChains <- dim(eta.mu)['chain']
     ##burnIn <- 1000
-    sampleSize <- dim(ans@inc.pred@value)['iteration']
+    sampleSize <- dim(eta.mu)['iteration']
     thin <- 1
 
 
@@ -242,7 +243,7 @@ setMethod('finalCumulativeDiff',
           function(object, plot)
       {
 
-          tmp <- object@inc.pred@value * object@prob.of.non.zero.payment@value
+          tmp <- slot(object@inc.pred, 'value') * slot(object@prob.of.non.zero.payment, 'value')
           object@inc.pred <- newNodeOutput(tmp)
 
           current.class <- class(object)
@@ -289,16 +290,17 @@ setMethod('tailFactor',
           function(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot)
       {
 
-          tmp <- object@inc.brk@value
+          prob.of.non.zero.payment.coda <-  slot(object@prob.of.non.zero.payment, 'value')
+          tmp <- slot(object@inc.brk, 'value')
           for(i in 1:2)
           {
-              tmp[,,i,,] <- tmp[,,i,,] * object@prob.of.non.zero.payment@value
+              tmp[,,i,,] <- tmp[,,i,,] * prob.of.non.zero.payment.coda
           }
 
           object@inc.brk <- newNodeOutput(tmp)
           rm(tmp)
 
-          tmp <- object@inc.pred@value * object@prob.of.non.zero.payment@value
+          tmp <- slot(object@inc.pred, 'value') *  prob.of.non.zero.payment.coda
           object@inc.pred <- newNodeOutput(tmp)
           rm(tmp)
 
@@ -348,7 +350,7 @@ setMethod('tailFactor',
           function(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot)
       {
 
-          tmp <- object@inc.pred@value * object@prob.of.non.zero.payment@value
+          tmp <- slot(object@inc.pred, 'value') * slot(object@prob.of.non.zero.payment, 'value')
           object@inc.pred <- newNodeOutput(tmp)
 
           current.class <- class(object)
@@ -382,7 +384,7 @@ setMethod('predictedPayments',
       {
 
 
-          tmp <- object@inc.pred@value * object@prob.of.non.zero.payment@value
+          tmp <- slot(object@inc.pred, 'value') * slot(object@prob.of.non.zero.payment, 'value')
           object@inc.pred <- newNodeOutput(tmp)
 
           current.class <- class(object)

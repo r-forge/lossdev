@@ -106,7 +106,8 @@ setMethod('rateOfDecay',
       {
 
           K <- getTriDim(object@input)[1]
-          delta.obs <- apply(exp(object@S@value[-1,,] - object@S@value[-K,,]) - 1, 1, median)
+          S <- slot(object@S, 'value')
+          delta.obs <- apply(exp(S[-1,,] - S[-K,,]) - 1, 1, median)
           delta.tail <- object@delta.tail@median
 
           last.non.zero.payment <- object@input@lastNonZeroPayment
@@ -223,7 +224,7 @@ setMethod('tailFactor',
           ##we don't have to test attachment nor finalAttachment because the generic function does that for us
           n.columns <- max(attachment.adj, finalAttachment)
 
-          inc.pred <- object@inc.pred@value
+          inc.pred <- slot(object@inc.pred, 'value')
           total.col <- dim(inc.pred)[2]
           total.rows <- dim(inc.pred)[1]
           total.exp.years <- object@input@exposureYears[1] + 1:total.rows - 1
@@ -284,7 +285,7 @@ setMethod('numberOfKnots',
           function(object, plot=TRUE)
       {
 
-         k <- object@k@value
+         k <- slot(object@k, 'value')
          k.vector <- as.vector(k)
 
          breaks <- seq(from=-0.5,
@@ -367,7 +368,8 @@ setMethod('rateOfDecayTracePlot',
           }
 
           K <- ub
-          delta.obs <- exp(object@S@value[-1,,] - object@S@value[-K,,]) - 1
+          S <- slot(object@S, 'value')
+          delta.obs <- exp(S[-1,,] - S[-K,,]) - 1
           plot.trace.plots(delta.obs[elements-1,,], paste('Rate of Decay :', elements, sep=''))
       })
 
@@ -405,7 +407,7 @@ setMethod('consumptionPathTracePlot',
                   stop(paste('"elements" must be at most the number of columns in the observed triangle (', ub,') and at least 1', sep=''))
           }
 
-          plot.trace.plots(object@S@value[elements,,], paste('Consumption Path :', elements, sep=''))
+          plot.trace.plots(slot(object@S, 'value')[elements,,], paste('Consumption Path :', elements, sep=''))
       })
 
 ##' A method to plot autocorrelations found in the \acronym{MCMC} samples for select parameters.
@@ -425,7 +427,7 @@ setMethod('mcmcACF',
       {
           ##Autocorrelation
 
-          n.chain <- dim(object@df@value)['chain']
+          n.chain <- dim(slot(object@df, 'value'))['chain']
           K <- getTriDim(object@input)[1]
 
           op <- par(no.readonly=TRUE)
@@ -433,7 +435,8 @@ setMethod('mcmcACF',
 
           par(mfcol=c(3,n.chain))
 
-          delta <- object@S@value[-1, , ] - object@S@value[-K, , ]
+          S <- slot(object@S, 'value')
+          delta <- S[-1, , ] - S[-K, , ]
 
 
 
@@ -445,12 +448,12 @@ setMethod('mcmcACF',
                   cex.lab=1.25,
                   main=paste('First Rate Of Decay\nChain:', i))
 
-              acf(object@kappa.log.error@value[3,,i],
+              acf(slot(object@kappa.log.error, 'value')[3,,i],
                   cex.axis=1.25,
                   cex.lab=1.25,
                   main=paste('First Calendar Year Effect Error\nChain:', i))
 
-              acf(object@eta@value[2,,i],
+              acf(slot(object@eta, 'value')[2,,i],
                   cex.axis=1.25,
                   cex.lab=1.25,
                   main=paste('First Exposure Year Growth\nChain:', i))
