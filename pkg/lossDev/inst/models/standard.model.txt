@@ -316,7 +316,7 @@ model
         }
 
     ## Priors
-    beta.stoch ~ dnorm(0, precision.for.skewness)  #this dist is drawn in R, changes here need to be accompanied by changes in R code
+    beta.stoch ~ dnorm(0, precision.for.skewness)T(skewness.parameter.bounds[1], skewness.parameter.bounds[2])  #this dist is drawn in R, changes here need to be accompanied by changes in R code
     beta <- beta.stoch * (allow.for.skew != 0) + 0 * (allow.for.skew == 0)    
     
     #this dist is drawn in R, changes here need to be accompanied by changes in R code

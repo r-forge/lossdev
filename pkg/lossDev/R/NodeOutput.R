@@ -38,16 +38,17 @@ NULL
 ##' Current slots are:
 ##' \describe{
 ##'   \item{\code{get.value.end}}{
-##'     An environment containing a parameterless function called "get.value" which when called will return the mcarray for the node.
+##'     An environment containing a parameterless function called \code{get.value} which when called will return the mcarray for the node.
+##'     It also contains \code{value.name} which is the name of the key (or file on the disk) if the value is stored on the disk.
 ##'   }
 ##'   \item{\code{mean}}{
-##'     An array that is the marginalized mean of slot \code{value}.
+##'     An array that is the marginalized mean of the value returned by calling \code{get.value}.
 ##'   }
 ##'   \item{\code{median}}{
-##'     An array that is the marginalized median of slot \code{value}.
+##'     An array that is the marginalized median of the value returned by calling \code{get.value}.
 ##'   }
 ##'   \item{\code{sd}}{
-##'     An array that is the marginalized standard deviation of slot \code{value}.
+##'     An array that is the marginalized standard deviation of the value returned by calling \code{get.value}.
 ##'   }
 ##' }
 ##' @name NodeOutput-class
@@ -130,6 +131,19 @@ newNodeOutput <- function(mcarray)
     return(ans)
 }
 
+
+##' A method to override the behavoir of the function \code{slot}.
+##'
+##' In order to enhance the memory management, coda files are optionally stored on the harddrive in temporary files and loaded on an as needed basis.
+##' By overriding this function, we are able to make this seamless.
+##' Overriding the function \code{slot} is a slight abuse and, as such, may in the future be replaced by an accessor function.
+##'
+##' @name slot,NodeOutput,character-method
+##' @param object The object of type \code{NodeOutput} with the slot to look up.
+##' @param name A character value giving the name of the slot to look up.
+##' @return Only if name is exactly \dQuote{value} will the method return the \code{mcarray} containing the coda.  Otherwise, it returns the result of \code{callNextMethod()}.
+##' @docType methods
+##' @seealso \code{\link{slot}}
 setMethod('slot',
           signature(object='NodeOutput', name='character'),
           function(object, name)
