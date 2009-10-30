@@ -1576,7 +1576,7 @@ setMethod('predictedPayments',
                           tmp <- inc.obs.for.plot[i,]
                           lines(x=1:length(tmp),
                                 y=tmp,
-                                type='o',
+                                type='p',
                                 col=get.color(i))
                       }
                   }
@@ -1624,7 +1624,7 @@ setMethod('predictedPayments',
                           tmp <- cumul.obs.for.plot[i,]
                           lines(x=1:length(tmp),
                                 y=tmp,
-                                type='b',
+                                type='p',
                                 col=get.color(i))
                       }
                   }
@@ -1639,7 +1639,7 @@ setMethod('predictedPayments',
                          legend=c('Predicted','Observed'),
                          col='black',
                          lwd=2,
-                         lty=1,
+                         lty=c(1, NA),
                          pch=c(ifelse(type=='incremental' && plotPredictedOnlyWhereObserved, 20, NA), 1),
                          horiz=TRUE,
                          bty='n',
