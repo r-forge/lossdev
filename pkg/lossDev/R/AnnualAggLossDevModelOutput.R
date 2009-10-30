@@ -607,12 +607,13 @@ setMethod('skewnessParameter',
 
           jd <- getJagsData(object@input)
           precision.for.skewness <- jd$precision.for.skewness
+          df.for.skewness <- jd$precision.for.skewness
+          mu <- 0
           d <- function(x)
           {
 
-              dnorm(x,
-                    0,
-                    sqrt(1/precision.for.skewness))
+
+              gamma((df.for.skewness+1)/2) / gamma(df.for.skewness / 2) * (precision.for.skewness/ df.for.skewness / pi) ^ 0.5 * (1 + precision.for.skewness / df.for.skewness * (x - mu)^2) ^ (-(df.for.skewness + 1) / 2)
           }
           ans <- plot.density.and.or.trace(coda=slot(object@beta, 'value')[1,,],
                                            plotDensity = plotDensity ,

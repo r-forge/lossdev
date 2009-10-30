@@ -32,34 +32,57 @@
 ##' @include BreakAnnualAggLossDevModelOutput.R
 NULL
 
-##' The class to handle incremental payments of zero.
+##' The class to handle incremental payments of zero for the standard model.
 ##'
 ##' \code{StandardAnnualAggLossDevModelOutputWithZeros} is a special class designed to be merged with aggregate annual model objects.
+##' It adds one extra node \code{prob.of.non.zero.payment} to the list of slots.
 ##'
 ##' @name StandardAnnualAggLossDevModelOutputWithZeros-class
 ##' @docType class
 ##' @seealso \code{\linkS4class{LossDevModelOutput}}
+##' @seealso \code{\linkS4class{AnnualAggLossDevModelOutputWithZeros}}
 setClass(
          'StandardAnnualAggLossDevModelOutputWithZeros',
          representation(
                         prob.of.non.zero.payment='NodeOutput'),
          contains=c('StandardAnnualAggLossDevModelOutput'))
 
-##' The class to handle incremental payments of zero.
+##' The class to handle incremental payments of zero for the break model.
 ##'
 ##' \code{BreakAnnualAggLossDevModelOutputWithZeros} is a special class designed to be merged with aggregate annual model objects.
+##' It adds one extra node \code{prob.of.non.zero.payment} to the list of slots.
 ##'
 ##' @name BreakAnnualAggLossDevModelOutputWithZeros-class
 ##' @docType class
 ##' @seealso \code{\linkS4class{LossDevModelOutput}}
+##' @seealso \code{\linkS4class{AnnualAggLossDevModelOutputWithZeros}}
 setClass(
          'BreakAnnualAggLossDevModelOutputWithZeros',
          representation(
                         prob.of.non.zero.payment='NodeOutput'),
          contains=c('BreakAnnualAggLossDevModelOutput'))
 
+##' The parent of \code{StandardAnnualAggLossDevModelOutputWithZeros} and \code{BreakAnnualAggLossDevModelOutputWithZeros}.
+##'
+##' To avoid creating multiple inheritance (directly), this class is created using \code{setClassUnion}.
+##' The union consists of classes \code{StandardAnnualAggLossDevModelOutputWithZeros} and \code{StandardAnnualAggLossDevModelOutputWithZeros}.
+##'
+##' @name AnnualAggLossDevModelOutputWithZeros-class
+##' @docType class
+##' @seealso \code{\linkS4class{LossDevModelOutput}}
+##' @seealso \code{\linkS4class{BreakAnnualAggLossDevModelOutputWithZeros}}
+##' @seealso \code{\linkS4class{StandardAnnualAggLossDevModelOutputWithZeros}}
 setClassUnion('AnnualAggLossDevModelOutputWithZeros', c('StandardAnnualAggLossDevModelOutputWithZeros', 'BreakAnnualAggLossDevModelOutputWithZeros'))
 
+##' The gompertz function. Intended for internal use only.
+##'
+##' This function is used as the probably of observing a zero payment.
+##' (Or one minus the probably of observing a positive payment.)
+##' (Note that negative payments are assumed to be missing values.)
+##' @param x The value(s) at which to evaluate the gompertz function.
+##' @param scale The scale parameter should always (or at least for how it is used in lossDev) be positive as this indicates an increasing probably of a zero payment.
+##' @param fifty.fifty The value at which the gompertz function returns 0.5.
+##' @return An object of type \code{AnnualAggLossDevModelOutputWithZeros} and \code{AnnualAggLossDevModelOutput}.
 gompertz <- function(x, scale, fifty.fifty)
 {
     b <- scale
@@ -68,8 +91,21 @@ gompertz <- function(x, scale, fifty.fifty)
     return(exp(-exp(-b * (x + c))))
 }
 
+##' A function to take a triangle estimated without considering zero payments, and account for the possibility of zero payments.
+##'
+##' As incremental payments are modeled on the log scale, zero payments (and negative payments) are treated as missing values.
+##' So, without somehow accounting for zero payments, the estimated payments would be overstated.
+##' Zero payments are accounted for by weighting the predicted payment (given that the payment is greater than zero) with the probability that this payment is zero.
+##' (Negative payments are not (currently) accounted for.)
+##' Currently the trajectory for this probably follows a gompertz curve and is constant across exposure years.
+##' This is currently implemented as a function but may be switched to a method.
+##'
+##' @param object The object containing the triangle estimated without accounting for zero payments.
+##' @param burnIn An integer to represent the number of initial \acronym{MCMC} iterations to be discarded. (The adaptive phase (\code{nAddapt}) is not considered part of \code{burnIn}.)
+##' @param nAddapt The length of the adaptive phase for the \acronym{MCMC} algorithm. (Default is \code{trunc(burnIn/4)+1}.)
 ##' @export
-accountForZeroPayments <- function(object, nAddapt=1000, burnIn=1000)
+##  #import rjags only do this in zzz.R
+accountForZeroPayments <- function(object, burnIn=1000, nAddapt=1000)
 {
     time.begin <- Sys.time()
 
@@ -135,7 +171,7 @@ accountForZeroPayments <- function(object, nAddapt=1000, burnIn=1000)
 
 
     message(paste('Burning-In Jags Model for', burnIn, 'iterations\n', 'Total Burn-In = ', burnIn))
-    update(jm, burnIn)
+    update.jags(jm, burnIn)
 
     message(paste('Sampling Jags Model for', sampleSize, 'iterations Thin =', thin,'\n', 'This will result in ~', sampleSize / thin, 'Samples'))
     output <- jags.samples(jm, parameters.to.save., sampleSize, thin)
@@ -156,6 +192,12 @@ accountForZeroPayments <- function(object, nAddapt=1000, burnIn=1000)
 
 }
 
+##' A function to turn a matrix of incremental payments into zero or ones depending upon whether a payment is positive.
+##'
+##' The conversion rule is as follows.  If \code{NA}, then \code{NA}. If \code{1}, then
+##'
+##' @param object The matrix of incremental payments.
+##' @return A matrix of zero or one (or \code{NA}) matching the structure of in input matrix.
 getPaymentNoPaymentMatrix <- function(object)
 {
     if(!is(object, 'AnnualAggLossDevModelInput'))

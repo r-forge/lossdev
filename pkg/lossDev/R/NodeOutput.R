@@ -73,6 +73,7 @@ setClass(
 ##' @param mcarray An S3 object of type \code{mcarray}.
 ##' @return An object of class \code{NodeOutput}.
 ##' @seealso \code{\linkS4class{NodeOutput}}
+##  #import filehash only do this in zzz.R
 newNodeOutput <- function(mcarray)
 {
     ans <- new('NodeOutput')

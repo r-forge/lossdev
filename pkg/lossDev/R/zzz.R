@@ -64,7 +64,8 @@ myLibPath <- function() return(get('myLibPath', env=mutableState, inherits=FALSE
 ##'
 ##' @name dot-onLoad-lossDev
 ##' @seealso \code{\link{.onLoad}}
-##' @importFrom rjags jags.module
+##' @import rjags
+##' @import filehash
 .onLoad <- function(libname, pkgname)
 {
     ##Create functions to return the required values. Lexical scoping ensures the correct values are returned.
@@ -134,6 +135,8 @@ setGenericVerif <- function(name, ...)
 ##' @param \dots named values to set.  If empty, only the current list of option settings is returned.
 ##' @return The current (or altered) list of option settings is returned.
 ##' @export
+##' @name dot-lossDevOptions
+##' @aliases .lossDevOptions
 .lossDevOptions <- function(...)
 {
 

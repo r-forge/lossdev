@@ -77,6 +77,7 @@ setGenericVerif('runLossDevModel',
 ##' @return An object of class \code{LossDevModelOutput}.
 ##' @docType methods
 ##' @seealso \code{\link{runLossDevModel}}
+##  #import rjags only do this in zzz.R
 setMethod(
           f='runLossDevModel',
           signature(object='LossDevModelInput'),
@@ -117,7 +118,7 @@ setMethod(
 
 
           message(paste('Burning-In Jags Model for', burnIn, 'iterations\n', 'Total Burn-In = ', burnIn))
-          update(jm, burnIn)
+          update.jags(jm, burnIn)
 
           message(paste('Sampling Jags Model for', sampleSize, 'iterations Thin =', thin,'\n', 'This will result in ~', sampleSize / thin, 'Samples'))
           output <- jags.samples(jm, parameters.to.save., sampleSize, thin)
