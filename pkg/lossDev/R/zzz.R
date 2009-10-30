@@ -135,9 +135,7 @@ setGenericVerif <- function(name, ...)
 ##' @param \dots named values to set.  If empty, only the current list of option settings is returned.
 ##' @return The current (or altered) list of option settings is returned.
 ##' @export
-##' @name dot-lossDevOptions
-##' @aliases .lossDevOptions
-.lossDevOptions <- function(...)
+lossDevOptions <- function(...)
 {
 
     args <- list(...)

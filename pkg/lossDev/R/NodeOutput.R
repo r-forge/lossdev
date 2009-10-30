@@ -91,7 +91,7 @@ newNodeOutput <- function(mcarray)
     value.name <- paste('object', mutableState$CounterForCreatedCodas, sep='')
 
 
-    save.to.disk <- .lossDevOptions()[['keepCodaOnDisk']]
+    save.to.disk <- lossDevOptions()[['keepCodaOnDisk']]
     if(save.to.disk)
     {
         ans@get.value.env <-  new.env()
