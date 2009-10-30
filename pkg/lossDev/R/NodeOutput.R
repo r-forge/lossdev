@@ -88,17 +88,24 @@ newNodeOutput <- function(mcarray)
     mutableState$CounterForCreatedCodas <- mutableState$CounterForCreatedCodas + 1
     value.name <- paste('object', mutableState$CounterForCreatedCodas, sep='')
 
+
     save.to.disk <- .lossDevOptions()[['keepCodaOnDisk']]
     if(save.to.disk)
     {
         ans@get.value.env <-  new.env()
+        ans@get.value.env$value.name <- value.name
         ans@get.value.env$get.value   <- function()
         {
             return(dbFetch(mutableState$fileHashDBForCodas, value.name))
         }
 
         reg.finalizer(ans@get.value.env,
-                      function(object){
+                      function(env){
+
+                          ##message('running reg.finalizer')
+                          ##message(paste('value.name is', value.name))
+                          ##message(paste('env$value.name is', env$value.name))
+                          ##dbDelete(mutableState$fileHashDBForCodas, env$value.name)
                           dbDelete(mutableState$fileHashDBForCodas, value.name)
                       },
                       onexit=TRUE)
