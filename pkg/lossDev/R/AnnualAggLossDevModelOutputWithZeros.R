@@ -171,7 +171,7 @@ accountForZeroPayments <- function(object, burnIn=1000, nAddapt=1000)
 
 
     message(paste('Burning-In Jags Model for', burnIn, 'iterations\n', 'Total Burn-In = ', burnIn))
-    update.jags(jm, burnIn)
+    update(jm, burnIn)
 
     message(paste('Sampling Jags Model for', sampleSize, 'iterations Thin =', thin,'\n', 'This will result in ~', sampleSize / thin, 'Samples'))
     output <- jags.samples(jm, parameters.to.save., sampleSize, thin)
@@ -192,9 +192,9 @@ accountForZeroPayments <- function(object, burnIn=1000, nAddapt=1000)
 
 }
 
-##' A function to turn a matrix of incremental payments into zero or ones depending upon whether a payment is positive.
+##' A function to turn a matrix of incremental payments into zero or ones depending upon whether a payment is positive. Intended for internal use only.
 ##'
-##' The conversion rule is as follows.  If \code{NA}, then \code{NA}. If \code{1}, then
+##' The conversion rule is as follows.  If \code{NA}, then \code{NA}. Else if greater than zero, then 1.  Else if equal to zero, then zero. Else \code{NA}.
 ##'
 ##' @param object The matrix of incremental payments.
 ##' @return A matrix of zero or one (or \code{NA}) matching the structure of in input matrix.
@@ -222,6 +222,11 @@ getPaymentNoPaymentMatrix <- function(object)
     ans <- apply(inc, c(1,2), f)
 }
 
+##' A function to calculate an empirical vector of the probability of payment. Intended for internal use only.
+##'
+##'
+##' @param x The matrix of the form returned by \code{\link{getPaymentNoPaymentMatrix}}.
+##' @return A vector equal in length to the number of columns in x representing the empirical probably of payment.
 calculateProbOfPayment <- function(x)
 {
     K <- dim(x)[2]
@@ -236,6 +241,13 @@ calculateProbOfPayment <- function(x)
 
 }
 
+##' A function to estimate priors for the gompertz curve. Intended for internal use only.
+##'
+##' The function uses \code{nlm} to minimize the squared error.
+##'
+##' @param p A vector of the form returned by \code{\link{calculateProbOfPayment}}. \code{NA}s are allowed.
+##' @return A vector equal in length to the number of columns in x representing the empirical probably of payment.
+##' @importFrom stats nlm
 estimate.priors <- function(p)
 {
     if(all(p == 1))
@@ -249,7 +261,7 @@ estimate.priors <- function(p)
     f <- function(x)
     {
         p.hat <- 1 - gompertz(1:K, x[1], x[2])
-        sse <- sum((p.hat - p)^2)
+        sse <- sum((p.hat - p)^2, na.rm=TRUE)
         return(sse)
     }
 
@@ -269,17 +281,19 @@ estimate.priors <- function(p)
 
 ##' A method to plot and/or return the difference between final actual and predicted cumulative payments.
 ##'
+##' This method accounts for zero payments. By weighting estimated predicted payments by the probably that the payment is greater than zero.
+##'
 ##' The relative difference (x/y - 1) between the final observed cumulative payment and the corresponding predicted cumulative payment is plotted for each exposure year.
 ##' The horizontal lines of each box represent (starting from the top) the 90th, 75th, 50th, 20th, and 10th percentiles.  Exposure years in which all cumulative payments are \code{NA} are omitted.
-##'
-##' This method accounts for zero payments.
 ##'
 ##' @name finalCumulativeDiff,AnnualAggLossDevModelOutputWithZeros-method
 ##' @param object The object of type \code{AnnualAggLossDevModelOuputWithZeros} from which to plot and/or return the difference between final actual and predicted cumulative payments.
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
 ##' @return Mainly called for the side effect of plotting the difference between final actual and predicted cumulative payments by exposure year.  Also returns a named array for the percentiles in the plot.  Returned invisibly.
 ##' @docType methods
+##' @seealso \code{\link{accountForZeroPayments}}
 ##' @seealso \code{\link{finalCumulativeDiff}}
+##' @seealso \code{\link{finalCumulativeDiff,AnnualAggLossDevModelOutput-method}}
 setMethod('finalCumulativeDiff',
           signature(object='AnnualAggLossDevModelOutputWithZeros'),
           function(object, plot)
@@ -296,6 +310,8 @@ setMethod('finalCumulativeDiff',
       })
 
 ##' A method to plot and/or return the predicted tail factors for a specific attachment point.
+##'
+##' This method accounts for zero payments. By weighting estimated predicted payments by the probably that the payment is greater than zero.
 ##'
 ##' The tail factor is the ratio of the estimated ultimate loss to cumulative loss at some point in development time.
 ##' This is a method to allow for the retrieval and illustration of the tail factor by exposure year.
@@ -325,7 +341,10 @@ setMethod('finalCumulativeDiff',
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
 ##' @return Mainly called for the side effect of plotting.  Also returns tail factors for \emph{all} attachment points through \code{finalAttachment}.  See Details. Returned invisibly.
 ##' @docType methods
+##' @seealso \code{\link{accountForZeroPayments}}
 ##' @seealso \code{\link{tailFactor}}
+##' @seealso \code{\link[=tailFactor,BreakAnnualAggLossDevModelOutput-method]{tailFactor("BreakAnnualAggLossDevModelOutput")}}
+##' @seealso \code{\link[=tailFactor,StandardAnnualAggLossDevModelOutputWithZeros-method]{tailFactor("StandardAnnualAggLossDevModelOutputWithZeros")}}
 ##' @seealso \code{\link[=tailFactor,StandardAnnualAggLossDevModelOutput-method]{tailFactor("StandardAnnualAggLossDevModelOutput")}}
 setMethod('tailFactor',
           signature(object='BreakAnnualAggLossDevModelOutputWithZeros'),
@@ -357,6 +376,8 @@ setMethod('tailFactor',
 
 ##' A method to plot and/or return the predicted tail factors for a specific attachment point.
 ##'
+##' This method accounts for zero payments. By weighting estimated predicted payments by the probably that the payment is greater than zero.
+##'
 ##' The tail factor is the ratio of the estimated ultimate loss to cumulative loss at some point in development time.
 ##' This is a method to allow for the retrieval and illustration of the tail factor by exposure year.
 ##'
@@ -385,7 +406,10 @@ setMethod('tailFactor',
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
 ##' @return Mainly called for the side effect of plotting.  Also returns tail factors for \emph{all} attachment points through \code{finalAttachment}.  See Details. Returned invisibly.
 ##' @docType methods
+##' @seealso \code{\link{accountForZeroPayments}}
 ##' @seealso \code{\link{tailFactor}}
+##' @seealso \code{\link[=tailFactor,BreakAnnualAggLossDevModelOutput-method]{tailFactor("BreakAnnualAggLossDevModelOutput")}}
+##' @seealso \code{\link[=tailFactor,BreakAnnualAggLossDevModelOutputWithZeros-method]{tailFactor("BreakAnnualAggLossDevModelOutputWithZeros")}}
 ##' @seealso \code{\link[=tailFactor,StandardAnnualAggLossDevModelOutput-method]{tailFactor("StandardAnnualAggLossDevModelOutput")}}
 setMethod('tailFactor',
           signature(object='StandardAnnualAggLossDevModelOutputWithZeros'),
@@ -404,12 +428,14 @@ setMethod('tailFactor',
 
 ##' A method to plot predicted vs actual payments for models from the \pkg{lossDev} package.
 ##'
+##' This method accounts for zero payments. By weighting estimated predicted payments by the probably that the payment is greater than zero.
+##'
 ##' Because the model is Bayesian, each estimated payment comes as a distribution.
 ##' The median of this distribution is used as a point estimate when plotting and/or returning values.
 ##' Note: One cannot calculate the estimated incremental payments from the estimated cumulative payments (and vice versa) since the median of sums need not be equal to the sum of medians.
 ##'
 ##' @name predictedPayments,AnnualAggLossDevModelOutputWithZeros-method
-##' @param object The object of type \code{AnnualAggLossDevModelOutput} from which to plot predicted vs actual payments and return predicted payments.
+##' @param object The object of type \code{AnnualAggLossDevModelOutputWithZeros} from which to plot predicted vs actual payments and return predicted payments.
 ##' @param type A singe character value specifying whether to plot/return the predicted incremental or cumulative payments. Valid values are "incremental" or "cumulative."  See details as to why these may not match up.
 ##' @param logScale A logical value.  If \code{TRUE}, then values are plotted on a log scale.
 ##' @param mergePredictedWithObserved A logical value.  If \code{TRUE}, then the returned values treat observed incremental payments at "face value"; otherwise predicted values are used in place of observed values.
@@ -419,6 +445,7 @@ setMethod('tailFactor',
 ##' @param plot A logical value. If \code{TRUE}, then the plot is generated and the statistics are returned; otherwise only the statistics are returned.
 ##' @return Mainly called for the side effect of plotting.  Also returns a named array (with the same structure as the input triangle) containing the predicted log incremental payments.  Returned invisibly.
 ##' @docType methods
+##' @seealso \code{\link{accountForZeroPayments}}
 ##' @seealso \code{\link{predictedPayments}}
 setMethod('predictedPayments',
           signature(object='AnnualAggLossDevModelOutputWithZeros'),
@@ -437,27 +464,38 @@ setMethod('predictedPayments',
 
       })
 
-
+##' A generic function to plot the probability of a payment.
+##'
+##' Because the model is Bayesian, each estimated payment comes as a distribution.
+##' The median of this distribution is used as a point estimate when plotting and/or returning values.
+##' Note: Negative payments are treated as missing and are not accounted for.
+##'
+##' @param object The object from which to plot the probability of a payment.
+##' @param plot A logical value. If \code{TRUE}, then the plot is generated and the statistics are returned; otherwise only the statistics are returned.
+##' @return Mainly called for the side effect of plotting.  Also returns a matrix containing the (median) probably of payment.  Returned invisibly.
 ##' @name probablityOfPayment
+##' @seealso \code{\link{accountForZeroPayments}}
 ##' @exportMethod probablityOfPayment
+##' @docType genericFunction
 setGenericVerif('probablityOfPayment',
                 function(object, plot=TRUE)
             {
                 standardGeneric('probablityOfPayment')
             })
 
-##' A method to plot predicted vs actual payments for models from the \pkg{lossDev} package.
+
+##' A method to plot the probability of a payment.
 ##'
 ##' Because the model is Bayesian, each estimated payment comes as a distribution.
 ##' The median of this distribution is used as a point estimate when plotting and/or returning values.
-##' Note: One cannot calculate the estimated incremental payments from the estimated cumulative payments (and vice versa) since the median of sums need not be equal to the sum of medians.
+##' Note: Negative payments are treated as missing and are not accounted for.
 ##'
-##' @name probablityOfPayment,AnnualAggLossDevModelOutputWithZeros-method
-##' @param object The object of type \code{AnnualAggLossDevModelOutput} from which to plot predicted vs actual payments and return predicted payments.
+##' @param object The object from which to plot the probability of a payment.
 ##' @param plot A logical value. If \code{TRUE}, then the plot is generated and the statistics are returned; otherwise only the statistics are returned.
-##' @return Mainly called for the side effect of plotting.  Also returns a named array (with the same structure as the input triangle) containing the predicted log incremental payments.  Returned invisibly.
+##' @return Mainly called for the side effect of plotting.  Also returns a matrix containing the (median) probably of payment.  Returned invisibly.
+##' @name probablityOfPayment,AnnualAggLossDevModelOutputWithZeros-method
+##' @seealso \code{\link{accountForZeroPayments}}
 ##' @docType methods
-##' @seealso \code{\link{predictedPayments}}
 setMethod('probablityOfPayment',
           signature(object='AnnualAggLossDevModelOutputWithZeros'),
           f <- function(object,  plot)

@@ -2,7 +2,9 @@
 \alias{tailFactor,StandardAnnualAggLossDevModelOutputWithZeros-method}
 \title{A method to plot and/or return the predicted tail factors for a specific attachment point.}
 \description{A method to plot and/or return the predicted tail factors for a specific attachment point.}
-\details{The tail factor is the ratio of the estimated ultimate loss to cumulative loss at some point in development time.
+\details{This method accounts for zero payments. By weighting estimated predicted payments by the probably that the payment is greater than zero.
+
+The tail factor is the ratio of the estimated ultimate loss to cumulative loss at some point in development time.
 This is a method to allow for the retrieval and illustration of the tail factor by exposure year.
 
 Because the model is Bayesian, each tail factor comes as a distribution.  To ease graphical interpretation, only the median for each factor is plotted/returned.
@@ -22,7 +24,10 @@ These are the tail factors estimated when assuming all years where in the pre-br
 }}
 \value{Mainly called for the side effect of plotting.  Also returns tail factors for \emph{all} attachment points through \code{finalAttachment}.  See Details. Returned invisibly.}
 \docType{methods}
+\seealso{\code{\link{accountForZeroPayments}}}
 \seealso{\code{\link{tailFactor}}}
+\seealso{\code{\link[=tailFactor,BreakAnnualAggLossDevModelOutput-method]{tailFactor("BreakAnnualAggLossDevModelOutput")}}}
+\seealso{\code{\link[=tailFactor,BreakAnnualAggLossDevModelOutputWithZeros-method]{tailFactor("BreakAnnualAggLossDevModelOutputWithZeros")}}}
 \seealso{\code{\link[=tailFactor,StandardAnnualAggLossDevModelOutput-method]{tailFactor("StandardAnnualAggLossDevModelOutput")}}}
 \arguments{\item{object}{The object from which to plot the predicted tail factors and return tail factors for \emph{all} attachment points.}
 \item{attachment}{An integer value specifying the attachment point for the tail.  Must be at least 1. See Details for more info.}
