@@ -44,7 +44,9 @@ NULL
 setClass(
          'StandardAnnualAggLossDevModelOutputWithZeros',
          representation(
-                        prob.of.non.zero.payment='NodeOutput'),
+                        prob.of.non.zero.payment='NodeOutput',
+                        scale.log='NodeOutput',
+                        fifty.fifty.log='NodeOutput'),
          contains=c('StandardAnnualAggLossDevModelOutput'))
 
 ##' The class to handle incremental payments of zero for the break model.
@@ -59,7 +61,9 @@ setClass(
 setClass(
          'BreakAnnualAggLossDevModelOutputWithZeros',
          representation(
-                        prob.of.non.zero.payment='NodeOutput'),
+                        prob.of.non.zero.payment='NodeOutput',
+                        scale.log='NodeOutput',
+                        fifty.fifty.log='NodeOutput'),
          contains=c('BreakAnnualAggLossDevModelOutput'))
 
 ##' The parent of \code{StandardAnnualAggLossDevModelOutputWithZeros} and \code{BreakAnnualAggLossDevModelOutputWithZeros}.
@@ -144,7 +148,7 @@ accountForZeroPayments <- function(object, burnIn=1000, nAddapt=1000)
 
 
 
-    parameters.to.save. <- 'prob.of.non.zero.payment'
+    parameters.to.save. <- c('prob.of.non.zero.payment', 'scale.log', 'fifty.fifty.log')
     ##print(parameters.to.save.)
 
 
@@ -548,5 +552,74 @@ setMethod('probablityOfPayment',
           return(invisible(ans))
 
       })
+
+
+##' A generic function to plot and/or return the posterior of the parameters for the gompertz curve which describes the probability of payment.
+##'
+##' The scale parameter describes how steep the curve is.
+##' Larger values are steeper.
+##' Positive values indicate that the probability of a positive payment should decrease with development time.
+##' (The scale is restricted to be positive.)
+##'
+##' The fifty.fifty parameter gives the point (in development time) when the gompertz curve gives a probability of fifty percent.
+##'
+##' @name gompertzParameters
+##' @param object The object from which to plot and/or return the parameters.
+##' @param parameter A character describing which parameter to plot. \dQuote{scale} for the scale parameter. \dQuote{fifty.fifty} for the point at which the gompertz give a probably of fifty percent.
+##' @param plotDensity A logical value. If \code{TRUE}, then the density is plotted. If \code{plotTrace} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
+##' @param plotTrace A logical value. If \code{TRUE}, then the trace is plotted. If \code{plotDensity} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
+##' @return Mainly called for the side effect of plotting.
+##' @docType genericFunction
+##' @seealso \code{\link{gompertzParameters,AnnualAggLossDevModelOutputWithZeros-method}}
+##' @exportMethod gompertzParameters
+setGenericVerif('gompertzParameters',
+                function(object,  parameter=c('scale', 'fifty.fifty'), plotDensity=TRUE, plotTrace=TRUE)
+            {
+                standardGeneric('gompertzParameters')
+            })
+
+
+##' A method to plot and/or return the posterior of the parameters for the gompertz curve which describes the probability of payment.
+##'
+##' The scale parameter describes how steep the curve is.
+##' Larger values are steeper.
+##' Positive values indicate that the probability of a positive payment should decrease with development time.
+##' (The scale is restricted to be positive.)
+##'
+##' The fifty.fifty parameter gives the point (in development time) when the gompertz curve gives a probability of fifty percent.
+##'
+##' @name gompertzParameters,AnnualAggLossDevModelOutputWithZeros-method
+##' @param object The object from which to plot and/or return the parameters.
+##' @param parameter A character describing which parameter to plot. \dQuote{scale} for the scale parameter. \dQuote{fifty.fifty} for the point at which the gompertz give a probably of fifty percent.
+##' @param plotDensity A logical value. If \code{TRUE}, then the density is plotted. If \code{plotTrace} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
+##' @param plotTrace A logical value. If \code{TRUE}, then the trace is plotted. If \code{plotDensity} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
+##' @return Mainly called for the side effect of plotting.
+##' @docType genericFunction
+##' @seealso \code{\link{gompertzParameters}}
+setMethod('gompertzParameters',
+          signature(object='AnnualAggLossDevModelOutputWithZeros'),
+          function(object,  parameter, plotDensity, plotTrace)
+      {
+
+
+          parameter <- match.arg(parameter)
+
+          if(parameter == 'scale')
+              coda <- exp(slot(object@scale.log, 'value')[1,,])
+          else
+              coda <- exp(slot(object@fifty.fifty.log, 'value')[1,,])
+
+
+          ans <- plot.density.and.or.trace(coda=coda,
+                                           plotDensity = plotDensity ,
+                                           plotTrace =   plotTrace,
+                                           draw.prior=FALSE,
+                                           nice.parameter.name=paste('Gompertz Parameter:', parameter),
+                                           zero.line=FALSE,
+                                           lower.bound=0)
+
+          return(invisible(ans))
+      })
+
 
 
