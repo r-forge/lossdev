@@ -1165,15 +1165,28 @@ setMethod('stochasticInflation',
 
 
 
+          suppressWarnings( stat.mean <- stochasticInflationStationaryMean(object, plotDensity=FALSE, plotTrace=FALSE))
+          if(is.null(stat.mean))
+          {
+              stat.mean <- object@input@knownStochInflationMean
+          } else {
+              stat.mean <- stat.mean['50%']
+          }
+
           f.plot <- function()
           {
               plot(x=range(observed.years) + c(0, extra.years),
-                   y=range(observed.inflation.rate, simulated.inflation.rate[1:(total.observed.years + extra.years)]),
+                   y=range(observed.inflation.rate, simulated.inflation.rate[1:(total.observed.years + extra.years)], stat.mean),
                    xlab="Calendar Year",
                    ylab="Rate of Inflation (Actual and Predicted)",
                    type='n',
                    cex.axis=1.25,
                    cex.lab=1.25)
+
+              abline(h=stat.mean,
+                     lwd=2,
+                     col='gray',
+                     lty=3)
 
               lines(
                     x=observed.years,
@@ -1200,18 +1213,19 @@ setMethod('stochasticInflation',
           {
               if(extra.years == 0)
                   legend('center',
-                         c('Actual','Predicted'),
-                         col = c('gray','black'),
-                         lwd=c(3,2),
+                         c('Actual','Predicted', 'Stationary\Mean'),
+                         col = c('gray','black', 'gray'),
+                         lwd=c(3,2,2),
+                         lty=c(1,1,3),
                          horiz=TRUE,
                          xpd=NA,
                          bty='n')
               else
                   legend('center',
-                         c('Actual', 'Predicted', 'Forecast'),
-                         col = c('gray', 'black', 'black'),
-                         lwd=c(3, 2, 2),
-                         lty=c(1, 1, 2),
+                         c('Actual', 'Predicted', 'Forecast','Stationary\Mean'),
+                         col = c('gray', 'black', 'black','gray'),
+                         lwd=c(3, 2, 2, 2),
+                         lty=c(1, 1, 2, 3),
                          horiz=TRUE,
                          xpd=NA,
                          bty='n')
