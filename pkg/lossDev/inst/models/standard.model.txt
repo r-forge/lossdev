@@ -316,7 +316,7 @@ model
         }
 
     ## Priors
-    beta.stoch ~ dt(0, precision.for.skewness, df.for.skewness) #this dist is drawn in R, changes here need to be accompanied by changes in R code
+    beta.stoch ~ dt(0, precision.for.skewness, df.for.skewness)T(bounds.for.skewness[1], bounds.for.skewness[2]) #this dist is drawn in R, changes here need to be accompanied by changes in R code
     beta <- beta.stoch * (allow.for.skew != 0) + 0 * (allow.for.skew == 0)    
     
     #this dist is drawn in R, changes here need to be accompanied by changes in R code

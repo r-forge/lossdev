@@ -594,6 +594,7 @@ setGenericVerif('skewnessParameter',
 ##' @return Mainly called for the side effect of plotting.  But also returns a named array with some select quantiles of the posterior for the skewness parameter.  Returned invisibly.
 ##' @docType methods
 ##' @seealso \code{\link{skewnessParameter}}
+##' @importFrom stats integrate
 setMethod('skewnessParameter',
           signature(object='AnnualAggLossDevModelOutput'),
           function(object,  plotDensity, plotTrace)
@@ -609,18 +610,32 @@ setMethod('skewnessParameter',
           precision.for.skewness <- jd$precision.for.skewness
           df.for.skewness <- jd$precision.for.skewness
           mu <- 0
-          d <- function(x)
+          d.un <- function(x)
           {
 
 
               gamma((df.for.skewness+1)/2) / gamma(df.for.skewness / 2) * (precision.for.skewness/ df.for.skewness / pi) ^ 0.5 * (1 + precision.for.skewness / df.for.skewness * (x - mu)^2) ^ (-(df.for.skewness + 1) / 2)
+
+          }
+
+          l <- integrate (d.un, lower = -Inf, upper = jd$bounds.for.skewness[1])
+          u <- integrate (d.un, lower = jd$bounds.for.skewness[2], upper = Inf)
+          d <- function(x)
+          {
+              if(x < jd$bounds.for.skewness[1] || x > jd$bounds.for.skewness[2])
+                  return(0)
+
+              return(d.un(x) / (u - l))
+
           }
           ans <- plot.density.and.or.trace(coda=slot(object@beta, 'value')[1,,],
                                            plotDensity = plotDensity ,
                                            plotTrace =   plotTrace,
                                            d.prior=d,
                                            nice.parameter.name='Skewness Parameter',
-                                           zero.line=TRUE)
+                                           zero.line=TRUE,
+                                           lower.bound=jd$bounds.for.skewness[1],
+                                           upper.bound=jd$bounds.for.skewness[2])
 
           return(invisible(ans))
 

@@ -164,6 +164,7 @@ setMethod('getTriDim',
 ##'   \item{\code{allow.for.skew}}{Zero tells the model to assume zero skewness, one to use the skewed \eqn{t}.}
 ##'   \item{\code{precision.for.skewness}}{The prior precision for the skewness parameter.  Stored in R rather than in the model so that modifications are accurately reflected in charts for the prior.}
 ##'   \item{\code{df.for.skewness}}{The prior df for the skewness parameter.  Stored in R rather than in the model so that modifications are accurately reflected in charts for the prior.}
+##'   \item{\code{bounds.for.skewness}}{The the skewness parameter is bounted to prevent chains from getting stuck.  Stored in R rather than in the model so that modifications are accurately reflected in charts for the prior.}
 ##'   \item{\code{precision.for.eta.mu}}{The prior precision for \code{eta.mu}.  Stored in R rather than in the model so that modifications are accurately reflected in charts for the prior.}
 ##'   \item{\code{df.k}}{The parameter for the chi-sqr prior on the degrees of freedom.  Stored in R rather than in the model so that modifications are accurately reflected in charts for the prior.}
 ##'   \item{\code{df.bounds}}{The lower and upper bounds on the degrees of freedom.  Stored in R rather than in the model so that modifications are accurately reflected in charts for the prior.}
@@ -229,6 +230,7 @@ setMethod(
           ans$allow.for.skew <- ifelse(object@allowForSkew, 1, 0)
           ans$precision.for.skewness <- 0.5
           ans$df.for.skewness <- 2.1
+          ans$bounds.for.skewness <- c(-10, 10)
 
           ans$precision.for.eta.mu <- 1
 
