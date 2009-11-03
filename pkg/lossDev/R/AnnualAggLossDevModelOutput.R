@@ -1213,7 +1213,7 @@ setMethod('stochasticInflation',
           {
               if(extra.years == 0)
                   legend('center',
-                         c('Actual','Predicted', 'Stationary\Mean'),
+                         c('Actual','Predicted', 'Stationary\nMean'),
                          col = c('gray','black', 'gray'),
                          lwd=c(3,2,2),
                          lty=c(1,1,3),
@@ -1222,7 +1222,7 @@ setMethod('stochasticInflation',
                          bty='n')
               else
                   legend('center',
-                         c('Actual', 'Predicted', 'Forecast','Stationary\Mean'),
+                         c('Actual', 'Predicted', 'Forecast','Stationary\nMean'),
                          col = c('gray', 'black', 'black','gray'),
                          lwd=c(3, 2, 2, 2),
                          lty=c(1, 1, 2, 3),
