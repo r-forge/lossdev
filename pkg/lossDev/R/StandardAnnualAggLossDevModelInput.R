@@ -289,6 +289,7 @@ setClass(
 ##' @param exp.year.type A single character value indicating the type of exposure years:  \sQuote{ambiguous}, \sQuote{py}, and \sQuote{ay} mean \sQuote{Exposure Year}, \sQuote{Policy Year}, and \sQuote{Accident Year}; respectively.
 ##' @param prior.for.knot.locations A single numeric value of at least 1.  The prior for the location of knots is a scaled beta with parameters \code{c(1,prior.for.knot.locations)}.  Large values produce stable consumption paths at high development years.
 ##' @param use.skew.t A logical value.  If \code{TRUE}, the model assumes that the observed and estimated log incremental payments are realizations from a skewed \eqn{t} distribution; if \code{FALSE} it assumes zero skewness. (See Reference.)
+##' @param bound.for.skewness.parameter A positive numerical value representing the symetric boundaries for the skewness parameter.  In most cases, the default should be sufficient. Ignored if \code{use.skew.t=FALSE}.
 ##' @param last.column.with.scale.innovation A single integer. Must be at least 1 and at most the number of columns in \code{incremental.payments}.  See \emph{Measurment Error-Second Order Random Walk} in Details.
 ##' @param use.ar1.in.calendar.year A logical value.  The calendar year effect errors may (at the users discretion) include an autoregressive process of order 1.  \code{TRUE} turns on the ar1 process, \code{FALSE} (the Default) turns it off.
 ##'
@@ -322,6 +323,7 @@ setClass(
 ##'   exp.year.type=c('ambiguous', 'py', 'ay'),
 ##'   prior.for.knot.locations=2,
 ##'   use.skew.t=FALSE,
+##'   bound.for.skewness.parameter=10,
 ##'   last.column.with.scale.innovation=dim(incremental.payments)[2],
 ##'   use.ar1.in.calendar.year=FALSE,
 ##'   projected.rate.of.decay=NA)
@@ -342,6 +344,7 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
                                     exp.year.type=c('ambiguous', 'py', 'ay'),
                                     prior.for.knot.locations=2,
                                     use.skew.t=FALSE,
+                                    bound.for.skewness.parameter=10,
                                     last.column.with.scale.innovation=dim(incremental.payments)[2],
                                     use.ar1.in.calendar.year=FALSE,
                                     projected.rate.of.decay=NA)
@@ -795,6 +798,17 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
         ans@allowForSkew <- TRUE
     else
         ans@allowForSkew <- FALSE
+
+    if(!is.numeric(bound.for.skewness.parameter) || length(bound.for.skewness.parameter) != 1 || !is.finite(bound.for.skewness.parameter) || bound.for.skewness.parameter == 0)
+        stop('"bound.for.skewness.parameter" must be a numeric of length 1 and be finite and non-zero')
+
+    if(bound.for.skewness.parameter < 0)
+    {
+        warning('"bound.for.skewness.parameter" was supplied as a negative value. The absolute value will be used.')
+        bound.for.skewness.parameter <- abs(bound.for.skewness.parameter)
+    }
+
+    ans@skewnessParameterBounds <- bound.for.skewness.parameter * c(-1, 1)
 
     if(!is.numeric(last.column.with.scale.innovation) || !identical(length(last.column.with.scale.innovation), as.integer(1)))
         stop('"last.column.with.scale.innovation" must be a single numeric')

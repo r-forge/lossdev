@@ -61,6 +61,7 @@ setClass(
                         finalRateOfDecaySD='numeric',
                         finalRateOfDecayWeight='matrix',
                         allowForSkew='logical',                   #should the skewed-t be turned on?
+                        skewnessParameterBounds='numeric',
                         ar1InCalendarYearEffect='logical',        #should the calendar year effect include an ar1 or white-noise error term?
                         noChangeInScaleParameterAfterColumn='integer', #valid values are 1 through K, 1 means all columns have same scale, K means all have different, acutal value will be truncated to last observed column
                         'VIRTUAL'),
@@ -358,7 +359,7 @@ setMethod(
                    sigma.ou.=runif(1, 0.1 / 1.05, 0.1 * 1.05),
                    a.ou.stoch= runif(1, 0.20, .3),
                    b.ou.stoch=rnorm(1, mean=0, sd=0.1),
-                   beta.stoch=rnorm(1,0,0.1),
+                   beta.stoch=min(rbeta(1,100, 100) * range(jd$bounds.for.skewness) + jd$bouds.for.skewness[1], rnorm(1, 0, 0.001)),
                    stoch.log.inf.c=stoch.log.inf.c.init
                    )
           }

@@ -619,7 +619,7 @@ setMethod('skewnessParameter',
           }
 
           l <- integrate (d.un, lower = -Inf, upper = jd$bounds.for.skewness[1])$value
-          u <- integrate (d.un, lower = jd$bounds.for.skewness[2], upper = Inf)$value
+          u <- integrate (d.un, lower = -Inf, upper = jd$bounds.for.skewness[2])$value
           d <- function(x)
           {
               if(x < jd$bounds.for.skewness[1] || x > jd$bounds.for.skewness[2])

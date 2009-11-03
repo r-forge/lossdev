@@ -19,6 +19,7 @@ cumulative.payments=cumulate(incremental.payments),
 exp.year.type=c('ambiguous', 'py', 'ay'),
 prior.for.knot.locations=2,
 use.skew.t=FALSE,
+bound.for.skewness.parameter=10,
 last.column.with.scale.innovation=dim(incremental.payments)[2],
 use.ar1.in.calendar.year=FALSE,
 projected.rate.of.decay=NA)}
@@ -261,6 +262,7 @@ Note that since the scale parameter is assumed to follow a second-order random w
 \item{exp.year.type}{A single character value indicating the type of exposure years:  \sQuote{ambiguous}, \sQuote{py}, and \sQuote{ay} mean \sQuote{Exposure Year}, \sQuote{Policy Year}, and \sQuote{Accident Year}; respectively.}
 \item{prior.for.knot.locations}{A single numeric value of at least 1.  The prior for the location of knots is a scaled beta with parameters \code{c(1,prior.for.knot.locations)}.  Large values produce stable consumption paths at high development years.}
 \item{use.skew.t}{A logical value.  If \code{TRUE}, the model assumes that the observed and estimated log incremental payments are realizations from a skewed \eqn{t} distribution; if \code{FALSE} it assumes zero skewness. (See Reference.)}
+\item{bound.for.skewness.parameter}{A positive numerical value representing the symetric boundaries for the skewness parameter.  In most cases, the default should be sufficient. Ignored if \code{use.skew.t=FALSE}.}
 \item{last.column.with.scale.innovation}{A single integer. Must be at least 1 and at most the number of columns in \code{incremental.payments}.  See \emph{Measurment Error-Second Order Random Walk} in Details.}
 \item{use.ar1.in.calendar.year}{A logical value.  The calendar year effect errors may (at the users discretion) include an autoregressive process of order 1.  \code{TRUE} turns on the ar1 process, \code{FALSE} (the Default) turns it off.}
 \item{projected.rate.of.decay}{May be one of three types (See \emph{Projected Rate of Decay} in Details): 1) \code{NA}; 2) a matrix of numerics (of specific dim); 3) a named list.}}

@@ -101,6 +101,7 @@ setClass(
 ##' @param prior.for.knot.locations.post.break See \code{prior.for.knot.locations.pre.break}. Large values produce stable consumption paths at high development years.
 ##'
 ##' @param use.skew.t A logical value.  If \code{TRUE} the model assumes the observed and estimated log incremental payments are realizations from a skewed \eqn{t} distribution; if \code{FALSE} it will assume zero skewness. (See Reference.)
+##' @param bound.for.skewness.parameter A positive numerical value representing the symetric boundaries for the skewness parameter.  In most cases, the default should be sufficient. Ignored if \code{use.skew.t=FALSE}.
 ##' @param last.column.with.scale.innovation A single integer must be at least 1 and at most the number of columns in \code{incremental.payments}.  See \emph{Measurment Error-Second Order Random Walk} in Details.
 ##' @param use.ar1.in.calendar.year A logical value.  The calendar year effect errors may (at the users digression) include an autoregressive process of order 1.  \code{TRUE} turns on the ar1 process, \code{FALSE} turns it off.
 ##'
@@ -137,6 +138,7 @@ setClass(
 ##'   prior.for.knot.locations.pre.break=2,
 ##'   prior.for.knot.locations.post.break=1,
 ##'   use.skew.t=FALSE,
+##'   bound.for.skewness.parameter=10,
 ##'   last.column.with.scale.innovation=dim(incremental.payments)[2],
 ##'   use.ar1.in.calendar.year=FALSE,
 ##'   projected.rate.of.decay=NA)
@@ -160,6 +162,7 @@ makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.paym
                                  prior.for.knot.locations.pre.break=2,
                                  prior.for.knot.locations.post.break=1,
                                  use.skew.t=FALSE,
+                                 bound.for.skewness.parameter=10,
                                  last.column.with.scale.innovation=dim(incremental.payments)[2],
                                  use.ar1.in.calendar.year=FALSE,
                                  projected.rate.of.decay=NA)
@@ -182,6 +185,7 @@ makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.paym
                                             exp.year.type=exp.year.type,
 
                                             use.skew.t=use.skew.t,
+                                            bound.for.skewness.parameter=bound.for.skewness.parameter,
                                             last.column.with.scale.innovation=last.column.with.scale.innovation,
                                             use.ar1.in.calendar.year=use.ar1.in.calendar.year,
                                             projected.rate.of.decay=projected.rate.of.decay)
