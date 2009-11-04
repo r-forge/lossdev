@@ -1,4 +1,4 @@
 rm lossDev/R/*~
-Rcmd BUILD --binary lossDev
-cp lossDev_0.0.1.zip ../..
-rm lossDev_0.0.1.zip
+Rcmd BUILD --binary lossDevB
+cp lossDevB_0.0.1.zip ../..
+rm lossDevB_0.0.1.zip
