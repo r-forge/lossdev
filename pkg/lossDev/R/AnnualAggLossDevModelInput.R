@@ -350,6 +350,9 @@ setMethod(
 
               stoch.log.inf.c.init[is.na(stoch.log.inf.c.obs)] <- rnorm(length(stoch.log.inf.c.obs[is.na(stoch.log.inf.c.obs)]), mean(stoch.log.inf.c.obs, na.rm=TRUE), 0.01)
 
+              beta.stoch <- c(rbeta(1,100, 100) * range(jd$bounds.for.skewness) + jd$bouds.for.skewness[1], rnorm(1, 0, 0.001))
+              beta.stoch.abs <- abs(beta.stoch)
+              beta.stoch <- beta.stoch[beta.stoch.abs == min(beta.stoch.abs)][1]
               list(
                    h.stoch=runif(2, center.h / 1.01, center.h * 1.01),
                    h.2.log.stoch=c(rep(NA,2), rnorm(K-2, log(center.h), 0.01)), #very tight to avoid divergent chains
@@ -359,7 +362,7 @@ setMethod(
                    sigma.ou.=runif(1, 0.1 / 1.05, 0.1 * 1.05),
                    a.ou.stoch= runif(1, 0.20, .3),
                    b.ou.stoch=rnorm(1, mean=0, sd=0.1),
-                   beta.stoch=min(rbeta(1,100, 100) * range(jd$bounds.for.skewness) + jd$bouds.for.skewness[1], rnorm(1, 0, 0.001)),
+                   beta.stoch=beta.stoch,
                    stoch.log.inf.c=stoch.log.inf.c.init
                    )
           }
