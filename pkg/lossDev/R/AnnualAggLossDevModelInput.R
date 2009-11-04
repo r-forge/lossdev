@@ -231,7 +231,7 @@ setMethod(
           ans$allow.for.skew <- ifelse(object@allowForSkew, 1, 0)
           ans$precision.for.skewness <- 0.5
           ans$df.for.skewness <- 2.1
-          ans$bounds.for.skewness <- c(-10, 10)
+          ans$bounds.for.skewness <- object@skewnessParameterBounds
 
           ans$precision.for.eta.mu <- 1
 
