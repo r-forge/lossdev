@@ -1,10 +1,10 @@
 Package: lossDev
-Version: 0.0.1
-Date: 2008-01-30
+Version: 0.7.0
+Date: 2009-11-05
 Title: Loss Development for Insurance Triangles
 Author: Christopher W. Laws, Frank A. Schmid
 Maintainer: Christopher W. Laws <chris_laws@ncci.com>
-Depends: R (>= 2.7.0), methods, rjags (>= 1.0.3-8), filehash
+Depends: R (>= 2.9.2), methods, rjags (>= 1.0.3-11), filehash
 SystemRequirements: jags (== 1.0.3)
 Lazyload: yes
 Description: Loss Development for Insurance Triangles
@@ -17,4 +17,4 @@ Collate: 'zzz.R' 'LossDevModelInput.R' 'AnnualAggLossDevModelInput.R'
     'StandardAnnualAggLossDevModelOutput.R'
     'AnnualAggLossDevModelOutputWithZeros.R'
     'BreakAnnualAggLossDevModelInput.R' 'DocumentationOfData.R'
-    'StandardAnnualAggLossDevModelInput.R' 'util.R'
+    'lossDev.R' 'StandardAnnualAggLossDevModelInput.R' 'util.R'

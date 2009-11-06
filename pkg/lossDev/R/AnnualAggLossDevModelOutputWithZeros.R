@@ -615,8 +615,7 @@ setMethod('gompertzParameters',
                                            plotTrace =   plotTrace,
                                            draw.prior=FALSE,
                                            nice.parameter.name=paste('Gompertz Parameter:', parameter),
-                                           zero.line=FALSE,
-                                           lower.bound=0)
+                                           zero.line=FALSE)
 
           return(invisible(ans))
       })
