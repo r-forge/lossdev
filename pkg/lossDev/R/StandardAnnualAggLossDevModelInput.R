@@ -375,6 +375,8 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
 
     if(any(na.omit(as.vector(incremental.payments <= 0))))
         warning('"incremental.payments" contains non-positive values.  These will be treated as missing an can thus result it an over estimated ultimate loss.  Be sure to check how predicted and actual cumulatives line up.')
+     if(any(na.omit(as.vector(incremental.payments == 0))))
+         message('"incremental.payments" contains incremental payments of zero.  You may wish to use the function "acccountForZeroPaymentscountForZeroPayments".')
 
     i <- rep(1:dim(incremental.payments)[1], dim(incremental.payments)[1])
     j <- rep(1:dim(incremental.payments)[1], rep(dim(incremental.payments)[1],dim(incremental.payments)[1]))
@@ -394,7 +396,8 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
     ans@exposureYears <- as.integer(tmp.exp.years)
     rm(tmp.exp.years)
 
-    warning('need to check "incremental.payments" to ensure it has "enough" values which will be non-missing after taking the log')
+    ##warning('need to check "incremental.payments" to ensure it has "enough" values which will be non-missing after taking the log')
+    ##for now we just let it crash if the user supplies poorly populated triangles
 
     ans@incrementals <- incremental.payments
     dimnames(ans@incrementals) <- NULL
