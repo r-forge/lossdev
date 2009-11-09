@@ -376,7 +376,7 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
     if(any(na.omit(as.vector(incremental.payments <= 0))))
         warning('"incremental.payments" contains non-positive values.  These will be treated as missing an can thus result it an over estimated ultimate loss.  Be sure to check how predicted and actual cumulatives line up.')
      if(any(na.omit(as.vector(incremental.payments == 0))))
-         message('"incremental.payments" contains incremental payments of zero.  You may wish to use the function "acccountForZeroPaymentscountForZeroPayments".')
+         message('"incremental.payments" contains incremental payments of zero.  You may wish to use the function "acccountForZeroPayments".')
 
     i <- rep(1:dim(incremental.payments)[1], dim(incremental.payments)[1])
     j <- rep(1:dim(incremental.payments)[1], rep(dim(incremental.payments)[1],dim(incremental.payments)[1]))
