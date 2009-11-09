@@ -42,19 +42,21 @@ echo $contents; } ?>
 
 <!-- end of project description -->
 
-<p> The <strong>project summary page</strong> you can find <a href="http://<?php echo $domain; ?>/projects/<?php echo $group_name; ?>/"><strong>here</strong></a>. </p>
+<p> The <strong>project summary page</strong> you find <a href="http://<?php echo $domain; ?>/projects/<?php echo $group_name; ?>/"><strong>here</strong></a>. </p>
 
 
-<p> Please feel free to download and try the current release of <strong>lossDev</strong>, <a href="pkg/lossDev_0.7.0.zip"> version 0.7.0</a>, which requires <strong>R</strong> version 2.9.2 or greater.
-Currently only Windows is supported but Linux\Unix will be supported shortly.
+<p> Feel free to download and try the current release of <strong>lossDev</strong>, <a href="pkg/lossDev_0.7.0-1.zip"> version 0.7.0</a>, which requires <strong>R</strong> version 2.9.2 or greater.
+Currently only Windows is supported, but Linux\Unix will be supported shortly.
 The package can be installed after opening <strong>R</strong> and selecting "Packages->Install package(s) from local zip files...".
 <strong>lossDev</strong> should be available on <strong>CRAN</strong> shortly.</p>
 
 <p>The documentation is currently available <a href="pkg/lossDev_Help.pdf"><strong>here</strong></a>.</p>
 
-<p> Look for a package vignette which gives specific examples of how to use this package to be available for download here shortly. </p>
+<p> A vignette, which offers specific examples of how to use this package, is available for download <a href="pkg/lossDev_Vignette.pdf"> here</a>.
+The <strong>R</strong> code associated with this Vignette can be downloaded <a href="pkg/lossDev_Code.R"> here</a>.
+</p>
 
-<p> Also look for a paper which describes in detail the model used by the packages to be available for download here shortly. </p>
+<p> The paper the package is based on you find <a href="http://ssrn.com/author=101739"> here</a>. </p>
 
 
 </body>
