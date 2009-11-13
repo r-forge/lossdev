@@ -1,7 +1,7 @@
 Package: lossDev
-Version: 0.7.0-1
+Version: 0.7.0-3
 Date: 2009-11-05
-Title: Loss Development for Insurance Triangles
+Title: Robust Loss Development Using MCMC
 Author: Christopher W. Laws, Frank A. Schmid
 Maintainer: Christopher W. Laws <chris_laws@ncci.com>
 Depends: R (>= 2.9.2), methods, rjags (>= 1.0.3-11), filehash

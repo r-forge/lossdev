@@ -133,7 +133,7 @@ setMethod(
           if(!validObject(ans))
               stop('A valid output could not be created')
 
-          print(paste('Update took', Sys.time() - time.begin))
+          print(paste('Update took', format(Sys.time() - time.begin)))
           return(invisible(ans))
       })
 

@@ -113,6 +113,11 @@ newNodeOutput <- function(mcarray)
                       onexit=TRUE)
 
         dbInsert(mutableState$fileHashDBForCodas, value.name, mcarray)
+
+        ##we have to remove this object from this closure, otherwise, since R must keep the closure around so it can still access "value.name"
+        ##(or any other variable it doesn't know about for that matter)
+        ##it will also keep "mcarray" around as well
+        rm(mcarray)
     } else {
 
         ans@get.value.env <-  new.env()
