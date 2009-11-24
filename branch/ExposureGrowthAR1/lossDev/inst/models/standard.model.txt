@@ -230,8 +230,7 @@ model
     ## Spline
     #first column is spline values evaluated at z[1:K]
     #second column is number of knots in first column
-    #third column first value is normal error with mean zero and precision of 8th parameter
-    #third column all but first value are normal errors with mean of zero and precision of 7th parameter
+ 
     #fourth column is AR1 process with AR1 coeff of 10th parameter and inovation precision of 9th
     S.[1:K,1:4] ~ dspline(
                 z[1:K], #values a which to evaluate the spline
@@ -243,7 +242,8 @@ model
                 tau.eta, #precision for eta (can be stochastic ll returned contains needed info)
                 tau.eta.mu, #precision for eta.mu (first value in the third column, cannot be stochastic)
                 tau.kappa, #precision for kappa (can be stochastic ll returned contains needed info)
-                rho.stoch.or.zero)
+                rho.stoch.or.zero,
+                rho.eta.stoch.or.zero)
 
     for(i in 1:K)
         {
@@ -300,6 +300,9 @@ model
     rho ~ dbeta(rho.prior[1],rho.prior[2]) #this dist is drawn in R, changes here need to be accompanied by changes in R code
     rho.stoch.or.zero <- ar1 * rho + (1 - ar1) * 0
 
+    rho.eta ~ dbeta(rho.eta.prior[1],rho.eta.prior[2]) #this dist is drawn in R, changes here need to be accompanied by changes in R code
+    rho.eta.stoch.or.zero <- ar1.eta * rho.eta + (1 - ar1.eta) * 0
+
     #exposure
     eta.log[1] <- 0 #cell [1,1] has no identifiable exposure growth
     eta[1] <- 0
@@ -309,9 +312,12 @@ model
         eta[i] <- exp(eta.log[i])-1
         }
 
+    eta.log.error[K] <- S.[K,3]
     for(i in (K+1):(K+H)) #exposure growth (stationary)
         {
-        eta.log[i] ~ dnorm(eta.mu,tau.eta)
+        eta.log.error[i] <- rho.eta.stoch.or.zero * eta.log.error[i-1]
+        eta.log.mu[i] <- eta.mu + eta.log.error[i]
+        eta.log[i] ~ dnorm(eta.log.mu[i], tau.eta)
         eta[i] <- exp(eta.log[i])-1
         }
 

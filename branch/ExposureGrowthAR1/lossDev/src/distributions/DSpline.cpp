@@ -40,7 +40,7 @@
 using std::vector;
 
 #include <iostream>
-DSpline::DSpline():Distribution("dspline", 10, false, false)
+DSpline::DSpline():Distribution("dspline", 11, false, false)
 {
 	
 }
@@ -67,30 +67,36 @@ DSpline::logLikelihood(double const *x, unsigned int length,
   const double &tau2 = parameters[8][0];
 
   const double &rho = parameters[9][0];
+  const double &etaRho = parameters[10][0];
 
   double ans = 0.0;
 
   if(numberOfSplines == 1)
-    {
+  {
       //3rd column of error terms (prec for first value doesn't matter)
-      for(unsigned int i = 1; i < nrow; ++i)
-        ans += dnorm4(x[i + nrow * 2],0.0,std::sqrt(1.0/tau1), 1);
+      //first value is head of AR1
+      ans += dnorm4(x[1 + nrow * 2], 0.0, std::sqrt(1.0/tau1 / (1.0 - etaRho * etaRho)), 1 );
+      for(unsigned int i = 2; i < nrow; ++i)
+      	  ans += dnorm4(x[i + nrow * 2], etaRho * x[i-1 + nrow*2] ,std::sqrt(1.0/tau1), 1);
+      
       
       //4th column of error terms (first value is blank)
       ans += dnorm(x[1 + nrow * 3], 0.0, std::sqrt(1.0/tau2 / (1.0 - rho * rho)), 1);
       for(unsigned int i = 2; i < nrow; ++i)
-        ans += dnorm4(x[i + nrow * 3],rho * x[i-1 + nrow*3],std::sqrt(1.0/tau2), 1);
+        ans += dnorm4(x[i + nrow * 3], rho * x[i-1 + nrow*3],std::sqrt(1.0/tau2), 1);
     }
   else if(numberOfSplines == 2)
     {
-      //3rd column of error terms (prec for first value doesn't matter)
-      for(unsigned int i = 1; i < nrow; ++i)
-        ans += dnorm4(x[i + nrow * 4],0.0,std::sqrt(1.0/tau1), 1);
-      
-      //4th column of error terms (first value is blank)
-      ans += dnorm(x[1 + nrow * 5], 0.0, std::sqrt(1.0/tau2 / (1.0 - rho * rho)), 1);
-      for(unsigned int i = 2; i < nrow; ++i)
-        ans += dnorm4(x[i + nrow * 5],rho * x[i-1 + nrow*5],std::sqrt(1.0/tau2), 1);
+	//3rd column of error terms (prec for first value doesn't matter)
+	//first value is head of AR1
+	ans += dnorm4(x[1 + nrow * 4], 0.0, std::sqrt(1.0/tau1 / (1.0 - etaRho * etaRho)), 1 );
+	for(unsigned int i = 2; i < nrow; ++i)
+	    ans += dnorm4(x[i + nrow * 4], etaRho * x[i-1 + nrow*4] ,std::sqrt(1.0/tau1), 1);
+	
+	//4th column of error terms (first value is blank)
+	ans += dnorm(x[1 + nrow * 5], 0.0, std::sqrt(1.0/tau2 / (1.0 - rho * rho)), 1);
+	for(unsigned int i = 2; i < nrow; ++i)
+	    ans += dnorm4(x[i + nrow * 5], rho * x[i-1 + nrow*5],std::sqrt(1.0/tau2), 1);
     }
   else
     {
@@ -189,7 +195,12 @@ DSpline::checkParameterDim (vector<vector<unsigned int> > const &parameters) con
   
   //tenth is the rho for the 4th column;
   if(parameters[9].size() != 1 || parameters[9][0] != 1)
-    return false;  
+    return false; 
+ 
+  //eleventh is the rho for the 3rd column;
+  if(parameters[10].size() != 1 || parameters[10][0] != 1)
+    return false; 
+
 
   //std::cout << "dim test OK" << std::endl;
   return true;
@@ -262,7 +273,10 @@ DSpline::checkParameterValue(vector<double const *> const &parameters,
   if(parameters[8][0] <= 0) //make sure tau is greater than zero
     return false;
 
-  if(parameters[9][0] <= -1 ||parameters[9][0] >= 1) //make sure tau is greater than zero
+  if(parameters[9][0] <= -1 ||parameters[9][0] >= 1) //make sure rho produces a stationary result
+      return false;
+
+  if(parameters[10][0] <= -1 ||parameters[10][0] >= 1) //make sure rho produces a stationary result
       return false;
 
   //std::cout << "no problem" << std::endl;
