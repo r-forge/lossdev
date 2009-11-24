@@ -63,6 +63,7 @@ setClass(
                         allowForSkew='logical',                   #should the skewed-t be turned on?
                         skewnessParameterBounds='numeric',
                         ar1InCalendarYearEffect='logical',        #should the calendar year effect include an ar1 or white-noise error term?
+                        ar1InExposureGrowth='logical',            #should the exposure growth include an ar1 or white-noise error term?
                         noChangeInScaleParameterAfterColumn='integer', #valid values are 1 through K, 1 means all columns have same scale, K means all have different, acutal value will be truncated to last observed column
                         'VIRTUAL'),
          contains='LossDevModelInput')
@@ -161,7 +162,9 @@ setMethod('getTriDim',
 ##'   \item{\code{delta.p}}{Vector equal in length to the number of total rows (observed plus forecast).  First column is (on the log scale) the mean of the final decay rate.  Second is standard deviation.}
 ##'   \item{\code{v}}{Matrix with number of rows equal to total rows (observed plus forecast) and number of columns equal to total development years (observed plus forecast) minus the number of observed development years.}
 ##'   \item{\code{ar1}}{Zero if calendar year effect does not have an ar1 component; 1 if it does.}
-##'   \item{\code{rho.prior}}{The parameters for the beta prior of the autoregressive parameter.  Stored in R rather than in the model so that modifications are accurately reflected in charts for the prior.}
+##'   \item{\code{rho.prior}}{The parameters for the beta prior of the autoregressive parameter in calendar year effect.  Stored in R rather than in the model so that modifications are accurately reflected in charts for the prior.}
+##'   \item{\code{ar1.eta}}{Zero if exposure growth does not have an ar1 component; 1 if it does.}
+##'   \item{\code{rho.eta.prior}}{The parameters for the beta prior of the autoregressive parameter in exposure growth.  Stored in R rather than in the model so that modifications are accurately reflected in charts for the prior.}
 ##'   \item{\code{allow.for.skew}}{Zero tells the model to assume zero skewness, one to use the skewed \eqn{t}.}
 ##'   \item{\code{precision.for.skewness}}{The prior precision for the skewness parameter.  Stored in R rather than in the model so that modifications are accurately reflected in charts for the prior.}
 ##'   \item{\code{df.for.skewness}}{The prior df for the skewness parameter.  Stored in R rather than in the model so that modifications are accurately reflected in charts for the prior.}
@@ -226,7 +229,11 @@ setMethod(
           ans$v <- object@finalRateOfDecayWeight
 
           ans$ar1 <- ifelse(object@ar1InCalendarYearEffect, 1, 0)
-          ans$rho.prior <- c(2,4)
+          ans$rho.prior <- c(1, 1.5)
+
+          ans$ar1.eta <- ifelse(object@ar1InExposureGrowth, 1, 0)
+          ans$rho.eta.prior <- c(1, 1.5)
+
 
           ans$allow.for.skew <- ifelse(object@allowForSkew, 1, 0)
           ans$precision.for.skewness <- 0.5

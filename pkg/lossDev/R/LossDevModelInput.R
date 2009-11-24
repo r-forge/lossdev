@@ -110,6 +110,7 @@ setMethod(
           ##ans@nChains <- as.integer(nChains)
 
           message(paste('Preparing Jags Model\nadapting for', nAddapt, 'iterations\n\n'))
+          gc()
           jm <- jags.model(file=file.path(myLibPath(), myPkgName(), 'models', object@modelFile),
                            data=getJagsData(object),
                            inits=getJagsInits(object),

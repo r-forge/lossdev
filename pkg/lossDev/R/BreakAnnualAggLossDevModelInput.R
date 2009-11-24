@@ -141,6 +141,7 @@ setClass(
 ##'   bound.for.skewness.parameter=10,
 ##'   last.column.with.scale.innovation=dim(incremental.payments)[2],
 ##'   use.ar1.in.calendar.year=FALSE,
+##'   use.ar1.in.exposure.growth=TRUE,
 ##'   projected.rate.of.decay=NA)
 makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.payments),
                                  first.year.in.new.regime=trunc(median(as.integer(dimnames(incremental.payments)[[1]]))),
@@ -165,6 +166,7 @@ makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.paym
                                  bound.for.skewness.parameter=10,
                                  last.column.with.scale.innovation=dim(incremental.payments)[2],
                                  use.ar1.in.calendar.year=FALSE,
+                                 use.ar1.in.exposure.growth=TRUE,
                                  projected.rate.of.decay=NA)
 {
 
@@ -188,6 +190,7 @@ makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.paym
                                             bound.for.skewness.parameter=bound.for.skewness.parameter,
                                             last.column.with.scale.innovation=last.column.with.scale.innovation,
                                             use.ar1.in.calendar.year=use.ar1.in.calendar.year,
+                                            use.ar1.in.exposure.growth=use.ar1.in.exposure.growth,
                                             projected.rate.of.decay=projected.rate.of.decay)
 
     ans <- new('BreakAnnualAggLossDevModelInput')

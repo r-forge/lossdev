@@ -20,7 +20,7 @@
 ##    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                             ##
 ##    GNU General Public License for more details.                                              ##
 ##                                                                                              ##
-##    You should have received a copy of the GNU General Public License                         ##
+##    You should have receed a copy of the GNU General Public License                         ##
 ##    along with this program.  If not, see <http://www.gnu.org/licenses/>.                     ##
 ##                                                                                              ##
 ##################################################################################################
@@ -50,6 +50,7 @@ setClass(
                         sigma.kappa='NodeOutput',
                         kappa.log.error='NodeOutput',
                         rho='NodeOutput',
+                        rho.eta='NodeOutput',
                         h='NodeOutput',
                         sigma.h.2.log.innov='NodeOutput',
                         beta='NodeOutput',
@@ -96,7 +97,7 @@ setMethod('exposureGrowth',
           eta <- object@eta@median[-1]
 
           obs.years <- object@input@exposureYears[-1]
-          pred.years <- length(eta) - (K - 1) + max(obs.years)
+          pred.years <- 1:(length(eta) - (K-1)) + max(obs.years)
 
           eta.obs <- eta[1:length(obs.years)]
           eta.pred <- eta[1:length(pred.years) + length(obs.years)]
@@ -135,20 +136,20 @@ setMethod('exposureGrowth',
                         pch=20,
                         lwd=2)
 
-                  abline(a=0,
-                         b=0,
+                  abline(h=median(exp(slot(object@eta.mu, 'value')) - 1),
                          col='black',
                          lwd=2,
-                         lty='dashed')
+                         lty=2)
               }
               f.legend <- function()
               {
 
                   legend('center',
-                         c("Rate of Exposure Growth","Future Median Rate of Growth"),
-                         col=c('black','black'),
-                         lwd=c(1,2),
-                         pch=c(1,20),
+                         c('Rate of Exposure Growth','Future Median Rate of Growth','Stationary Mean'),
+                         col=c('black','black','black'),
+                         lwd=c(1,2,2),
+                         pch=c(1,20,NA),
+                         lty=c(1,3,2),
                          horiz=TRUE,
                          bty='n',
                          xpd=NA)
@@ -658,7 +659,10 @@ setMethod('skewnessParameter',
 ##' @exportMethod autoregressiveParameter
 setGenericVerif('autoregressiveParameter',
                 function(object, plotDensity=TRUE, plotTrace=TRUE)
-                standardGeneric('autoregressiveParameter'))
+            {
+                .Deprecated('calendarYearEffectAutoregressiveParameter')
+                standardGeneric('autoregressiveParameter')
+            })
 
 ##' A method to plot and/or return the posterior of the autoregressive parameter for models in \pkg{lossDev}.
 ##'
@@ -676,10 +680,51 @@ setMethod('autoregressiveParameter',
           signature(object='AnnualAggLossDevModelOutput'),
           function(object,  plotDensity, plotTrace)
       {
+          calendarYearEffectAutoregressiveParameter(object, plotDensity, plotTrace)
+      })
+
+
+##' A generic function to plot and/or return the posterior of the autoregressive parameter for the calendar year effect for models in \pkg{lossDev}.
+##'
+##'
+##'
+##' @name calendarYearEffectAutoregressiveParameter
+##' @param object The object from which to plot and/or return the autoregressive parameter which is associated with the calendar year effect.
+##' @param plotDensity A logical value. If \code{TRUE}, the density is plotted. If \code{plotTrace} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
+##' @param plotTrace A logical value. If \code{TRUE}, the trace is plotted. If \code{plotDensity} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
+##' @return Mainly called for the side effect of plotting.
+##' @docType genericFunction
+##' @seealso \code{\link[=calednarYearEffectAutoregressiveParameter,AnnualAggLossDevModelOutput-method]{calendarYearEffectAutoregressiveParameter("AnnualAggLossDevModelOutput")}}
+##' @seealso \code{\link{standardDeviationOfCalendarYearEffect}}
+##' @seealso \code{\link{calendarYearEffect}}
+##' @seealso \code{\link{calendarYearEffectErrors}}
+##' @exportMethod calendarYearEffectAutoregressiveParameter
+setGenericVerif('calendarYearEffectAutoregressiveParameter',
+                function(object, plotDensity=TRUE, plotTrace=TRUE)
+            {
+                standardGeneric('calendarYearEffectAutoregressiveParameter')
+            })
+
+##' A method to plot and/or return the posterior of the autoregressive parameter for the calendar year effect for models in \pkg{lossDev}.
+##'
+##' @name calendarYearEffectAutoregressiveParameter,AnnualAggLossDevModelOutput-method
+##' @param object The object of type \code{AnnualAggLossDevModelOuput} from which to plot and/or return the autoregressive parameter which is associated with the calendar year effect.
+##' @param plotDensity A logical value. If \code{TRUE}, the density is plotted. If \code{plotTrace} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
+##' @param plotTrace A logical value. If \code{TRUE}, the trace is plotted. If \code{plotDensity} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
+##' @return Mainly called for the side effect of plotting.  Also returns a named array with select quantiles of the posterior for the autoregressive parameter.  Returned invisibly.
+##' @docType methods
+##' @seealso \code{\link{calendarYearEffectAutoregressiveParameter}}
+##' @seealso \code{\link{standardDeviationOfCalendarYearEffect}}
+##' @seealso \code{\link{calendarYearEffect}}
+##' @seealso \code{\link{calendarYearEffectErrors}}
+setMethod('calendarYearEffectAutoregressiveParameter',
+          signature(object='AnnualAggLossDevModelOutput'),
+          function(object,  plotDensity, plotTrace)
+      {
 
           if(!object@input@ar1InCalendarYearEffect)
           {
-              warning('Cannot call "autoregressiveParameter" unless the model was estimated with a autoregressive error term in the calendar year effect. Returning "NULL" invisibly.')
+              warning('Cannot call "calendarYearEffectAutoregressiveParameter" unless the model was estimated with a autoregressive error term in the calendar year effect. Returning "NULL" invisibly.')
               return(invisible(NULL))
           }
 
@@ -688,7 +733,59 @@ setMethod('autoregressiveParameter',
                                            plotDensity = plotDensity ,
                                            plotTrace =   plotTrace,
                                            d.prior=function(x) dbeta(x, jd$rho.prior[1], jd$rho.prior[2]),
-                                           nice.parameter.name='Autoregressive Parameter',
+                                           nice.parameter.name='Calendar Year Autoregressive Parameter',
+                                           zero.line=FALSE,
+                                           lower.bound=0,
+                                           upper.bound=1)
+
+          return(invisible(ans))
+
+      })
+
+##' A generic function to plot and/or return the posterior of the autoregressive parameter for the exposure growth for models in \pkg{lossDev}.
+##'
+##'
+##'
+##' @name exposureGrowthAutoregressiveParameter
+##' @param object The object from which to plot and/or return the autoregressive parameter which is associated with exposure growth.
+##' @param plotDensity A logical value. If \code{TRUE}, the density is plotted. If \code{plotTrace} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
+##' @param plotTrace A logical value. If \code{TRUE}, the trace is plotted. If \code{plotDensity} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
+##' @return Mainly called for the side effect of plotting.
+##' @docType genericFunction
+##' @seealso \code{\link[=exposureGrowthAutoregressiveParameter,AnnualAggLossDevModelOutput-method]{exposureGrowthAutoregressiveParameter("AnnualAggLossDevModelOutput")}}
+##' @exportMethod exposureGrowthAutoregressiveParameter
+setGenericVerif('exposureGrowthAutoregressiveParameter',
+                function(object, plotDensity=TRUE, plotTrace=TRUE)
+            {
+                standardGeneric('exposureGrowthAutoregressiveParameter')
+            })
+
+##' A method to plot and/or return the posterior of the autoregressive parameter for the exposure growth for models in \pkg{lossDev}.
+##'
+##' @name exposureGrowthAutoregressiveParameter,AnnualAggLossDevModelOutput-method
+##' @param object The object of type \code{AnnualAggLossDevModelOuput} from which to plot and/or return the autoregressive parameter which is associated with exposure growth.
+##' @param plotDensity A logical value. If \code{TRUE}, the density is plotted. If \code{plotTrace} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
+##' @param plotTrace A logical value. If \code{TRUE}, the trace is plotted. If \code{plotDensity} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
+##' @return Mainly called for the side effect of plotting.  Also returns a named array with select quantiles of the posterior for the autoregressive parameter.  Returned invisibly.
+##' @docType methods
+##' @seealso \code{\link{exposureGrowthAutoregressiveParameter}}
+setMethod('exposureGrowthAutoregressiveParameter',
+          signature(object='AnnualAggLossDevModelOutput'),
+          function(object,  plotDensity, plotTrace)
+      {
+
+          if(!object@input@ar1InExposureGrowth)
+          {
+              warning('Cannot call "exposureGrowthAutoregressiveParameter" unless the model was estimated with a autoregressive error term in the calendar year effect. Returning "NULL" invisibly.')
+              return(invisible(NULL))
+          }
+
+          jd <- getJagsData(object@input)
+          ans <- plot.density.and.or.trace(coda=slot(object@rho.eta, 'value')[1,,],
+                                           plotDensity = plotDensity ,
+                                           plotTrace =   plotTrace,
+                                           d.prior=function(x) dbeta(x, jd$rho.eta.prior[1], jd$rho.eta.prior[2]),
+                                           nice.parameter.name='Exposure Growth Autoregressive Parameter',
                                            zero.line=FALSE,
                                            lower.bound=0,
                                            upper.bound=1)
@@ -698,9 +795,11 @@ setMethod('autoregressiveParameter',
       })
 
 
+
+
 ##' A generic function to plot and/or return the posterior of the mean exposure growth for models in \pkg{lossDev}.
 ##'
-##' exposure growth is currently modeled in a way that is not intended for sophisticated forecasting.  Each year's rate of growth is assumed to be a realization from a normal distribution with mean equal to this parameter.
+##' (Optionally) exposure growth is modeled as an ar1 process.  This inherently assumes that periods of high exposure growth are (or at least have the possibility of being) followed by continued high periods.
 ##'
 ##' @name meanExposureGrowth
 ##' @param object The object from which to plot and/or return the mean exposure growth.

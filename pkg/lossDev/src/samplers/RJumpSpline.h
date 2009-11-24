@@ -74,6 +74,7 @@ class RJumpSpline : public Sampler
 
   //autoregressive coefficient
   double _rho;
+  double _etaRho;
   
   //values at which spline is to be evaluated
   //For now assume this is constant

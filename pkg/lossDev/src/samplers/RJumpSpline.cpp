@@ -194,11 +194,13 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
   //double *A = new double[N];
 
   for(unsigned int i = 0; i < nrow; ++i)
-    {
+  {
       if(i == 0)
-        b[i] =   _tauOfFirstIn3rdColumn * (0.0 - xold[i]);
-      else if(i < 1 + (_TriDim - 1)) // we are in the first _n - 1 values (which are the error in the 3rd column)
-        b[i] =  _tauOf3rdColumn * (0.0 - xold[i]);
+	  b[i] =   _tauOfFirstIn3rdColumn * (0.0 - xold[i]);
+      else if(i < 2) // we are in the first _n - 1 values (which are the error in the 3rd column)
+	  b[i] =  _tauOf3rdColumn * (1 - _etaRho * _etaRho) * (0.0 - xold[i]);
+      else if(i < 1 + (_TriDim - 1))
+	  b[i] = _tauOf3rdColumn * (0.0 - xold[i]);
       else if(i < 1 + 1 + (_TriDim-1)) // we are in the second _n - 1 values (which are the errors in the 4th column)
 	  b[i] = _tauOf4thColumn * (1 - _rho * _rho) * (0.0 - xold[i]);
       else if(i < 1 + 2 * (_TriDim-1))
@@ -214,6 +216,8 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
           {
             if(i == 0)
               A[i + j * nrow] =   _tauOfFirstIn3rdColumn;
+	    else if (i < 2)
+		A[i + j * nrow] =  _tauOf3rdColumn * (1 - _etaRho * _etaRho);
             else if(i < 1 + (_TriDim - 1)) // we are in the first _n - 1 values (which are the error in the 3rd column)
               A[i + j * nrow] =  _tauOf3rdColumn;
 	    else if(i < 1 + 1 + (_TriDim-1)) // we are in the second _n - 1 values (which are the errors in the 4th column)
@@ -460,6 +464,7 @@ RJumpSpline::RJumpSpline(vector<StochasticNode *> const &nodes, Graph const &gra
 
   //autoregressive coefficient
   _rho =  _snode->parameters(0)[9][0];
+  _etaRho =  _snode->parameters(0)[10][0];
 		
   //posterior parameters for Beta under current and posterior cases
   _bPostCurrent = new double[maxBetaLength];
@@ -554,11 +559,13 @@ double RJumpSpline::llZ(bool const &current, unsigned int chain) const
       if(i == 0)
         ans  +=  dnorm4(coeff[i], 0.0, std::sqrt(1.0/ _tauOfFirstIn3rdColumn), 1);
       
+      else if(i < 2)
+	  ans  +=  dnorm4(coeff[i], 0.0, std::sqrt(1.0/ _tauOf3rdColumn / (1 - _etaRho * _etaRho)), 1);
       else if(i < 1 + (_TriDim - 1)) // we are in the first _n - 1 values (which are the error in the 3rd column)
-        ans  +=  dnorm4(coeff[i], 0.0, std::sqrt(1.0/ _tauOf3rdColumn), 1);
+	  ans  +=  dnorm4(coeff[i], 0.0, std::sqrt(1.0/ _tauOf3rdColumn), 1);
       
       else if(i < 1 + 1 + (_TriDim-1)) // we are in the second _n - 1 values (which are the errors in the 4th column)
-	  ans += dnorm4(coeff[i], 0.0, std::sqrt(1.0 / _tauOf4thColumn * (1 - _rho * _rho)), 1) ;
+	  ans += dnorm4(coeff[i], 0.0, std::sqrt(1.0 / _tauOf4thColumn / (1 - _rho * _rho)), 1) ;
 
       else if(i < 1 + 2 * (_TriDim-1)) // we are in the second _n - 1 values (which are the errors in the 4th column)
         ans  +=  dnorm4(coeff[i], 0.0, std::sqrt(1.0/ _tauOf4thColumn), 1);
@@ -639,6 +646,7 @@ void RJumpSpline::update(std::vector<RNG *> const &rng)
 
       //autoregressive coefficient
       _rho =  _snode->parameters(c)[9][0];
+      _etaRho = _snode->parameters(c)[10][0];
         
       RNG* const r = rng[c];
 
@@ -782,8 +790,9 @@ void RJumpSpline::setSplineValue(bool const &current, unsigned int const &chain)
 
       //fifth column error terms first value blank
       value[0 + nrow * 4] = coeff[0]; 
-      for(unsigned int i = 0; i < _TriDim-1; ++i)
-        value[i + nrow * 4 + 1] = coeff[i + 1];
+      value[1 + nrow * 4] = coeff[1];
+      for(unsigned int i = 1; i < _TriDim-1; ++i)
+        value[i + nrow * 4 + 1] = coeff[i + 1] + _etaRho * value[i + nrow * 4 + 1 - 1];
 
       //sixth column error terms first value blank
       value[0 + nrow * 5] = 0; 
@@ -796,8 +805,9 @@ void RJumpSpline::setSplineValue(bool const &current, unsigned int const &chain)
       
       //third column error terms first value blank
       value[0 + nrow * 2] = coeff[0]; 
-      for(unsigned int i = 0; i < _TriDim-1; ++i)
-        value[i + nrow * 2 + 1] = coeff[i + 1];
+      value[1 + nrow * 2] = coeff[1];
+      for(unsigned int i = 1; i < _TriDim-1; ++i)
+        value[i + nrow * 2 + 1] = coeff[i + 1] + _etaRho * value[i + nrow * 2 + 1 - 1];
 
       //fourth column error terms first value blank
       value[0 + nrow * 3] = 0; 

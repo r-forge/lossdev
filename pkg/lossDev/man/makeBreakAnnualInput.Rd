@@ -25,6 +25,7 @@ use.skew.t=FALSE,
 bound.for.skewness.parameter=10,
 last.column.with.scale.innovation=dim(incremental.payments)[2],
 use.ar1.in.calendar.year=FALSE,
+use.ar1.in.exposure.growth=TRUE,
 projected.rate.of.decay=NA)}
 \description{Create an Object of class \code{BreakAnnualAggLossDevModelInput}.}
 \details{The loss development models require a lot of input.  Much of the input is directly dependent on the values of other input.

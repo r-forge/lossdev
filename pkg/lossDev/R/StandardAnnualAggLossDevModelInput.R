@@ -292,6 +292,7 @@ setClass(
 ##' @param bound.for.skewness.parameter A positive numerical value representing the symetric boundaries for the skewness parameter.  In most cases, the default should be sufficient. Ignored if \code{use.skew.t=FALSE}.
 ##' @param last.column.with.scale.innovation A single integer. Must be at least 1 and at most the number of columns in \code{incremental.payments}.  See \emph{Measurment Error-Second Order Random Walk} in Details.
 ##' @param use.ar1.in.calendar.year A logical value.  The calendar year effect errors may (at the users discretion) include an autoregressive process of order 1.  \code{TRUE} turns on the ar1 process, \code{FALSE} (the Default) turns it off.
+##' @param use.ar1.in.exposure.growth A logical value.  The exposure growth errors may (at the users discretion) include an autoregressive process of order 1.  \code{TRUE} (the Default) turns on the ar1 process, \code{FALSE} turns it off.
 ##'
 ##' @param projected.rate.of.decay  May be one of three types (See \emph{Projected Rate of Decay} in Details): 1) \code{NA}; 2) a matrix of numerics (of specific dim); 3) a named list.
 
@@ -326,6 +327,7 @@ setClass(
 ##'   bound.for.skewness.parameter=10,
 ##'   last.column.with.scale.innovation=dim(incremental.payments)[2],
 ##'   use.ar1.in.calendar.year=FALSE,
+##'   use.ar1.in.exposure.growth=TRUE,
 ##'   projected.rate.of.decay=NA)
 makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.payments),
                                     extra.dev.years=1,
@@ -347,6 +349,7 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
                                     bound.for.skewness.parameter=10,
                                     last.column.with.scale.innovation=dim(incremental.payments)[2],
                                     use.ar1.in.calendar.year=FALSE,
+                                    use.ar1.in.exposure.growth=TRUE,
                                     projected.rate.of.decay=NA)
 {
 
@@ -827,6 +830,11 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
         ans@ar1InCalendarYearEffect <- TRUE
     else
         ans@ar1InCalendarYearEffect <- FALSE
+
+    if(use.ar1.in.exposure.growth)
+        ans@ar1InExposureGrowth <- TRUE
+    else
+        ans@ar1InExposureGrowth <- FALSE
 
 
     if(!validObject(ans))

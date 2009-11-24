@@ -22,6 +22,7 @@ use.skew.t=FALSE,
 bound.for.skewness.parameter=10,
 last.column.with.scale.innovation=dim(incremental.payments)[2],
 use.ar1.in.calendar.year=FALSE,
+use.ar1.in.exposure.growth=TRUE,
 projected.rate.of.decay=NA)}
 \description{Create an Object of class \code{StandardAnnualAggLossDevModelInput}.}
 \details{The loss development models require extensive input.  Much of the input is directly dependent on the values of other input.
@@ -265,4 +266,5 @@ Note that since the scale parameter is assumed to follow a second-order random w
 \item{bound.for.skewness.parameter}{A positive numerical value representing the symetric boundaries for the skewness parameter.  In most cases, the default should be sufficient. Ignored if \code{use.skew.t=FALSE}.}
 \item{last.column.with.scale.innovation}{A single integer. Must be at least 1 and at most the number of columns in \code{incremental.payments}.  See \emph{Measurment Error-Second Order Random Walk} in Details.}
 \item{use.ar1.in.calendar.year}{A logical value.  The calendar year effect errors may (at the users discretion) include an autoregressive process of order 1.  \code{TRUE} turns on the ar1 process, \code{FALSE} (the Default) turns it off.}
+\item{use.ar1.in.exposure.growth}{A logical value.  The exposure growth errors may (at the users discretion) include an autoregressive process of order 1.  \code{TRUE} (the Default) turns on the ar1 process, \code{FALSE} turns it off.}
 \item{projected.rate.of.decay}{May be one of three types (See \emph{Projected Rate of Decay} in Details): 1) \code{NA}; 2) a matrix of numerics (of specific dim); 3) a named list.}}
