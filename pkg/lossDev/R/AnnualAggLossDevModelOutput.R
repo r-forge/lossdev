@@ -1248,6 +1248,8 @@ setMethod('stochasticInflation',
 
           #the median holds up under log and exp so we don't have to calculate this draw by draw
           simulated.inflation.rate <- exp(object@stoch.log.inf.pred@median) - 1
+          simulated.inflation.rate.ci <- apply(exp(slot(object@stoch.log.inf.pred, 'value')) - 1, 1, quantile, c(0.05, 0.95))
+
           total.simulated.years <- length(simulated.inflation.rate)
           simulated.years <- min(object@input@stochInflationYears) - 1 + 1:total.simulated.years
           names(simulated.inflation.rate) <- simulated.years
@@ -1300,12 +1302,25 @@ setMethod('stochasticInflation',
                     col='black')
 
               if(extra.years > 0 )
+              {
                   lines(
                         x=max(observed.years) + 1:extra.years,
                         y=simulated.inflation.rate[total.observed.years + 1:extra.years],
                         lwd=2,
                         col='black',
-                        lty=2)
+                        lty=1)
+
+                  for(ind in c('5%', '95%'))
+                  {
+                      lines(
+                            x=max(observed.years) + 1:extra.years,
+                            y=simulated.inflation.rate.ci[ind, total.observed.years + 1:extra.years],
+                            lwd=2,
+                            col='gray',
+                            lty=2)
+                  }
+
+              }
           }
 
           f.legend <- function()
@@ -1321,8 +1336,8 @@ setMethod('stochasticInflation',
                          bty='n')
               else
                   legend('center',
-                         c('Actual', 'Predicted', 'Forecast','Stationary\nMean'),
-                         col = c('gray', 'black', 'black','gray'),
+                         c('Actual', 'Predicted/\nForecast', '90 Percent\nCredible Interval', 'Stationary\nMean'),
+                         col = c('gray', 'black', 'gray', 'gray'),
                          lwd=c(3, 2, 2, 2),
                          lty=c(1, 1, 2, 3),
                          horiz=TRUE,
