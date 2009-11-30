@@ -145,7 +145,7 @@ setMethod('exposureGrowth',
               {
 
                   legend('center',
-                         c('Rate of Exposure Growth','Future Median Rate of Growth','Stationary Mean'),
+                         c('Rate of Exposure Growth','Future Rate of Growth','Stationary Mean'),
                          col=c('black','black','black'),
                          lwd=c(1,2,2),
                          pch=c(1,20,NA),
