@@ -163,16 +163,38 @@ plot.density.and.or.trace <- function(coda,  plotDensity, plotTrace, d.prior, ni
         stop('"plotTrace" must either be "TRUE" or "FALSE"')
 
 
+
     plot.d <- function()
     {
+        n <- 100
         if(is.na(lower.bound) && is.na(upper.bound))
-             post <- density(coda)
-        else if(!is.na(lower.bound) && is.na(upper.bound))
-            post <- density(coda, from=lower.bound)
-        else if(!is.na(upper.bound) && is.na(lower.bound))
-            post <- density(coda, to=upper.bound)
-        else
-            post <- density(coda, from=lower.bound, to=upper.bound)
+        {
+            ##post <- density(coda)
+            fit <- logspline(coda)
+            xx <- seq(from=min(coda), to=max(coda), length.out=n)
+
+        } else if(!is.na(lower.bound) && is.na(upper.bound))
+        {
+            ##post <- density(coda, from=lower.bound)
+            fit <- logspline(coda, lbound=lower.bound)
+            xx <- seq(from=lower.bound, to=max(coda), length.out=n)
+
+        } else if(!is.na(upper.bound) && is.na(lower.bound))
+        {
+            ##post <- density(coda, to=upper.bound)
+            fit <- logspline(coda, ubound=upper.bound)
+            xx <- seq(from=min(coda), to=upper.bound, length.out=n)
+
+        } else {
+            ##post <- density(coda, from=lower.bound, to=upper.bound)
+             fit <- logspline(coda, lbound=lower.bound, ubound=upper.bound)
+             xx <- seq(from=lower.bound, to=upper.bound, length.out=n)
+        }
+
+
+        yy <- dlogspline(xx, fit)
+        post <- list(x=xx, y=yy)
+
 
         if(draw.prior)
             prior <- list(x=post$x,
