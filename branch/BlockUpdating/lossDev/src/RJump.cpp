@@ -32,7 +32,16 @@
 #include <vector>
 
 #include "distributions/DSpline.h"
+//#include "distributions/DBlockTChisqr.h"
+#include "distributions/DChisqrOV.h"
+#include "distributions/DTOV.h"
+#include "distributions/DNormOV.h"
+#include "distributions/DUnifOV.h"
+
+
 #include "samplers/RJumpSplineFactory.h"
+//#include "samplers/MultiVarSliceFactory.h"
+#include "samplers/SliceFactoryOV.h"
 
 
 
@@ -44,7 +53,16 @@ RJump::RJump()
 
 
 	insert(new DSpline);
+	//insert(new DBlockTChisqr);
+	insert(new DChisqrOV);
+	insert(new DTOV);
+	insert(new DNormOV);
+	insert(new DUnifOV);
+
+
 	insert(new RJumpSplineFactory);
+	//insert(new MultiVarSliceFactory);
+	insert(new SliceFactoryOV);
 	
 	
 }

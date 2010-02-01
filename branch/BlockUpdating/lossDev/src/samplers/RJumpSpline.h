@@ -31,9 +31,10 @@
 #define RJUMPSPLINE_H_
 
 #include <JAGS/sampler/Sampler.h>
-#include "DMNorm.h"
+//#include <BUGS/distributions/DMNorm.h>
 #include "Knots.h"
 #include "ExpandableArray.h"
+class DMNorm;
 
 /*
  * Values labeled as current are the current state.

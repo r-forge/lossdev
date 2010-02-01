@@ -135,6 +135,8 @@ setMethod(
               stop('A valid output could not be created')
 
           print(paste('Update took', format(Sys.time() - time.begin)))
+
+          ##attributes(ans)[['jags.model']] <- jm
           return(invisible(ans))
       })
 

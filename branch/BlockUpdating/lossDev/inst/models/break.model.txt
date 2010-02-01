@@ -124,7 +124,7 @@ model
         
         mu.shifted.obs[i] <- mu[log.inc.index[i,1], log.inc.index[i,2]] + beta / theta.obs[i]
         theta.obs[i] <- omega.obs[i] / df / pow(h[log.inc.index[i,2]], 2)
-        omega.obs[i] ~ dchisqr(df)
+        omega.obs[i] ~ dchisqrOV(df)
         }
 
    for(i in 1:K)
@@ -444,11 +444,12 @@ model
         }
 
     ## Priors
-    beta.stoch ~ dt(0, precision.for.skewness, df.for.skewness)T(bounds.for.skewness[1], bounds.for.skewness[2])  #this dist is drawn in R, changes here need to be accompanied by changes in R code
+    beta.stoch ~ dtOV(0, precision.for.skewness, df.for.skewness)T(bounds.for.skewness[1], bounds.for.skewness[2])  #this dist is drawn in R, changes here need to be accompanied by changes in R code
+    #beta.stoch ~ dt(0, precision.for.skewness, df.for.skewness)T(bounds.for.skewness[1], bounds.for.skewness[2])  #this dist is drawn in R, changes here need to be accompanied by changes in R code
     beta <- beta.stoch * (allow.for.skew != 0) + 0 * (allow.for.skew == 0)    
     
     #this dist is drawn in R, changes here need to be accompanied by changes in R code
-    df ~ dchisqr(df.k) T(df.bounds[1], df.bounds[2]) #degrees of freedom of Student's t
+    df ~ dchisqrOV(df.k) T(df.bounds[1], df.bounds[2]) #degrees of freedom of Student's t
 
     ## Standard deviations
     sigma.kappa ~ dunif(sigma.kappa.bounds[1], sigma.kappa.bounds[2])#this dist is drawn in R, changes here need to be accompanied by changes in R code
@@ -464,7 +465,8 @@ model
     ##initial values
     for(t in 1:2)
         {   
-        h.stoch[t] ~ dunif(0, 10)                                       
+        h.stoch[t] ~ dunifOV(0, 10)                                       
+	#h.stoch[t] ~ dunif(0, 10)                                       
         h.2.log[t] <- log(h.2[t])
         h.2[t] <- pow(h[t], 2)      
         }
@@ -475,7 +477,8 @@ model
     for(t in 3:K)
         {
         h[t] <- sqrt(h.2[t])
-        h.2.log.stoch[t] ~ dnorm(h.2.log.mu[t], tau.h.2.log.innov)
+        h.2.log.stoch[t] ~ dnormOV(h.2.log.mu[t], tau.h.2.log.innov)
+        #h.2.log.stoch[t] ~ dnorm(h.2.log.mu[t], tau.h.2.log.innov)
         h.2.log.mu[t] <- 2 * h.2.log[t-1] - h.2.log[t-2]
         h.2.log[t] <- (h.same.as.last[t] != 0) * h.2.log[t-1] + (h.same.as.last[t] == 0) * h.2.log.stoch[t]
         h.2[t] <- exp(h.2.log[t])         
