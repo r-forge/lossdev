@@ -166,7 +166,7 @@ plot.density.and.or.trace <- function(coda,  plotDensity, plotTrace, d.prior, ni
 
     plot.d <- function()
     {
-        n <- 100
+        n <- 1000
         if(is.na(lower.bound) && is.na(upper.bound))
         {
             ##post <- density(coda)
