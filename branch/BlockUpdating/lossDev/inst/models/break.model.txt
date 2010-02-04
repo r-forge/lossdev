@@ -432,7 +432,7 @@ model
     for(i in (K+1):(K+H)) #exposure growth (stationary)
         {
         eta.log.error.mu[i] <- rho.eta.stoch.or.zero * eta.log.error[i-1]
-	eta.log.error[i] ~ dnrom(eta.log.error.mu[i], tau.eta)
+	eta.log.error[i] ~ dnorm(eta.log.error.mu[i], tau.eta)
 	eta.log[i] <- eta.log.error[i] + eta.mu
         eta[i] <- exp(eta.log[i])-1
         }
