@@ -94,6 +94,7 @@ myLibPath <- function() return(get('myLibPath', env=mutableState, inherits=FALSE
 
     mutableState$lossDevOptions <- list()
     mutableState$lossDevOptions[['keepCodaOnDisk']] <- TRUE
+    mutableState$lossDevOptions[['logsplinePenaltyFunction']] <- function(x) 1.5 * log(length(x))
 
 }
 
@@ -125,13 +126,23 @@ setGenericVerif <- function(name, ...)
 
 ##' Options for \pkg{lossDev}.
 ##'
-##' Currently the only option is \code{keepCodaOnDisk}.
-##' If \code{TRUE} (the default), then \pkg{filehash} will be used to store the coda for every node in a temporary file.
-##' This reduces the required memory and can improve copying performance.
-##' Since copied objects refer to the same file, copy time can be greatly reduced.
-##' If \code{FALSE}, then coda's will be kept in memory.
-##' Changing the value will only be taking into account on a "going forward" basis.
+##' Currently the only options are \code{keepCodaOnDisk} and \code{numberOfDensityEvalPoints}.
 ##'
+##' \describe{
+##'   \item{\code{keepCodaOnDisk}}{
+##'     If \code{TRUE} (the default), then \pkg{filehash} will be used to store the coda for every node in a temporary file.
+##'     This reduces the required memory and can improve copying performance.
+##'     Since copied objects refer to the same file, copy time can be greatly reduced.
+##'     If \code{FALSE}, then coda's will be kept in memory.
+##'     Changing the value will only be taking into account on a "going forward" basis.
+##'   }
+##'   \item{\code{logsplinePenaltyFunction}}{
+##'     When drawing kernal density plots using the \pkg{logspline}, it maybe desirable to specify a penalty to smooth the density (See \code{?logspline}).
+##'     This value must be a function which takes one paramter (a vector of the sampled data points) and returns one value -- the penalty.
+##'     The default returns the 1.5 times the log of the number of draws.
+##'   }
+##'
+##' }
 ##' @param \dots named values to set.  If empty, only the current list of option settings is returned.
 ##' @return The current (or altered) list of option settings is returned.
 ##' @export
@@ -144,17 +155,29 @@ lossDevOptions <- function(...)
     if(length(n) == 0)
         return(mutableState$lossDevOptions)
 
-    if(length(n) != 1 || n[1] != 'keepCodaOnDisk')
-        stop('The only current option is "keepCodaOnDisk"')
+    if(length(n) != 1)
+        stop('You must specify only one option at a time')
+
+    if(n != 'keepCodaOnDisk'  && n != 'logsplinePenaltyFunction')
+        stop('The only current options are "keepCodaOnDisk" and "logsplinePenaltyFunction"')
 
 
-    for(i in n)
+
+    if(n == 'keepCodaOnDisk')
     {
-        if(i == 'keepCodaOnDisk')
-            if(!is.logical(args[[i]]))
-                stop('"keepCodaOnDisk" must be a logical value.  Reverting to previous setting.')
-        mutableState$lossDevOptions[[i]] <- args[[i]]
+        if(!is.logical(args[[n]]))
+            stop('"keepCodaOnDisk" must be a logical value.  Reverting to previous setting.')
+
+    } else if(n == 'logsplinePenaltyFunction') {
+        f <- args[[n]]
+        if(!is.function(f) && is.number(f(c(1, 2, 3))) && length(f(c(1, 2, 3))) != 1 )
+            stop('"logsplinePenaltyFunction" must be a function.  Reverting to previous setting.')
+
     }
+
+    mutableState$lossDevOptions[[n]] <- args[[n]]
+
+
 
     return(mutableState$lossDevOptions)
 

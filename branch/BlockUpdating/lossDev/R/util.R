@@ -162,36 +162,44 @@ plot.density.and.or.trace <- function(coda,  plotDensity, plotTrace, d.prior, ni
     if(!is.logical(plotTrace) || length(plotTrace) != 1 || is.na(plotTrace))
         stop('"plotTrace" must either be "TRUE" or "FALSE"')
 
+    f.xx <- function(fit)
+    {
+        n <- 100
+        l <- qlogspline(0.005, fit)
+        u <- qlogspline(0.995, fit)
+        xx <- seq(from=l, to=u, length.out=n)
+    }
 
 
     plot.d <- function()
     {
-        n <- 1000
+
+        penalty <-  lossDevOptions()[['logsplinePenaltyFunction']](coda)
         if(is.na(lower.bound) && is.na(upper.bound))
         {
             ##post <- density(coda)
-            fit <- logspline(coda)
-            xx <- seq(from=min(coda), to=max(coda), length.out=n)
+            fit <- logspline(coda, penalty=penalty)
+
 
         } else if(!is.na(lower.bound) && is.na(upper.bound))
         {
             ##post <- density(coda, from=lower.bound)
-            fit <- logspline(coda, lbound=lower.bound)
-            xx <- seq(from=lower.bound, to=max(coda), length.out=n)
+            fit <- logspline(coda, lbound=lower.bound, penalty=penalty)
+
 
         } else if(!is.na(upper.bound) && is.na(lower.bound))
         {
             ##post <- density(coda, to=upper.bound)
-            fit <- logspline(coda, ubound=upper.bound)
-            xx <- seq(from=min(coda), to=upper.bound, length.out=n)
+            fit <- logspline(coda, ubound=upper.bound, penalty=penalty)
+
 
         } else {
             ##post <- density(coda, from=lower.bound, to=upper.bound)
-             fit <- logspline(coda, lbound=lower.bound, ubound=upper.bound)
-             xx <- seq(from=lower.bound, to=upper.bound, length.out=n)
+             fit <- logspline(coda, lbound=lower.bound, ubound=upper.bound, penalty=penalty)
+
         }
 
-
+        xx <- f.xx(fit)
         yy <- dlogspline(xx, fit)
         post <- list(x=xx, y=yy)
 
@@ -226,6 +234,7 @@ plot.density.and.or.trace <- function(coda,  plotDensity, plotTrace, d.prior, ni
               y=post$y,
               col='black',
               lwd=2)
+
     }
 
     d.legend <- function()
