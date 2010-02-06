@@ -3,7 +3,7 @@
 \title{Options for lossDev.}
 \usage{lossDevOptions(...)}
 \description{Options for \pkg{lossDev}.}
-\details{Currently the only options are \code{keepCodaOnDisk} and \code{numberOfDensityEvalPoints}.
+\details{Currently the only options are \code{keepCodaOnDisk} and \code{logsplinePenaltyFunction}.
 
 \describe{
 \item{\code{keepCodaOnDisk}}{
@@ -13,9 +13,10 @@ Since copied objects refer to the same file, copy time can be greatly reduced.
 If \code{FALSE}, then coda's will be kept in memory.
 Changing the value will only be taking into account on a "going forward" basis.
 }
-\item{\code{numberOfDensityEvalPoints}}{
-When drawing kernal density plots using the \pkg{logspline}, it is necessary to specify \dQuote{the number of equally spaced points at which to plot the density}.
-The number of points choosen is this value.  The default is 200.
+\item{\code{logsplinePenaltyFunction}}{
+When drawing kernal density plots using the \pkg{logspline}, it maybe desirable to specify a penalty to smooth the density (See \code{?logspline}).
+This value must be a function which takes one paramter (a vector of the sampled data points) and returns one value -- the penalty.
+The default returns the the log of the number of draws.
 }
 
 }}

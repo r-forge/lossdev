@@ -94,7 +94,7 @@ myLibPath <- function() return(get('myLibPath', env=mutableState, inherits=FALSE
 
     mutableState$lossDevOptions <- list()
     mutableState$lossDevOptions[['keepCodaOnDisk']] <- TRUE
-    mutableState$lossDevOptions[['logsplinePenaltyFunction']] <- function(x) 1.5 * log(length(x))
+    mutableState$lossDevOptions[['logsplinePenaltyFunction']] <- function(x) log(length(x))
 
 }
 
@@ -126,7 +126,7 @@ setGenericVerif <- function(name, ...)
 
 ##' Options for \pkg{lossDev}.
 ##'
-##' Currently the only options are \code{keepCodaOnDisk} and \code{numberOfDensityEvalPoints}.
+##' Currently the only options are \code{keepCodaOnDisk} and \code{logsplinePenaltyFunction}.
 ##'
 ##' \describe{
 ##'   \item{\code{keepCodaOnDisk}}{
@@ -139,7 +139,7 @@ setGenericVerif <- function(name, ...)
 ##'   \item{\code{logsplinePenaltyFunction}}{
 ##'     When drawing kernal density plots using the \pkg{logspline}, it maybe desirable to specify a penalty to smooth the density (See \code{?logspline}).
 ##'     This value must be a function which takes one paramter (a vector of the sampled data points) and returns one value -- the penalty.
-##'     The default returns the 1.5 times the log of the number of draws.
+##'     The default returns the the log of the number of draws.
 ##'   }
 ##'
 ##' }

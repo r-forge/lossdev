@@ -164,7 +164,7 @@ plot.density.and.or.trace <- function(coda,  plotDensity, plotTrace, d.prior, ni
 
     f.xx <- function(fit)
     {
-        n <- 100
+        n <- 200
         l <- qlogspline(0.005, fit)
         u <- qlogspline(0.995, fit)
         xx <- seq(from=l, to=u, length.out=n)
@@ -184,18 +184,18 @@ plot.density.and.or.trace <- function(coda,  plotDensity, plotTrace, d.prior, ni
         } else if(!is.na(lower.bound) && is.na(upper.bound))
         {
             ##post <- density(coda, from=lower.bound)
-            fit <- logspline(coda, lbound=lower.bound, penalty=penalty)
+            fit <- logspline(coda, lbound=min(coda), penalty=penalty)
 
 
         } else if(!is.na(upper.bound) && is.na(lower.bound))
         {
             ##post <- density(coda, to=upper.bound)
-            fit <- logspline(coda, ubound=upper.bound, penalty=penalty)
+            fit <- logspline(coda, ubound=max(coda), penalty=penalty)
 
 
         } else {
             ##post <- density(coda, from=lower.bound, to=upper.bound)
-             fit <- logspline(coda, lbound=lower.bound, ubound=upper.bound, penalty=penalty)
+             fit <- logspline(coda, lbound=min(coda), ubound=max(coda), penalty=penalty)
 
         }
 
