@@ -39,7 +39,7 @@
 
 #include <stdexcept>
 
-#include "DMNorm.h"
+#include <BUGS/distributions/DMNorm.h>
 #include "lapack.h"
 
 #include <cmath>

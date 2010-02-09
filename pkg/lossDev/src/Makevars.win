@@ -31,8 +31,8 @@ PKG_CPPFLAGS=-I../jags-win32/include/ -I../jags-win32/include/JAGS -DMATHLIB_STA
 
 PKG_LIBS=-L../jags-win32/lib/ -llapack -lblas -ljrmath -ljags -lbasemod -lbugs
 
-OBJECTS.samplers=samplers/ExpandableArray.o samplers/Knots.o samplers/RJumpSpline.o  samplers/RJumpSplineFactory.o
-OBJECTS.distributions=distributions/DSpline.o
+OBJECTS.samplers=samplers/ExpandableArray.o samplers/Knots.o samplers/RJumpSpline.o  samplers/RJumpSplineFactory.o samplers/RealSlicerOV.o  samplers/SliceFactoryOV.o 
+OBJECTS.distributions=distributions/DSpline.o distributions/DChisqrOV.o distributions/DTOV.o distributions/DNormOV.o distributions/DUnifOV.o
 OBJECTS.root=RJump.o
 
 OBJECTS= $(OBJECTS.samplers) $(OBJECTS.distributions) $(OBJECTS.root)

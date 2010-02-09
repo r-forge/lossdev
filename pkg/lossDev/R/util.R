@@ -162,17 +162,47 @@ plot.density.and.or.trace <- function(coda,  plotDensity, plotTrace, d.prior, ni
     if(!is.logical(plotTrace) || length(plotTrace) != 1 || is.na(plotTrace))
         stop('"plotTrace" must either be "TRUE" or "FALSE"')
 
+    f.xx <- function(fit)
+    {
+        n <- 200
+        l <- qlogspline(0.005, fit)
+        u <- qlogspline(0.995, fit)
+        xx <- seq(from=l, to=u, length.out=n)
+    }
+
 
     plot.d <- function()
     {
+
+        penalty <-  lossDevOptions()[['logsplinePenaltyFunction']](coda)
         if(is.na(lower.bound) && is.na(upper.bound))
-             post <- density(coda)
-        else if(!is.na(lower.bound) && is.na(upper.bound))
-            post <- density(coda, from=lower.bound)
-        else if(!is.na(upper.bound) && is.na(lower.bound))
-            post <- density(coda, to=upper.bound)
-        else
-            post <- density(coda, from=lower.bound, to=upper.bound)
+        {
+            ##post <- density(coda)
+            fit <- logspline(coda, penalty=penalty)
+
+
+        } else if(!is.na(lower.bound) && is.na(upper.bound))
+        {
+            ##post <- density(coda, from=lower.bound)
+            fit <- logspline(coda, lbound=min(coda), penalty=penalty)
+
+
+        } else if(!is.na(upper.bound) && is.na(lower.bound))
+        {
+            ##post <- density(coda, to=upper.bound)
+            fit <- logspline(coda, ubound=max(coda), penalty=penalty)
+
+
+        } else {
+            ##post <- density(coda, from=lower.bound, to=upper.bound)
+             fit <- logspline(coda, lbound=min(coda), ubound=max(coda), penalty=penalty)
+
+        }
+
+        xx <- f.xx(fit)
+        yy <- dlogspline(xx, fit)
+        post <- list(x=xx, y=yy)
+
 
         if(draw.prior)
             prior <- list(x=post$x,
@@ -204,6 +234,7 @@ plot.density.and.or.trace <- function(coda,  plotDensity, plotTrace, d.prior, ni
               y=post$y,
               col='black',
               lwd=2)
+
     }
 
     d.legend <- function()

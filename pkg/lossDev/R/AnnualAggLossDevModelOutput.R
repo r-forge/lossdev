@@ -62,6 +62,7 @@ setClass(
                         stoch.log.inf.pred='NodeOutput',
                         kappa='NodeOutput',
                         delta.tail='NodeOutput',
+                        #omega.obs='NodeOutput',
                         'VIRTUAL'),
          contains='LossDevModelOutput')
 
