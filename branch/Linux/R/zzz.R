@@ -93,7 +93,7 @@ myLibPath <- function() return(get('myLibPath', env=mutableState, inherits=FALSE
     mutableState$CounterForCreatedCodas <- 0
 
     mutableState$lossDevOptions <- list()
-    mutableState$lossDevOptions[['keepCodaOnDisk']] <- TRUE
+    mutableState$lossDevOptions[['keepCodaOnDisk']] <- FALSE
     mutableState$lossDevOptions[['logsplinePenaltyFunction']] <- function(x) log(length(x))
 
 }
@@ -130,7 +130,7 @@ setGenericVerif <- function(name, ...)
 ##'
 ##' \describe{
 ##'   \item{\code{keepCodaOnDisk}}{
-##'     If \code{TRUE} (the default), then \pkg{filehash} will be used to store the coda for every node in a temporary file.
+##'     If \code{TRUE} (the default is FALSE), then \pkg{filehash} will be used to store the coda for every node in a temporary file.
 ##'     This reduces the required memory and can improve copying performance.
 ##'     Since copied objects refer to the same file, copy time can be greatly reduced.
 ##'     If \code{FALSE}, then coda's will be kept in memory.
