@@ -661,7 +661,7 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
         if(is.null(names(projected.rate.of.decay)) || any(!(c('final.rate.of.decay.mean', 'final.rate.of.decay.sd', 'final.rate.of.decay.weight') %in% names(projected.rate.of.decay))))
             stop('If "projected.rate.of.decay" is specified as a list, it must be named and those names must contain, "final.rate.of.decay.mean", "final.rate.of.decay.sd", and "final.rate.of.decay.weight"')
 
-        if(length(project.rate.of.decay) != 3 && (length(projected.rate.of.decay) != 4 && !('last.non.zero.payment' %in% names(projected.rate.of.decay))))
+        if(length(projected.rate.of.decay) != 3 && (length(projected.rate.of.decay) != 4 && !('last.non.zero.payment' %in% names(projected.rate.of.decay))))
             stop('If "projected.rate.of.decay" is specified as a list, its names must only contain, "final.rate.of.decay.mean", "final.rate.of.decay.sd", and "final.rate.of.decay.weight" (and optionally "last.non.zero.payment")')
 
         ##last.non.zero.payment
@@ -758,7 +758,7 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
         ##final.rate.of.decay.weight
         final.rate.of.decay.weight <- projected.rate.of.decay[['final.rate.of.decay.weight']]
         if((!is.vector(final.rate.of.decay.weight, mode='numeric') || length(final.rate.of.decay.weight) != total.dev.years - dim(incremental.payments)[2]) &&
-           (!is.matrix(final.rate.of.decay.weight) || !identical(dim(final.rate.of.decay.weight), c(total.exp.years, total.dev.years - dim(incremental.payments)[2]))))
+           (!is.matrix(final.rate.of.decay.weight) || !all(dim(final.rate.of.decay.weight) == c(total.exp.years, total.dev.years - dim(incremental.payments)[2]))))
             stop('"projected.rate.of.decay[[\'final.rate.of.decay.weight\']]" must be a numeric vector of length "total.dev.years - dim(incremental.payments)[2]" or a matrix of dim total.exp.years, total.dev.years - dim(incremental.payments)[2]')
         if(any(is.infinite(final.rate.of.decay.weight)))
             stop('"projected.rate.of.decay[[\'final.rate.of.decay.weight\']]" must be finite')
