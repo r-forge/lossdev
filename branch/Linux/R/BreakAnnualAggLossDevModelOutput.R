@@ -330,7 +330,7 @@ setMethod('tailFactor',
               {
                   current.loss <- current.loss + inc.pred[[i]][,j,,]
 
-                  tail.list[[i]][,j] <- apply(ult / current.loss, c(1), median)
+                  tail.list[[i]][,j] <- apply(ult / current.loss, c(1), median, na.rm=TRUE)
 
               }
           }

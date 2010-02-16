@@ -252,7 +252,7 @@ setMethod('tailFactor',
           {
               current.loss <- current.loss + inc.pred[,j,,]
 
-              tail.matrix[,j] <- apply(ult / current.loss, c(1), median)
+              tail.matrix[,j] <- apply(ult / current.loss, c(1), median, na.rm=TRUE)
 
           }
 
