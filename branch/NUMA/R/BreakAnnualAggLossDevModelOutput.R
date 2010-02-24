@@ -43,7 +43,8 @@ setClass(
          'BreakAnnualAggLossDevModelOutput',
          representation(
                         R='NodeOutput',
-                        inc.brk='NodeOutput',
+                        inc.brk.pre='NodeOutput',
+                        inc.brk.post='NodeOutput',
                         first.row.in.post='NodeOutput'),
          contains='AnnualAggLossDevModelOutput')
 
@@ -296,8 +297,8 @@ setMethod('tailFactor',
 
           inc.pred <- list()
           inc.pred[['Actual']] <- slot(object@inc.pred, 'value')
-          inc.pred[['AsIfPreBreak']] <-  slot(object@inc.brk, 'value')[,,1,,]
-          inc.pred[['AsIfPostBreak']] <- slot(object@inc.brk, 'value')[,,2,,]
+          inc.pred[['AsIfPreBreak']] <-  slot(object@inc.brk.pre, 'value')
+          inc.pred[['AsIfPostBreak']] <- slot(object@inc.brk.post, 'value')
 
           total.col <- dim(inc.pred[[1]])[2]
           total.rows <- dim(inc.pred[[1]])[1]

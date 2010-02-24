@@ -356,14 +356,18 @@ setMethod('tailFactor',
       {
 
           prob.of.non.zero.payment.coda <-  slot(object@prob.of.non.zero.payment, 'value')
-          tmp <- slot(object@inc.brk, 'value')
-          for(i in 1:2)
-          {
-              tmp[,,i,,] <- tmp[,,i,,] * prob.of.non.zero.payment.coda
-          }
 
-          object@inc.brk <- newNodeOutput(tmp)
-          rm(tmp)
+          tmp.pre <- slot(object@inc.brk.pre, 'value')
+          tmp.post <- slot(object@inc.brk.post, 'value')
+
+          tmp.pre <- tmp.pre * prob.of.non.zero.payment.coda
+          tmp.post <- tmp.post * prob.of.non.zero.payment.coda
+
+
+          object@inc.brk.pre <- newNodeOutput(tmp.pre)
+          object@inc.brk.post <- newNodeOutput(tmp.post)
+          rm(tmp.pre)
+          rm(tmp.post)
 
           tmp <- slot(object@inc.pred, 'value') *  prob.of.non.zero.payment.coda
           object@inc.pred <- newNodeOutput(tmp)
