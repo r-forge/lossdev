@@ -88,8 +88,8 @@ myLibPath <- function() return(get('myLibPath', env=mutableState, inherits=FALSE
     dir.create(db.folder)
     setwd(db.folder)
 
-    dbCreate('lossDev.filehash', type='RDS')
-    mutableState$fileHashDBForCodas <- dbInit('lossDev.filehash', type='RDS')
+    #dbCreate('lossDev.filehash', type='RDS')
+    #mutableState$fileHashDBForCodas <- dbInit('lossDev.filehash', type='RDS')
     mutableState$CounterForCreatedCodas <- 0
 
     mutableState$lossDevOptions <- list()
