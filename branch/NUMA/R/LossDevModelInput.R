@@ -114,7 +114,7 @@ setMethod(
           jm <- jags.model(file=file.path(myLibPath(), myPkgName(), 'models', object@modelFile),
                            data=getJagsData(object),
                            inits=getJagsInits(object),
-                           n.chains=nChains,
+                           nchain=nChains,
                            n.adapt=nAddapt)
 
 
