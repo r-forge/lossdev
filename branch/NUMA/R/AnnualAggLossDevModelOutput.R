@@ -2066,7 +2066,7 @@ setMethod('lossDevelopmentFactors',
           {
               next.loss <- current.loss + inc.pred[, j + 1, , ]
 
-              ldf.pred[,j] <- apply(next.loss / current.loss, 1, median)
+              ldf.pred[,j] <- apply(next.loss / current.loss, 1, median, na.rm = TRUE)
 
               current.loss <- next.loss
           }
