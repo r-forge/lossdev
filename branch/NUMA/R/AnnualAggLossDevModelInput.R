@@ -369,7 +369,7 @@ setMethod(
                    sigma.ou.=runif(1, 0.1 / 1.05, 0.1 * 1.05),
                    a.ou.stoch= runif(1, 0.20, .3),
                    b.ou.stoch=rnorm(1, mean=0, sd=0.1),
-                   block.beta.df=c(beta.stoch, 6),
+                   beta.stoch=beta.stoch,
                    stoch.log.inf.c=stoch.log.inf.c.init
                    )
           }
