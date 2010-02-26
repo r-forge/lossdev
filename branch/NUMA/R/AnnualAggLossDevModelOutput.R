@@ -196,7 +196,7 @@ setGenericVerif('finalCumulativeDiff',
 ##' @seealso \code{\link{finalCumulativeDiff}}
 setMethod('finalCumulativeDiff',
           signature(object='AnnualAggLossDevModelOutput'),
-          function(object, plot, expYearRange='all')
+          function(object, plot, expYearRange)
       {
 
           K <- getTriDim(object@input)[1]
@@ -213,14 +213,14 @@ setMethod('finalCumulativeDiff',
               if(expYearRange == 'all')
                   expYearRange <- range(exp.years)
               else
-                  expYearsRange <- range(exp.years[which(!is.na(cumulatives[,1]))])
+                  expYearRange <- range(exp.years[which(!is.na(cumulatives[,1]))])
           } else {
 
               if(!all(as.integer(expYearRange) == expYearRange))
                   stop('"expYearRange" must be supplied as an integer')
               if(length(expYearRange) != 2)
                     stop('"expYearRange" must have length 2')
-              if(max(exp.years) < max(expYearsRange) || min(exp.years) > min(expYearsRange))
+              if(max(exp.years) < max(expYearRange) || min(exp.years) > min(expYearRange))
                   stop('"expYearRange" must be a subset of the actual exposure years')
           }
 
@@ -253,7 +253,7 @@ setMethod('finalCumulativeDiff',
           if(plot)
           {
               plot(
-                   x=range(expYearsRange) + c(-1, +1),
+                   x=range(exp.years) + c(-1, +1),
                    y=range(0, cumulative.resi.stats, na.rm=TRUE),
                    type='n',
                    xlab=getExposureYearLabel(object@input),
@@ -263,10 +263,10 @@ setMethod('finalCumulativeDiff',
 
               abline(h=0,col='gray23',lwd=2,lty='dashed')
 
-              expYearsRange.seq <- seq(expYearsRange[1], expYearsRange[2])
-              for(i in seq_along(expYearsRange.seq))
+              expYearRange.seq <- seq(expYearRange[1], expYearRange[2])
+              for(i in seq_along(expYearRange.seq))
               {
-                  year.i <- expYearsRange.seq[i]
+                  year.i <- expYearRange.seq[i]
 
                   ##draw median to make it thick
                   off.set <- .45
