@@ -2227,6 +2227,7 @@ setGenericVerif('rateOfDecay',
 ##' or \code{\link{makeBreakAnnualInput}}).  An exposure year type of \dQuote{policy year} corresponds to \code{firstIsHalfReport=TRUE},
 ##' and an exposure year type of \dQuote{accident year} corresponds to \code{firstIsHalfReport=FALSE}.  Setting \code{firstIsHalfReport} to a non-missing value will override this default.
 ##'
+##' If \code{expYearRange} is \dQuote{fullyObs}, then only exposure years with a non missing value in the first column will be plotted.
 ##'
 ##' @name tailFactor
 ##' @param object The object from which to plot the predicted tail factors and return tail factors for \emph{all} attachment points.
@@ -2235,13 +2236,14 @@ setGenericVerif('rateOfDecay',
 ##' @param firstIsHalfReport A logical value or \code{NA}.  See Details for more info.
 ##' @param finalAttachment An integer value must be at least 1. Default value is \code{attachment}.  A call to \code{tailFactor} will return (invisibly) a matrix of tail factors through this value.
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
+##' @param expYearRange Either a range of years (for example c(1995, 2006)) or one of the keywords \dQuote{all} or \dQuote{fullyObs}.
 ##' @return Mainly called for the side effect of plotting.
 ##' @docType genericFunction
 ##' @seealso \code{\link[=tailFactor,StandardAnnualAggLossDevModelOutput-method]{tailFactor("StandardAnnualAggLossDevModelOutput")}}
 ##' @seealso \code{\link[=tailFactor,BreakAnnualAggLossDevModelOutput-method]{tailFactor("BreakAnnualAggLossDevModelOutput")}}
 ##' @exportMethod tailFactor
 setGenericVerif('tailFactor',
-                function(object, attachment, useObservedValues=FALSE, firstIsHalfReport=NA, finalAttachment=attachment, plot=TRUE)
+                function(object, attachment, useObservedValues=FALSE, firstIsHalfReport=NA, finalAttachment=attachment, plot=TRUE, expYearRange='all')
             {
                 if(!is.numeric(attachment))
                     stop('"attachment" must be numeric')
@@ -2275,6 +2277,28 @@ setGenericVerif('tailFactor',
 
                 if(finalAttachment < attachment)
                     stop('"finalAttachment" must be at least equal to "attachment"')
+
+
+                if(is.character(expYearRange))
+                {
+                    if(length(expYearRange) != 1)
+                        stop('"expYearRange" must be of length one if it is a character')
+                    if(expYearRange != 'all' && expYearRange != 'fullyObs')
+                        stop('"expYearRange" must be one of "all" or "fullyObs" if it is supplied as a character')
+                    ##if(expYearRange == 'all')
+                        ##expYearRange <- range(exp.years)
+                    ##else
+                        ##expYearRange <- range(exp.years[which(!is.na(cumulatives[,1]))])
+                } else {
+
+                    if(!all(as.integer(expYearRange) == expYearRange))
+                        stop('"expYearRange" must be supplied as an integer')
+                    if(length(expYearRange) != 2)
+                        stop('"expYearRange" must have length 2')
+                    ##if(max(exp.years) < max(expYearRange) || min(exp.years) > min(expYearRange))
+                        ##stop('"expYearRange" must be a subset of the actual exposure years')
+                }
+
 
 
                 standardGeneric('tailFactor')
