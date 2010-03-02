@@ -372,7 +372,7 @@ setMethod('tailFactor',
                   plot(x=range(total.exp.years),
                        y=y.range,
                        xlab=getExposureYearLabel(object@input),
-                       ylab=paste(attachment.adj,"th to Ultimate Tail Factor",sep=""),
+                       ylab=paste(attachment,"th to Ultimate Tail Factor",sep=""),
                        type="n",
                        cex.axis=1.25,
                        cex.lab=1.25)
