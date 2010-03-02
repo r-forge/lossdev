@@ -67,6 +67,10 @@ setGenericVerif('runLossDevModel',
 ##' This method returns a valid output object or flags an error.
 ##' This method is suitable for classes properly derived from class \code{LossDevModelInput} that properly override \dQuote{\code{\link{getJagsData}}} and \dQuote{\code{\link{getJagsInits}}}
 ##' and whose output type has a valid \code{getModelOutputNodes} method.
+##'
+##' \pkg{lossDev} sets the seed in each chain from a random number generated inside of \code{R}.
+##' So to make a run reproducible, all one must do is set the seed (using \code{set.seed}) in \code{R} prior to the execution of this method.
+##'
 ##' @name runLossDevModel,LossDevModelInput-method
 ##' @param object The object of type \code{LossDevModelInput} containing the model to estimate.
 ##' @param burnIn An integer to represent the number of initial \acronym{MCMC} iterations to be discarded. (The adaptive phase (\code{nAddapt}) is not considered part of \code{burnIn}.)
@@ -76,7 +80,7 @@ setGenericVerif('runLossDevModel',
 ##' @param nAddapt The length of the adaptive phase for the \acronym{MCMC} algorithm. (Default is \code{trunc(burnIn/4)+1}.)
 ##' @return An object of class \code{LossDevModelOutput}.
 ##' @docType methods
-##' @seealso \code{\link{runLossDevModel}}
+##' @seealso \code{\link{runLossDevModel}} \code{\link{set.seed}}
 ##  #import rjags only do this in zzz.R
 setMethod(
           f='runLossDevModel',
@@ -111,6 +115,32 @@ setMethod(
 
           message(paste('Preparing Jags Model\nadapting for', nAddapt, 'iterations\n\n'))
           gc()
+
+          rngs <- rep(paste('base', c('Wichmann-Hill', 'Marsaglia-Multicarry', 'Super-Duper', 'Mersenne-Twister'), sep='::'), length.out=nChains)
+
+          if(nChains > 100) stop(paste('Why are you running so many chains?', nChains, 'is too many.  Let\'s keep it below 100, OK?'))
+          gen.seed <- function() ceiling(runif(1, 1, 10000))
+
+          rng.seeds <- gen.seed()
+          for(i in seq(1, nChains)[-1])
+          {
+              prop.seed <- gen.seed()
+              while(prop.seed %in%  rng.seeds)
+                  prop.seed <- gen.seed()
+
+              rng.seeds[i] <- prop.seed
+          }
+
+          master.inits.f <- getJagsInits(object)
+
+          inits.f <- function(chain)
+          {
+              ans <- master.inits.f()
+              ans[['.RNG.name']] <- rngs[chain]
+              ans[['.RNG.seed']] <- rng.seeds[chain]
+
+          }
+
           jm <- jags.model(file=file.path(myLibPath(), myPkgName(), 'models', object@modelFile),
                            data=getJagsData(object),
                            inits=getJagsInits(object),
