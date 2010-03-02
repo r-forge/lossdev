@@ -139,6 +139,8 @@ setMethod(
               ans[['.RNG.name']] <- rngs[chain]
               ans[['.RNG.seed']] <- rng.seeds[chain]
 
+              return(ans)
+
           }
 
           jm <- jags.model(file=file.path(myLibPath(), myPkgName(), 'models', object@modelFile),
