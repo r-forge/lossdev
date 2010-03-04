@@ -171,12 +171,13 @@ setMethod('exposureGrowth',
 ##' @name finalCumulativeDiff
 ##' @param object The object from which to plot and/or return the difference.
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
+##' @param expYearRange Either a range of years (for example c(1995, 2006)) or one of the keywords \dQuote{all} or \dQuote{fullyObs}.
 ##' @return Mainly called for the side effect of plotting.
 ##' @docType genericFunction
 ##' @seealso \code{\link[=finalCumulativeDiff,AnnualAggLossDevModelOutput-method]{finalCumulativeDiff("AnnualAggLossDevModelOutput")}}
 ##' @exportMethod finalCumulativeDiff
 setGenericVerif('finalCumulativeDiff',
-                function(object, plot=TRUE)
+                function(object, plot=TRUE, expYearRange='all')
                 standardGeneric('finalCumulativeDiff'))
 
 ##' A method to plot and/or return the difference between final actual and predicted cumulative payments.
@@ -184,21 +185,45 @@ setGenericVerif('finalCumulativeDiff',
 ##' The relative difference (x/y - 1) between the final observed cumulative payment and the corresponding predicted cumulative payment is plotted for each exposure year.
 ##' The horizontal lines of each box represent (starting from the top) the 90th, 75th, 50th, 20th, and 10th percentiles.  Exposure years in which all cumulative payments are \code{NA} are omitted.
 ##'
+##' If \code{expYearRange} is \dQuote{fullyObs}, then only exposure years with a non missing value in the first column will be plotted.
+##'
 ##' @name finalCumulativeDiff,AnnualAggLossDevModelOutput-method
 ##' @param object The object of type \code{AnnualAggLossDevModelOuput} from which to plot and/or return the difference between final actual and predicted cumulative payments.
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
+##' @param expYearRange Either a range of years (for example c(1995, 2006)) or one of the keywords \dQuote{all} or \dQuote{fullyObs}.
 ##' @return Mainly called for the side effect of plotting the difference between final actual and predicted cumulative payments by exposure year.  Also returns a named array for the percentiles in the plot.  Returned invisibly.
 ##' @docType methods
 ##' @seealso \code{\link{finalCumulativeDiff}}
 setMethod('finalCumulativeDiff',
           signature(object='AnnualAggLossDevModelOutput'),
-          function(object, plot)
+          function(object, plot, expYearRange)
       {
 
           K <- getTriDim(object@input)[1]
           inc.pred.coda <- slot(object@inc.pred, 'value')[1:K, 1:K,,]
           cumulatives <- object@input@cumulatives
           exp.years <- object@input@exposureYears
+
+          if(is.character(expYearRange))
+          {
+              if(length(expYearRange) != 1)
+                  stop('"expYearRange" must be of length one if it is a character')
+              if(expYearRange != 'all' && expYearRange != 'fullyObs')
+                  stop('"expYearRange" must be one of "all" or "fullyObs" if it is supplied as a character')
+              if(expYearRange == 'all')
+                  expYearRange <- range(exp.years)
+              else
+                  expYearRange <- range(exp.years[which(!is.na(cumulatives[,1]))])
+          } else {
+
+              if(!all(as.integer(expYearRange) == expYearRange))
+                  stop('"expYearRange" must be supplied as an integer')
+              if(length(expYearRange) != 2)
+                    stop('"expYearRange" must have length 2')
+              if(max(exp.years) < max(expYearRange) || min(exp.years) > min(expYearRange))
+                  stop('"expYearRange" must be a subset of the actual exposure years')
+          }
+
 
           cumulative.resi.stats <- array(NA, c(5, K), dimnames=list(c('10%', '25%', '50%', '75%', '90%'), exp.years))
 
@@ -238,9 +263,10 @@ setMethod('finalCumulativeDiff',
 
               abline(h=0,col='gray23',lwd=2,lty='dashed')
 
-              for(i in 1:K)
+              expYearRange.seq <- seq(expYearRange[1], expYearRange[2])
+              for(i in seq_along(expYearRange.seq))
               {
-                  year.i <- exp.years[i]
+                  year.i <- expYearRange.seq[i]
 
                   ##draw median to make it thick
                   off.set <- .45
@@ -2066,7 +2092,7 @@ setMethod('lossDevelopmentFactors',
           {
               next.loss <- current.loss + inc.pred[, j + 1, , ]
 
-              ldf.pred[,j] <- apply(next.loss / current.loss, 1, median)
+              ldf.pred[,j] <- apply(next.loss / current.loss, 1, median, na.rm = TRUE)
 
               current.loss <- next.loss
           }
@@ -2201,6 +2227,7 @@ setGenericVerif('rateOfDecay',
 ##' or \code{\link{makeBreakAnnualInput}}).  An exposure year type of \dQuote{policy year} corresponds to \code{firstIsHalfReport=TRUE},
 ##' and an exposure year type of \dQuote{accident year} corresponds to \code{firstIsHalfReport=FALSE}.  Setting \code{firstIsHalfReport} to a non-missing value will override this default.
 ##'
+##' If \code{expYearRange} is \dQuote{fullyObs}, then only exposure years with a non missing value in the first column will be plotted.
 ##'
 ##' @name tailFactor
 ##' @param object The object from which to plot the predicted tail factors and return tail factors for \emph{all} attachment points.
@@ -2209,13 +2236,14 @@ setGenericVerif('rateOfDecay',
 ##' @param firstIsHalfReport A logical value or \code{NA}.  See Details for more info.
 ##' @param finalAttachment An integer value must be at least 1. Default value is \code{attachment}.  A call to \code{tailFactor} will return (invisibly) a matrix of tail factors through this value.
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
+##' @param expYearRange Either a range of years (for example c(1995, 2006)) or one of the keywords \dQuote{all} or \dQuote{fullyObs}.
 ##' @return Mainly called for the side effect of plotting.
 ##' @docType genericFunction
 ##' @seealso \code{\link[=tailFactor,StandardAnnualAggLossDevModelOutput-method]{tailFactor("StandardAnnualAggLossDevModelOutput")}}
 ##' @seealso \code{\link[=tailFactor,BreakAnnualAggLossDevModelOutput-method]{tailFactor("BreakAnnualAggLossDevModelOutput")}}
 ##' @exportMethod tailFactor
 setGenericVerif('tailFactor',
-                function(object, attachment, useObservedValues=FALSE, firstIsHalfReport=NA, finalAttachment=attachment, plot=TRUE)
+                function(object, attachment, useObservedValues=FALSE, firstIsHalfReport=NA, finalAttachment=attachment, plot=TRUE, expYearRange='all')
             {
                 if(!is.numeric(attachment))
                     stop('"attachment" must be numeric')
@@ -2249,6 +2277,28 @@ setGenericVerif('tailFactor',
 
                 if(finalAttachment < attachment)
                     stop('"finalAttachment" must be at least equal to "attachment"')
+
+
+                if(is.character(expYearRange))
+                {
+                    if(length(expYearRange) != 1)
+                        stop('"expYearRange" must be of length one if it is a character')
+                    if(expYearRange != 'all' && expYearRange != 'fullyObs')
+                        stop('"expYearRange" must be one of "all" or "fullyObs" if it is supplied as a character')
+                    ##if(expYearRange == 'all')
+                        ##expYearRange <- range(exp.years)
+                    ##else
+                        ##expYearRange <- range(exp.years[which(!is.na(cumulatives[,1]))])
+                } else {
+
+                    if(!all(as.integer(expYearRange) == expYearRange))
+                        stop('"expYearRange" must be supplied as an integer')
+                    if(length(expYearRange) != 2)
+                        stop('"expYearRange" must have length 2')
+                    ##if(max(exp.years) < max(expYearRange) || min(exp.years) > min(expYearRange))
+                        ##stop('"expYearRange" must be a subset of the actual exposure years')
+                }
+
 
 
                 standardGeneric('tailFactor')

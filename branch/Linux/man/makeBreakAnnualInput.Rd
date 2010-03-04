@@ -19,8 +19,8 @@ total.dev.years=extra.dev.years+dim(incremental.payments)[2],
 total.exp.years=extra.exp.years+dim(incremental.payments)[1],
 cumulative.payments=cumulate(incremental.payments),
 exp.year.type=c('ambiguous', 'py', 'ay'),
-prior.for.knot.locations.pre.break=2,
-prior.for.knot.locations.post.break=1,
+prior.for.knot.locations.pre.break=NA,
+prior.for.knot.locations.post.break=NA,
 use.skew.t=FALSE,
 bound.for.skewness.parameter=10,
 last.column.with.scale.innovation=dim(incremental.payments)[2],
@@ -48,6 +48,11 @@ Note also that the number of rows above and below the break must be at least 4 a
 The prior for the \code{first.year.in.new.regime} is a (scaled and discretized) beta distribtion.
 A value of \code{c(1,1)} would indicate a uniform distribution.
 See \code{\link{firstYearInNewRegime}}.
+}
+\item{\code{prior.for.knot.locations.pre.break} and \code{prior.for.knot.locations.post.break}}{
+If these values are \code{NA} (the default), then \code{prior.for.knot.locations.pre.break} will be assigned a value of 2.
+And \code{prior.for.knot.locations.post.break} wil be assigned a value of \code{1 + (num.years.in.post.break.period + 0.5 * num.years.in.break.period)/num.years.in.triangle.}.
+These values must either both be \code{NA} or both be set to numbers.
 }
 }}
 \references{Kim, Y., and J. McCulloch (2007) \dQuote{The Skew-Student Distribution with Application to U.S. Stock Market Returns and the Equity Premium,} Department of Economics, Ohio State University, October 2007}

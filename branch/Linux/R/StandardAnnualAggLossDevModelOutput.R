@@ -199,13 +199,14 @@ setMethod('rateOfDecay',
 ##' @param firstIsHalfReport A logical value or \code{NA}.  See Details for more information.
 ##' @param finalAttachment An integer value must be at least 1 default value is \code{attachment}.  A call to \code{tailFactor} returns (invisibly) a matrix of tail factors through this value.
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
+##' @param expYearRange Either a range of years (for example c(1995, 2006)) or one of the keywords \dQuote{all} or \dQuote{fullyObs}.
 ##' @return Mainly called for the side effect of plotting.  Also returns tail factors for \emph{all} attachment points through \code{finalAttachment}.  Returned invisibly.
 ##' @docType methods
 ##' @seealso \code{\link{tailFactor}}
 ##' @seealso \code{\link[=tailFactor,BreakAnnualAggLossDevModelOutput-method]{tailFactor("BreakAnnualAggLossDevModelOutput")}}
 setMethod('tailFactor',
           signature(object='StandardAnnualAggLossDevModelOutput'),
-          function(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot)
+          function(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot, expYearRange)
       {
 
           ey.type <- object@input@triangleType
@@ -228,6 +229,28 @@ setMethod('tailFactor',
           total.col <- dim(inc.pred)[2]
           total.rows <- dim(inc.pred)[1]
           total.exp.years <- object@input@exposureYears[1] + 1:total.rows - 1
+
+
+          if(is.character(expYearRange))
+          {
+              ##if(length(expYearRange) != 1)
+              ##stop('"expYearRange" must be of length one if it is a character')
+              ##if(expYearRange != 'all' && expYearRange != 'fullyObs')
+              ##stop('"expYearRange" must be one of "all" or "fullyObs" if it is supplied as a character')
+              if(expYearRange == 'all')
+                  expYearRange <- range(total.exp.years)
+              else
+                  expYearRange <- range(object@input@exposureYears[which(!is.na(object@input@cumulatives[,1]))],
+                                        total.exp.years[total.exp.years > max(object@input@exposureYears)])
+          } else {
+
+              ##if(!all(as.integer(expYearRange) == expYearRange))
+              ##stop('"expYearRange" must be supplied as an integer')
+              ##if(length(expYearRange) != 2)
+              ##stop('"expYearRange" must have length 2')
+              if(max(total.exp.years) < max(expYearRange) || min(total.exp.years) > min(expYearRange))
+                  stop('"expYearRange" must be a subset of the actual exposure years')
+          }
 
           if(n.columns > total.col)
               stop('either "attachment" or "finalAttachment" is set larger than the number of total development years.  Set these to a smaller value or re-estiamte the triangle with additional predicted development years.')
@@ -257,13 +280,25 @@ setMethod('tailFactor',
           }
 
           if(plot)
-              plot(x=total.exp.years,
-                   y=tail.matrix[,attachment],
+          {
+              plot(x=range(total.exp.years),
+                   y=range(tail.matrix[,attachment.adj]),
                    xlab=getExposureYearLabel(object@input),
-                   ylab=paste(attachment.adj,"th to Ultimate Tail Factor",sep=""),
-                   type="b",
+                   ylab=paste(attachment,"th to Ultimate Tail Factor",sep=""),
+                   type='n',
                    cex.axis=1.25,
                    cex.lab=1.25)
+
+
+              expYearRange.seq <- seq(expYearRange[1], expYearRange[2])
+              lines(x=expYearRange.seq,
+                    y=tail.matrix[as.character(expYearRange.seq),attachment.adj],
+                    type='b')
+
+
+          }
+
+
 
           return(invisible(tail.matrix))
       })

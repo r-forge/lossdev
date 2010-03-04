@@ -15,7 +15,9 @@ it is impossible to plot half-to-ultimate tail factors; however, they are the fi
 \code{firstIsHalfReport} can be \code{NA} (the default)
 if the exposure year type was specified to be one of \dQuote{policy year} or \dQuote{accident year} at the time the input object was constructed (see \code{\link{makeStandardAnnualInput}}
 or \code{\link{makeBreakAnnualInput}}).  An exposure year type of \dQuote{policy year} corresponds to \code{firstIsHalfReport=TRUE},
-and an exposure year type of \dQuote{accident year} corresponds to \code{firstIsHalfReport=FALSE}.  Setting \code{firstIsHalfReport} to a non-missing value will override this default.}
+and an exposure year type of \dQuote{accident year} corresponds to \code{firstIsHalfReport=FALSE}.  Setting \code{firstIsHalfReport} to a non-missing value will override this default.
+
+If \code{expYearRange} is \dQuote{fullyObs}, then only exposure years with a non missing value in the first column will be plotted.}
 \value{Mainly called for the side effect of plotting.}
 \docType{genericFunction}
 \seealso{\code{\link[=tailFactor,StandardAnnualAggLossDevModelOutput-method]{tailFactor("StandardAnnualAggLossDevModelOutput")}}}
@@ -25,4 +27,5 @@ and an exposure year type of \dQuote{accident year} corresponds to \code{firstIs
 \item{useObservedValues}{A logical value.  If \code{TRUE}, observed values are substituted for predicted values whenever possible in the calculation.  If \code{FALSE}, only predicted values are used.}
 \item{firstIsHalfReport}{A logical value or \code{NA}.  See Details for more info.}
 \item{finalAttachment}{An integer value must be at least 1. Default value is \code{attachment}.  A call to \code{tailFactor} will return (invisibly) a matrix of tail factors through this value.}
-\item{plot}{A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.}}
+\item{plot}{A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.}
+\item{expYearRange}{Either a range of years (for example c(1995, 2006)) or one of the keywords \dQuote{all} or \dQuote{fullyObs}.}}
