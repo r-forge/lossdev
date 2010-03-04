@@ -12,4 +12,5 @@ The horizontal lines of each box represent (starting from the top) the 90th, 75t
 \seealso{\code{\link{finalCumulativeDiff}}}
 \seealso{\code{\link{finalCumulativeDiff,AnnualAggLossDevModelOutput-method}}}
 \arguments{\item{object}{The object of type \code{AnnualAggLossDevModelOuputWithZeros} from which to plot and/or return the difference between final actual and predicted cumulative payments.}
-\item{plot}{A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.}}
+\item{plot}{A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.}
+\item{expYearRange}{Either a range of years (for example c(1995, 2006)) or one of the keywords \dQuote{all} or \dQuote{fullyObs}.}}

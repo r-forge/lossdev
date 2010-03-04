@@ -52,6 +52,7 @@ See \code{\link{firstYearInNewRegime}}.
 \item{\code{prior.for.knot.locations.pre.break} and \code{prior.for.knot.locations.post.break}}{
 If these values are \code{NA} (the default), then \code{prior.for.knot.locations.pre.break} will be assigned a value of 2.
 And \code{prior.for.knot.locations.post.break} wil be assigned a value of \code{1 + (num.years.in.post.break.period + 0.5 * num.years.in.break.period)/num.years.in.triangle.}.
+These values must either both be \code{NA} or both be set to numbers.
 }
 }}
 \references{Kim, Y., and J. McCulloch (2007) \dQuote{The Skew-Student Distribution with Application to U.S. Stock Market Returns and the Equity Premium,} Department of Economics, Ohio State University, October 2007}

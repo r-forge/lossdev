@@ -75,6 +75,7 @@ setClass(
 ##'   \item{\code{prior.for.knot.locations.pre.break} and \code{prior.for.knot.locations.post.break}}{
 ##'     If these values are \code{NA} (the default), then \code{prior.for.knot.locations.pre.break} will be assigned a value of 2.
 ##'     And \code{prior.for.knot.locations.post.break} wil be assigned a value of \code{1 + (num.years.in.post.break.period + 0.5 * num.years.in.break.period)/num.years.in.triangle.}.
+##'     These values must either both be \code{NA} or both be set to numbers.
 ##'   }
 ##' }
 ##'
@@ -247,7 +248,7 @@ makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.paym
     } else {
 
         if(!is.numeric(prior.for.knot.locations.pre.break) || length(prior.for.knot.locations.pre.break) != 1)
-            stop('"prior.for.knot.locations.pre.break" must be a numeric of length 1')
+            stop('"prior.for.knot.locations.pre.break" and "prior.for.knot.locations.post.break" must both be numeric of length 1.')
         if(prior.for.knot.locations.pre.break < 1)
             stop('"prior.for.knot.locations.pre.break" must be at least 1')
         ans@priorForKnotPositionsPreBreak <- prior.for.knot.locations.pre.break
@@ -255,7 +256,7 @@ makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.paym
 
 
         if(!is.numeric(prior.for.knot.locations.post.break) || length(prior.for.knot.locations.post.break) != 1)
-            stop('"prior.for.knot.locations.post.break" must be a numeric of length 1')
+            stop('"prior.for.knot.locations.pre.break" and "prior.for.knot.locations.post.break" must both be numeric of length 1')
         if(prior.for.knot.locations.post.break < 1)
             stop('"prior.for.knot.locations.post.break" must be at least 1')
 
