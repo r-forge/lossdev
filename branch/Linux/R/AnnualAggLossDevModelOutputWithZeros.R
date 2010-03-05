@@ -141,10 +141,13 @@ accountForZeroPayments <- function(object, burnIn=1000, nAddapt=1000)
     if(dim(u)[1] != jags.data$K)
         stop('error "dim(u)[1] != jags.data$K"')
 
-    jags.data$u <- u
-    jags.data$scale.prior <- priorsForProbOfPayment['scale']
-    jags.data$fifty.fifty.prior <- priorsForProbOfPayment['fifty.fifty']
-
+    jags.data.new <- list()
+    jags.data.new$u <- u
+    jags.data.new$scale.prior <- priorsForProbOfPayment['scale']
+    jags.data.new$fifty.fifty.prior <- priorsForProbOfPayment['fifty.fifty']
+    jags.data.new$K <- jags.data$K
+    jags.data.new$H <- jags.data$H
+    jags.data.new$L.vec <- jags.data$L.vec
 
 
 
@@ -166,10 +169,40 @@ accountForZeroPayments <- function(object, burnIn=1000, nAddapt=1000)
     sampleSize <- dim(eta.mu)['iteration']
     thin <- 1
 
+    rngs <- rep(paste('base', c('Wichmann-Hill', 'Marsaglia-Multicarry', 'Super-Duper', 'Mersenne-Twister'), sep='::'), length.out=nChains)
+
+    gen.seed <- function() ceiling(runif(1, 1, 10000))
+
+    rng.seeds <- gen.seed()
+    for(i in seq(1, nChains)[-1])
+    {
+        prop.seed <- gen.seed()
+        while(prop.seed %in%  rng.seeds)
+            prop.seed <- gen.seed()
+
+        rng.seeds[i] <- prop.seed
+    }
+
+    #master.inits.f <- getJagsInits(object)
+
+    inits.f <- function(chain)
+    {
+        ans <- list()
+        ans[['.RNG.name']] <- rngs[chain]
+        ans[['.RNG.seed']] <- rng.seeds[chain]
+
+        return(ans)
+
+    }
+
+
+
+
 
     message(paste('Preparing Jags Model\nadapting for', nAddapt, 'iterations\n\n'))
     jm <- jags.model(file=file.path(myLibPath(), myPkgName(), 'models', 'probOfPayment.model.txt'),
-                     data=jags.data,
+                     data=jags.data.new,
+                     inits=inits.f,
                      n.chains=nChains,
                      n.adapt=nAddapt)
 
@@ -189,7 +222,7 @@ accountForZeroPayments <- function(object, burnIn=1000, nAddapt=1000)
     if(!validObject(ans))
         stop('A valid output could not be created')
 
-          print(paste('Update took', Sys.time() - time.begin))
+          print(paste('Update took', format( Sys.time() - time.begin)))
 
     return(invisible(ans))
 
