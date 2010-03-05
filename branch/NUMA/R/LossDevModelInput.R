@@ -155,6 +155,9 @@ setMethod(
 
           message(paste('Sampling Jags Model for', sampleSize, 'iterations Thin =', thin,'\n', 'This will result in ~', sampleSize / thin, 'Samples'))
           output <- jags.samples(jm, parameters.to.save., sampleSize, thin)
+          rm(jm)
+          gc()
+          gc()
 
 
           ans@input <- object
