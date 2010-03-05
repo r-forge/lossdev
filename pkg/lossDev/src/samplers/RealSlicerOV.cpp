@@ -21,7 +21,7 @@ using std::string;
 RealSlicerOV::RealSlicerOV()
     : RealSlicer(),
       _probOfOverrelaxed(.9),
-      _endpointAccuracy(10),
+      _endpointAccuracy(5),
       _maxOV(100),
       _widthOV(1),
       _iterOV(0),

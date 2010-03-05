@@ -293,6 +293,7 @@ estimate.priors <- function(p)
 ##' @name finalCumulativeDiff,AnnualAggLossDevModelOutputWithZeros-method
 ##' @param object The object of type \code{AnnualAggLossDevModelOuputWithZeros} from which to plot and/or return the difference between final actual and predicted cumulative payments.
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
+##' @param expYearRange Either a range of years (for example c(1995, 2006)) or one of the keywords \dQuote{all} or \dQuote{fullyObs}.
 ##' @return Mainly called for the side effect of plotting the difference between final actual and predicted cumulative payments by exposure year.  Also returns a named array for the percentiles in the plot.  Returned invisibly.
 ##' @docType methods
 ##' @seealso \code{\link{accountForZeroPayments}}
@@ -300,7 +301,7 @@ estimate.priors <- function(p)
 ##' @seealso \code{\link{finalCumulativeDiff,AnnualAggLossDevModelOutput-method}}
 setMethod('finalCumulativeDiff',
           signature(object='AnnualAggLossDevModelOutputWithZeros'),
-          function(object, plot)
+          function(object, plot, expYearRange)
       {
 
           tmp <- slot(object@inc.pred, 'value') * slot(object@prob.of.non.zero.payment, 'value')
@@ -343,6 +344,7 @@ setMethod('finalCumulativeDiff',
 ##' @param firstIsHalfReport A logical value or \code{NA}.  See Details for more information.
 ##' @param finalAttachment An integer value must be at least 1 default value is \code{attachment}.  A call to \code{tailFactor} returns (invisibly) a matrix of tail factors through this value.
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
+##' @param expYearRange Either a range of years (for example c(1995, 2006)) or one of the keywords \dQuote{all} or \dQuote{fullyObs}.
 ##' @return Mainly called for the side effect of plotting.  Also returns tail factors for \emph{all} attachment points through \code{finalAttachment}.  See Details. Returned invisibly.
 ##' @docType methods
 ##' @seealso \code{\link{accountForZeroPayments}}
@@ -352,18 +354,22 @@ setMethod('finalCumulativeDiff',
 ##' @seealso \code{\link[=tailFactor,StandardAnnualAggLossDevModelOutput-method]{tailFactor("StandardAnnualAggLossDevModelOutput")}}
 setMethod('tailFactor',
           signature(object='BreakAnnualAggLossDevModelOutputWithZeros'),
-          function(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot)
+          function(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot, expYearRange)
       {
 
           prob.of.non.zero.payment.coda <-  slot(object@prob.of.non.zero.payment, 'value')
-          tmp <- slot(object@inc.brk, 'value')
-          for(i in 1:2)
-          {
-              tmp[,,i,,] <- tmp[,,i,,] * prob.of.non.zero.payment.coda
-          }
 
-          object@inc.brk <- newNodeOutput(tmp)
-          rm(tmp)
+          tmp.pre <- slot(object@inc.brk.pre, 'value')
+          tmp.post <- slot(object@inc.brk.post, 'value')
+
+          tmp.pre <- tmp.pre * prob.of.non.zero.payment.coda
+          tmp.post <- tmp.post * prob.of.non.zero.payment.coda
+
+
+          object@inc.brk.pre <- newNodeOutput(tmp.pre)
+          object@inc.brk.post <- newNodeOutput(tmp.post)
+          rm(tmp.pre)
+          rm(tmp.post)
 
           tmp <- slot(object@inc.pred, 'value') *  prob.of.non.zero.payment.coda
           object@inc.pred <- newNodeOutput(tmp)
@@ -374,7 +380,7 @@ setMethod('tailFactor',
           current.class <- class(object)
           i <- match(current.class, is(object))
           f <- selectMethod('tailFactor', is(object)[i+1])
-          return(f(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot))
+          return(f(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot, expYearRange))
 
       })
 
@@ -408,6 +414,7 @@ setMethod('tailFactor',
 ##' @param firstIsHalfReport A logical value or \code{NA}.  See Details for more information.
 ##' @param finalAttachment An integer value must be at least 1 default value is \code{attachment}.  A call to \code{tailFactor} returns (invisibly) a matrix of tail factors through this value.
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
+##' @param expYearRange Either a range of years (for example c(1995, 2006)) or one of the keywords \dQuote{all} or \dQuote{fullyObs}.
 ##' @return Mainly called for the side effect of plotting.  Also returns tail factors for \emph{all} attachment points through \code{finalAttachment}.  See Details. Returned invisibly.
 ##' @docType methods
 ##' @seealso \code{\link{accountForZeroPayments}}
@@ -417,7 +424,7 @@ setMethod('tailFactor',
 ##' @seealso \code{\link[=tailFactor,StandardAnnualAggLossDevModelOutput-method]{tailFactor("StandardAnnualAggLossDevModelOutput")}}
 setMethod('tailFactor',
           signature(object='StandardAnnualAggLossDevModelOutputWithZeros'),
-          function(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot)
+          function(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot, expYearRange)
       {
 
           tmp <- slot(object@inc.pred, 'value') * slot(object@prob.of.non.zero.payment, 'value')
@@ -426,7 +433,7 @@ setMethod('tailFactor',
           current.class <- class(object)
           i <- match(current.class, is(object))
           f <- selectMethod('tailFactor', is(object)[i+1])
-          return(f(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot))
+          return(f(object, attachment, useObservedValues, firstIsHalfReport, finalAttachment, plot, expYearRange))
 
       })
 
