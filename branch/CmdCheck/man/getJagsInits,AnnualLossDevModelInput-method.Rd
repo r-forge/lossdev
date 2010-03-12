@@ -6,6 +6,4 @@
 The derived classes \code{StandardAnnualAggLossDevModelInput} and \code{BreakAnnualAggLossDevModelInput} call this method via \code{NextMethod()} and then return a new function.}
 \value{A named list of the specific model elements.  See details for more information.}
 \docType{methods}
-\seealso{\code{\link{getJagsInits}} \code{\link[getJagsInits,StandardAnnualAggLossDevModelInput-method]{getJagsInits("StandardAnnualAggLossDevModelInput")}}}
-\seealso{\code{\link[getJagsInits,BreakAnnualAggLossDevModelInput-method]{getJagsInits("BreakAnnualAggLossDevModelInput")}}}
 \arguments{\item{object}{An object of type \code{AnnualAggLossDevModelInput} from which to collect the needed initial values for the model.}}

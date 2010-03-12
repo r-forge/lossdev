@@ -17,6 +17,4 @@ The following elements are appended:
 }}
 \value{A named list of the specific model elements.  See details for more info.}
 \docType{methods}
-\seealso{\code{\link{getJagsData}} \code{\link[getJagsData,AnnualAggLossDevModelInput-method]{getJagsData("AnnualAggLossDevModelInput")}}}
-\seealso{\code{\link[getJagsData,StandardAnnualAggLossDevModelInput-method]{getJagsData("StandardAnnualAggLossDevModelInput")}}}
 \arguments{\item{object}{An object of type \code{BreakAnnualAggLossDevModelInput} from which to collect the needed model input.}}

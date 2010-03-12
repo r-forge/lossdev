@@ -11,5 +11,4 @@ This method returns a parameterless function which, when called, first calls the
 \value{A named list of the specific model elements.  See details for more information.}
 \docType{methods}
 \seealso{\code{\link{getJagsInits}}}
-\seealso{\code{\link[getJagsInits,BreakAnnualAggLossDevModelInput-method]{getJagsInits("BreakAnnualAggLossDevModelInput")}}}
 \arguments{\item{object}{An object of type \code{StandardAnnualAggLossDevModelInput} from which to collect the needed initial values for the model.}}

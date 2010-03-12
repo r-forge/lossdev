@@ -5,5 +5,4 @@
 \details{The dimension of a triangle is the number of rows and number of columns.}
 \value{An integer vector of the dimension of the observed triangle.}
 \docType{genericFunction}
-\seealso{\code{\link[=getTriDim,AnnualAggLossDevModelInput-method]{getTriDim("AnnualAggLossDevModelInput")}}}
 \arguments{\item{object}{The object from which to get the dim of the observed triangle.}}

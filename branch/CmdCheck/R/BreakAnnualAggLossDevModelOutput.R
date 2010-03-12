@@ -427,7 +427,7 @@ setMethod('tailFactor',
 ##'
 ##' The break model has to consumption paths.  This method will plot the number of knots for each path.
 ##'
-##' @name numberOfKnots,BreakAnnualAggLossDevModelOutput
+##' @name numberOfKnots,BreakAnnualAggLossDevModelOutput-method
 ##' @param object The object from which to plot the number of knots.
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
 ##' @return Mainly called for the side effect of plotting.  Also returns a list of length 2 with each element containing a named vector with names equal to the number of knots and values equal to the density.  Returned invisibly.

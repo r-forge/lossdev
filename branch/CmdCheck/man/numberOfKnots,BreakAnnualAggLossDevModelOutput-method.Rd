@@ -1,5 +1,5 @@
-\name{numberOfKnots,BreakAnnualAggLossDevModelOutput}
-\alias{numberOfKnots,BreakAnnualAggLossDevModelOutput}
+\name{numberOfKnots,BreakAnnualAggLossDevModelOutput-method}
+\alias{numberOfKnots,BreakAnnualAggLossDevModelOutput-method}
 \title{A method to plot and/or return the posterior number of knots.}
 \description{A method to plot and/or return the posterior number of knots.}
 \details{The break model has to consumption paths.  This method will plot the number of knots for each path.}
