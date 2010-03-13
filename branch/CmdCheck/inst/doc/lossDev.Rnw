@@ -347,7 +347,7 @@ one may find useful.
 <<EstiamteTheStandardModel>>=
 standard.model.output <- runLossDevModel(standard.model.input,
                                          burnIn=30.0E+3,
-                                         sampleSize=40.0E+3,
+                                         sampleSize=30.0E+3,
                                          thin=10)
 
 
@@ -857,6 +857,8 @@ stochasticInflationRhoParameter(standard.model.output)
 
 <<cleanUpWorkSpace,echo=FALSE>>=
 rm(list=ls())
+gc()
+gc()
 @
 
 
@@ -989,7 +991,7 @@ estimates.
 <<EstimateTheBreakModel>>=
 break.model.output <- runLossDevModel(break.model.input,
                                       burnIn=30.0E+3,
-                                      sampleSize=40.0E+3,
+                                      sampleSize=30.0E+3,
                                       thin=10)
 
 @
@@ -1254,7 +1256,7 @@ break.model.input.w.ar1 <- makeBreakAnnualInput(cumulative.payments = Cumulative
                                                 use.ar1.in.calendar.year = TRUE)
 break.model.output.w.ar1 <- runLossDevModel(break.model.input.w.ar1,
                                             burnIn=30.0E+3,
-                                            sampleSize=40.0E+3,
+                                            sampleSize=30.0E+3,
                                             thin=10)
 calendarYearEffectErrors(break.model.output.w.ar1)
 
