@@ -721,7 +721,7 @@ setMethod('autoregressiveParameter',
 ##' @param plotTrace A logical value. If \code{TRUE}, the trace is plotted. If \code{plotDensity} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
 ##' @return Mainly called for the side effect of plotting.
 ##' @docType genericFunction
-##' @seealso \code{\link[=calednarYearEffectAutoregressiveParameter,AnnualAggLossDevModelOutput-method]{calendarYearEffectAutoregressiveParameter("AnnualAggLossDevModelOutput")}}
+##' @seealso \code{\link[=calendarYearEffectAutoregressiveParameter,AnnualAggLossDevModelOutput-method]{calendarYearEffectAutoregressiveParameter("AnnualAggLossDevModelOutput")}}
 ##' @seealso \code{\link{standardDeviationOfCalendarYearEffect}}
 ##' @seealso \code{\link{calendarYearEffect}}
 ##' @seealso \code{\link{calendarYearEffectErrors}}

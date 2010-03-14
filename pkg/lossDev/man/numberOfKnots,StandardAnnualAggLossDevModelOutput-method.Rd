@@ -1,5 +1,5 @@
-\name{numberOfKnots,StandardAnnualAggLossDevModelOutput}
-\alias{numberOfKnots,StandardAnnualAggLossDevModelOutput}
+\name{numberOfKnots,StandardAnnualAggLossDevModelOutput-method}
+\alias{numberOfKnots,StandardAnnualAggLossDevModelOutput-method}
 \title{A method to plot and/or return the posterior number of knots.}
 \description{A method to plot and/or return the posterior number of knots.}
 \value{Mainly called for the side effect of plotting.  Also returns a named vector with names equal to the number of knots and values equal to the density.  Returned invisibly.}

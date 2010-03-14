@@ -141,15 +141,15 @@ get.color <- function(i)
 ##' @param draw.prior Should the prior be drawn?
 ##' @return Mainly called for the side effect of plotting. Also returns a vector of quantiles.
 ##' @usage
-##'    plot.density.and.or.trace <- function(coda,
-##'                                          plotDensity,
-##'                                          plotTrace,
-##'                                          d.prior,
-##'                                          nice.parameter.name,
-##'                                          zero.line=FALSE,
-##'                                          lower.bound=NA,
-##'                                          upper.bound=NA,
-##'                                          draw.prior=TRUE)
+##'    plot.density.and.or.trace( coda,
+##'                               plotDensity,
+##'                               plotTrace,
+##'                               d.prior,
+##'                               nice.parameter.name,
+##'                               zero.line=FALSE,
+##'                               lower.bound=NA,
+##'                               upper.bound=NA,
+##'                               draw.prior=TRUE)
 
 plot.density.and.or.trace <- function(coda,  plotDensity, plotTrace, d.prior, nice.parameter.name, zero.line=FALSE, lower.bound=NA, upper.bound=NA, draw.prior=TRUE)
 {

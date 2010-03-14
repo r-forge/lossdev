@@ -1,7 +1,7 @@
 \name{makeBreakAnnualInput}
 \alias{makeBreakAnnualInput}
 \title{Create an Object of class BreakAnnualAggLossDevModelInput.}
-\usage{makeBreakAnnualInput <- function(
+\usage{makeBreakAnnualInput(
 incremental.payments=decumulate(cumulative.payments),
 first.year.in.new.regime=trunc(median(as.integer(dimnames(incremental.payments)[[1]]))),
 prior.for.first.year.in.new.regime=c(2,2),
@@ -80,4 +80,5 @@ These values must either both be \code{NA} or both be set to numbers.
 \item{bound.for.skewness.parameter}{A positive numerical value representing the symetric boundaries for the skewness parameter.  In most cases, the default should be sufficient. Ignored if \code{use.skew.t=FALSE}.}
 \item{last.column.with.scale.innovation}{A single integer must be at least 1 and at most the number of columns in \code{incremental.payments}.  See \emph{Measurment Error-Second Order Random Walk} in Details.}
 \item{use.ar1.in.calendar.year}{A logical value.  The calendar year effect errors may (at the users digression) include an autoregressive process of order 1.  \code{TRUE} turns on the ar1 process, \code{FALSE} turns it off.}
+\item{use.ar1.in.exposure.growth}{A logical value.  The exposure growth errors may (at the users discretion) include an autoregressive process of order 1.  \code{TRUE} (the Default) turns on the ar1 process, \code{FALSE} turns it off.}
 \item{projected.rate.of.decay}{May be one of three types (See \emph{Projected Rate of Decay} in Details). 1) \code{NA}. 2) A matrix of numerics (of specific dim). 3) A named list.}}

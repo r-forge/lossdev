@@ -306,7 +306,7 @@ setClass(
 ##' @return An object of class \code{AggModelInput}.  The model specified by the returned object must then be estimated using the function \code{runLossDevModel}.
 ##' @export
 ##' @usage
-##' makeStandardAnnualInput <- function(
+##' makeStandardAnnualInput(
 ##'   incremental.payments=decumulate(cumulative.payments),
 ##'   extra.dev.years=1,
 ##'   extra.exp.years=1,
@@ -863,8 +863,6 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
 ##' @param object An object of type \code{StandardAnnualAggLossDevModelInput} from which to collect the needed model input.
 ##' @return A named list of the specific model elements.  See details for more info.
 ##' @docType methods
-##' @seealso \code{\link{getJagsData}} \code{\link[getJagsData,AnnualAggLossDevModelInput-method]{getJagsData("AnnualAggLossDevModelInput")}}
-##' @seealso \code{\link[getJagsData,BreakAnnualAggLossDevModelInput-method]{getJagsData("BreakAnnualAggLossDevModelInput")}}
 setMethod(
           'getJagsData',
           signature(object='StandardAnnualAggLossDevModelInput'),
@@ -920,7 +918,6 @@ setMethod(
 ##' @return A named list of the specific model elements.  See details for more information.
 ##' @docType methods
 ##' @seealso \code{\link{getJagsInits}}
-##' @seealso \code{\link[getJagsInits,BreakAnnualAggLossDevModelInput-method]{getJagsInits("BreakAnnualAggLossDevModelInput")}}
 setMethod(
           'getJagsInits',
           signature(object='StandardAnnualAggLossDevModelInput'),

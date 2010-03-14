@@ -1,7 +1,7 @@
 \name{plot.density.and.or.trace}
 \alias{plot.density.and.or.trace}
 \title{A rather generic function to plot diagnostics for a single node (a one-dimensional node or a single slot from a multi-dimensional node).}
-\usage{plot.density.and.or.trace <- function(coda,
+\usage{plot.density.and.or.trace( coda,
 plotDensity,
 plotTrace,
 d.prior,

@@ -125,7 +125,6 @@ getNonMissingIndexes <- function(m)
 ##' @param object The object from which to get the dim of the observed triangle.
 ##' @return An integer vector of the dimension of the observed triangle.
 ##' @docType genericFunction
-##' @seealso \code{\link[=getTriDim,AnnualAggLossDevModelInput-method]{getTriDim("AnnualAggLossDevModelInput")}}
 setGenericVerif('getTriDim',
                  function(object)
                  standardGeneric('getTriDim'))
@@ -193,8 +192,6 @@ setMethod('getTriDim',
 ##' @param object An object of type \code{AnnualAggLossDevModelInput} from which to collect the needed model input.
 ##' @return A named list of the specific model elements.  See Details for more information.
 ##' @docType methods
-##' @seealso \code{\link{getJagsData}} \code{\link[getJagsData,StandardAnnualAggLossDevModelInput-method]{getJagsData("StandardAnnualAggLossDevModelInput")}}
-##' @seealso \code{\link[getJagsData,BreakAnnualAggLossDevModelInput-method]{getJagsData("BreakAnnualAggLossDevModelInput")}}
 setMethod(
           'getJagsData',
           signature(object='AnnualAggLossDevModelInput'),
@@ -337,8 +334,6 @@ setMethod(
 ##' @param object An object of type \code{AnnualAggLossDevModelInput} from which to collect the needed initial values for the model.
 ##' @return A named list of the specific model elements.  See details for more information.
 ##' @docType methods
-##' @seealso \code{\link{getJagsInits}} \code{\link[getJagsInits,StandardAnnualAggLossDevModelInput-method]{getJagsInits("StandardAnnualAggLossDevModelInput")}}
-##' @seealso \code{\link[getJagsInits,BreakAnnualAggLossDevModelInput-method]{getJagsInits("BreakAnnualAggLossDevModelInput")}}
 setMethod(
           'getJagsInits',
           signature(object='AnnualAggLossDevModelInput'),

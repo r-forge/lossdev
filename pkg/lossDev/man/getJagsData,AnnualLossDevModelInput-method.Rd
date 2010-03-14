@@ -47,6 +47,4 @@ The returned value is a list containing the following elements with the followin
 }}
 \value{A named list of the specific model elements.  See Details for more information.}
 \docType{methods}
-\seealso{\code{\link{getJagsData}} \code{\link[getJagsData,StandardAnnualAggLossDevModelInput-method]{getJagsData("StandardAnnualAggLossDevModelInput")}}}
-\seealso{\code{\link[getJagsData,BreakAnnualAggLossDevModelInput-method]{getJagsData("BreakAnnualAggLossDevModelInput")}}}
 \arguments{\item{object}{An object of type \code{AnnualAggLossDevModelInput} from which to collect the needed model input.}}

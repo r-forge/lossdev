@@ -109,6 +109,7 @@ setClass(
 ##' @param bound.for.skewness.parameter A positive numerical value representing the symetric boundaries for the skewness parameter.  In most cases, the default should be sufficient. Ignored if \code{use.skew.t=FALSE}.
 ##' @param last.column.with.scale.innovation A single integer must be at least 1 and at most the number of columns in \code{incremental.payments}.  See \emph{Measurment Error-Second Order Random Walk} in Details.
 ##' @param use.ar1.in.calendar.year A logical value.  The calendar year effect errors may (at the users digression) include an autoregressive process of order 1.  \code{TRUE} turns on the ar1 process, \code{FALSE} turns it off.
+##' @param use.ar1.in.exposure.growth A logical value.  The exposure growth errors may (at the users discretion) include an autoregressive process of order 1.  \code{TRUE} (the Default) turns on the ar1 process, \code{FALSE} turns it off.
 ##'
 ##' @param projected.rate.of.decay  May be one of three types (See \emph{Projected Rate of Decay} in Details). 1) \code{NA}. 2) A matrix of numerics (of specific dim). 3) A named list.
 
@@ -122,7 +123,7 @@ setClass(
 ##' @return An object of class \code{AggModelInput}.  This the model specified by the returned object must then be estimated using the function \code{runLossDevModel}.
 ##' @export
 ##' @usage
-##' makeBreakAnnualInput <- function(
+##' makeBreakAnnualInput(
 ##'   incremental.payments=decumulate(cumulative.payments),
 ##'   first.year.in.new.regime=trunc(median(as.integer(dimnames(incremental.payments)[[1]]))),
 ##'   prior.for.first.year.in.new.regime=c(2,2),
@@ -150,7 +151,7 @@ setClass(
 ##'   projected.rate.of.decay=NA)
 makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.payments),
                                  first.year.in.new.regime=trunc(median(as.integer(dimnames(incremental.payments)[[1]]))),
-                                 priors.for.first.year.in.new.regime=c(2,2),
+                                 prior.for.first.year.in.new.regime=c(2,2),
                                  extra.dev.years=1,
                                  extra.exp.years=1,
                                  non.stoch.inflation.rate=0,
@@ -270,13 +271,13 @@ makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.paym
     if(sum(ans@exposureYears >= ans@rangeForFirstYearInNewRegime[2]) < 4)
         stop('The maximum value for "first.year.in.new.regime" is too large.  There must be at least 4 years in the post-break period.')
 
-    if(!is.numeric(priors.for.first.year.in.new.regime) || length(priors.for.first.year.in.new.regime) != 2)
-        stop('The value supplied for "priors.for.first.year.in.new.regime" must be a numeric vector of length 2.')
+    if(!is.numeric(prior.for.first.year.in.new.regime) || length(prior.for.first.year.in.new.regime) != 2)
+        stop('The value supplied for "prior.for.first.year.in.new.regime" must be a numeric vector of length 2.')
 
-    if(any(priors.for.first.year.in.new.regime <=0))
-        stop('"priors.for.first.year.in.new.regime" must be greater than 0')
+    if(any(prior.for.first.year.in.new.regime <=0))
+        stop('"prior.for.first.year.in.new.regime" must be greater than 0')
 
-    ans@priorsForFirstYearInNewRegime <- priors.for.first.year.in.new.regime
+    ans@priorsForFirstYearInNewRegime <- prior.for.first.year.in.new.regime
 
 
     ans@outputType <- 'BreakAnnualAggLossDevModelOutput'
@@ -305,8 +306,6 @@ makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.paym
 ##' @param object An object of type \code{BreakAnnualAggLossDevModelInput} from which to collect the needed model input.
 ##' @return A named list of the specific model elements.  See details for more info.
 ##' @docType methods
-##' @seealso \code{\link{getJagsData}} \code{\link[getJagsData,AnnualAggLossDevModelInput-method]{getJagsData("AnnualAggLossDevModelInput")}}
-##' @seealso \code{\link[getJagsData,StandardAnnualAggLossDevModelInput-method]{getJagsData("StandardAnnualAggLossDevModelInput")}}
 setMethod(
           'getJagsData',
           signature(object='BreakAnnualAggLossDevModelInput'),
@@ -376,7 +375,6 @@ setMethod(
 ##' @return A named list of the specific model elements.  See details for more info.
 ##' @docType methods
 ##' @seealso \code{\link{getJagsInits}}
-##' @seealso \code{\link[getJagsInits,StandardAnnualAggLossDevModelInput-method]{getJagsInits("StandardAnnualAggLossDevModelInput")}}
 setMethod(
           'getJagsInits',
           signature(object='BreakAnnualAggLossDevModelInput'),

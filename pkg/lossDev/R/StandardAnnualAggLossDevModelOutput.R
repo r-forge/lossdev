@@ -307,7 +307,7 @@ setMethod('tailFactor',
 ##' A method to plot and/or return the posterior number of knots.
 ##'
 ##'
-##' @name numberOfKnots,StandardAnnualAggLossDevModelOutput
+##' @name numberOfKnots,StandardAnnualAggLossDevModelOutput-method
 ##' @param object The object from which to plot the number of knots.
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
 ##' @return Mainly called for the side effect of plotting.  Also returns a named vector with names equal to the number of knots and values equal to the density.  Returned invisibly.

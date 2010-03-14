@@ -44,7 +44,6 @@ mutableState <- new.env(parent=emptyenv())
 ##'
 ##'
 ##' @return The current name of the package including version number if the package was installed as such. (i.e. \samp{lossDev})
-##' @seealso \code{\link{dot-onLoad-lossDev}}
 myPkgName <- function() return(get('myPkgName', env=mutableState, inherits=FALSE))
 
 ##' Installation Library of the Package.   Intended for internal use only.
@@ -53,7 +52,6 @@ myPkgName <- function() return(get('myPkgName', env=mutableState, inherits=FALSE
 ##' Set by \code{.onLoad}.
 ##'
 ##'
-##' @seealso \code{\link{dot-onLoad-lossDev}}
 myLibPath <- function() return(get('myLibPath', env=mutableState, inherits=FALSE))
 
 
@@ -62,10 +60,14 @@ myLibPath <- function() return(get('myLibPath', env=mutableState, inherits=FALSE
 ##' Currently only sets correct functions for \code{myPkgName} and \code{myLibPath} and loads the \acronym{JAGS} module.
 ##
 ##'
+##' @param libname The library where the R package is installed.
+##' @param pkgname The name of the R package.
 ##' @name dot-onLoad-lossDev
+##' @aliases .onLoad
 ##' @seealso \code{\link{.onLoad}}
 ##' @import rjags
 ##' @import filehash
+##' @importFrom utils normalizePath
 .onLoad <- function(libname, pkgname)
 {
     ##Create functions to return the required values. Lexical scoping ensures the correct values are returned.
@@ -170,7 +172,7 @@ lossDevOptions <- function(...)
 
     } else if(n == 'logsplinePenaltyFunction') {
         f <- args[[n]]
-        if(!is.function(f) && is.number(f(c(1, 2, 3))) && length(f(c(1, 2, 3))) != 1 )
+        if(!is.function(f) && is.numeric(f(c(1, 2, 3))) && length(f(c(1, 2, 3))) != 1 )
             stop('"logsplinePenaltyFunction" must be a function.  Reverting to previous setting.')
 
     }

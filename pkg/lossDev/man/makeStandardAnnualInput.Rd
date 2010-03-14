@@ -1,7 +1,7 @@
 \name{makeStandardAnnualInput}
 \alias{makeStandardAnnualInput}
 \title{Create an Object of class StandardAnnualAggLossDevModelInput.}
-\usage{makeStandardAnnualInput <- function(
+\usage{makeStandardAnnualInput(
 incremental.payments=decumulate(cumulative.payments),
 extra.dev.years=1,
 extra.exp.years=1,
