@@ -1,7 +1,7 @@
 ###################################################
 ### chunk number 1: setValueSoUsersCanLookAtAllPlots
 ###################################################
-options(device.ask.default=TRUE)
+options(device.ask.default=FALSE)
 
 
 ###################################################
@@ -56,7 +56,7 @@ standard.model.input <- makeStandardAnnualInput(incremental.payments = Increment
 ###################################################
 standard.model.output <- runLossDevModel(standard.model.input,
                                          burnIn=30.0E+3,
-                                         sampleSize=40.0E+3,
+                                         sampleSize=30.0E+3,
                                          thin=10)
 
 
@@ -252,6 +252,8 @@ stochasticInflationRhoParameter(standard.model.output)
 ### chunk number 29: cleanUpWorkSpace
 ###################################################
 rm(list=ls())
+gc()
+gc()
 
 
 ###################################################
@@ -288,7 +290,7 @@ break.model.input <- makeBreakAnnualInput(cumulative.payments = CumulativeAutoBo
                                           non.stoch.inflation.weight = 0,
                                           stoch.inflation.rate = MCPI.rate,
                                           first.year.in.new.regime = c(1986, 1987),
-                                          priors.for.first.year.in.new.regime=c(2,1),
+                                          prior.for.first.year.in.new.regime=c(2,1),
                                           exp.year.type = 'ay',
                                           extra.dev.years = 5,
                                           use.skew.t = TRUE,
@@ -300,7 +302,7 @@ break.model.input <- makeBreakAnnualInput(cumulative.payments = CumulativeAutoBo
 ###################################################
 break.model.output <- runLossDevModel(break.model.input,
                                       burnIn=30.0E+3,
-                                      sampleSize=40.0E+3,
+                                      sampleSize=30.0E+3,
                                       thin=10)
 
 
@@ -397,7 +399,7 @@ break.model.input.w.ar1 <- makeBreakAnnualInput(cumulative.payments = Cumulative
                                                 non.stoch.inflation.weight = 0,
                                                 stoch.inflation.rate = MCPI.rate,
                                                 first.year.in.new.regime = c(1986, 1987),
-                                                priors.for.first.year.in.new.regime=c(2,1),
+                                                prior.for.first.year.in.new.regime=c(2,1),
                                                 exp.year.type = 'ay',
                                                 extra.dev.years = 5,
                                                 use.skew.t = TRUE,
@@ -405,7 +407,7 @@ break.model.input.w.ar1 <- makeBreakAnnualInput(cumulative.payments = Cumulative
                                                 use.ar1.in.calendar.year = TRUE)
 break.model.output.w.ar1 <- runLossDevModel(break.model.input.w.ar1,
                                             burnIn=30.0E+3,
-                                            sampleSize=40.0E+3,
+                                            sampleSize=30.0E+3,
                                             thin=10)
 calendarYearEffectErrors(break.model.output.w.ar1)
 
@@ -415,7 +417,7 @@ calendarYearEffectErrors(break.model.output.w.ar1)
 ### chunk number 46: breakAutoregressiveParameter
 ###################################################
 
-autoregressiveParameter(break.model.output.w.ar1)
+calendarYearEffectAutoregressiveParameter(break.model.output.w.ar1)
 
 
 ###################################################

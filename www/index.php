@@ -45,10 +45,11 @@ echo $contents; } ?>
 <p> The <strong>project summary page</strong> you find <a href="http://<?php echo $domain; ?>/projects/<?php echo $group_name; ?>/"><strong>here</strong></a>. </p>
 
 
-<p> Feel free to download and try the current release of <strong>lossDev</strong>, <a href="pkg/lossDev_0.9.0.zip"> version 0.9.0</a>, which requires <strong>R</strong> version 2.9.2 or greater.
-Currently only Windows is supported, but Linux\Unix will be supported shortly.
+<p> Feel free to download and try the current release of <strong>lossDev</strong>, <a href="pkg/lossDev_0.9.1.zip"> version 0.9.1</a>, which requires <strong>R</strong> version 2.9.2 or greater.
 The package can be installed after opening <strong>R</strong> and selecting "Packages->Install package(s) from local zip files...".
 <strong>lossDev</strong> should be available on <strong>CRAN</strong> shortly.</p>
+
+For Linux installations one will need the tar.gz file available here <a href="pkg/lossDev_0.9.1.tar.gz"> lossDev_0.9.1.tar.gz.</a>
 
 <p>The documentation is currently available <a href="pkg/lossDev_Help.pdf"><strong>here</strong></a>.</p>
 
