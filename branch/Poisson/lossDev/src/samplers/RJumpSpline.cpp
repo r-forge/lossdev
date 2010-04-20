@@ -365,9 +365,6 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
 RJumpSpline::RJumpSpline(vector<StochasticNode *> const &nodes, Graph const &graph):
   Sampler(nodes, graph)
 {
-	
-   
-  //std::cout <<"start Const" << std::endl;	
   _snode = nodes[0];
   _nchain = _snode->nchain();
   _numberOfSplines = _snode->parameterDims()[1][0];
@@ -375,7 +372,7 @@ RJumpSpline::RJumpSpline(vector<StochasticNode *> const &nodes, Graph const &gra
   _knots= new Knots*[_numberOfSplines];
 
   double PriorForT[2];
-  unsigned int KLimits[2];
+  //unsigned int KLimits[2];
   double TLimits[2];
 
   unsigned int maxK[_numberOfSplines];
@@ -385,8 +382,8 @@ RJumpSpline::RJumpSpline(vector<StochasticNode *> const &nodes, Graph const &gra
       PriorForT[0] = _snode->parameters(0)[5][0 + 2 * i];
       PriorForT[1] = _snode->parameters(0)[5][1 + 2 * i];
 
-      KLimits[0] = 0;
-      KLimits[1] = static_cast<unsigned int>(_snode->parameters(0)[1][i]);
+      //KLimits[0] = 0;
+      //KLimits[1] = static_cast<unsigned int>(_snode->parameters(0)[1][i]);
 
       TLimits[0] = _snode->parameters(0)[3][i];
       TLimits[1] = _snode->parameters(0)[4][i];
@@ -394,11 +391,11 @@ RJumpSpline::RJumpSpline(vector<StochasticNode *> const &nodes, Graph const &gra
       
       _knots[i] = new Knots(_nchain, //number of chains
                             PriorForT,//prior for knot positions
-                            KLimits,//Limits for number of knots
+                            nodes[i + 1],//number of knots
                             TLimits//Limits for knot positions
                             );
 
-      maxK[i] = KLimits[1];
+      maxK[i] = _knots[i]->maxK();
     }
   
   
@@ -481,7 +478,7 @@ RJumpSpline::RJumpSpline(vector<StochasticNode *> const &nodes, Graph const &gra
   for(unsigned int i = 0; i < _nchain; ++i)
     setSplineValue(true, i);
 
-  //std::cout <<"end Const" << std::endl;
+ 
   _calPost_betas = new ExpandableArray;
   _calPost_C = new ExpandableArray;
   _calPost_delta = new ExpandableArray;
@@ -714,7 +711,7 @@ void RJumpSpline::setSplineValue(bool const &current, unsigned int const &chain)
   const unsigned int &nrow = _TriDim;
   const unsigned int ncol = _numberOfSplines == 1 ? 4 : 6;
 
-  double value[nrow * ncol];
+  double value[nrow * ncol + _numberOfSplines];
 
   //first spline
   if(current || _updatingKnotsI != 0)
@@ -752,6 +749,7 @@ void RJumpSpline::setSplineValue(bool const &current, unsigned int const &chain)
   //second column number of knots
   for(unsigned int i = 0; i < nrow; ++i)
     value[i + nrow * 1] = numberOfKnots;
+  value[nrow * ncol] = numberOfKnots;
 
   if(_numberOfSplines == 2)
   {
@@ -786,7 +784,8 @@ void RJumpSpline::setSplineValue(bool const &current, unsigned int const &chain)
 
       //forth column number of knots
       for(unsigned int i = 0; i < nrow; ++i)
-        value[i + nrow * 3] =numberOfKnots;
+        value[i + nrow * 3] = numberOfKnots;
+      value[nrow * ncol + 1] = numberOfKnots;
 
       //fifth column error terms first value blank
       value[0 + nrow * 4] = coeff[0]; 
@@ -817,7 +816,7 @@ void RJumpSpline::setSplineValue(bool const &current, unsigned int const &chain)
   }
     
   
-  const_cast<RJumpSpline* const>(this)->setValue(value, nrow * ncol, chain);
+  const_cast<RJumpSpline* const>(this)->setValue(value, nrow * ncol + _numberOfSplines, chain);
 
    //std::cout << "end setSplineValue" << std::endl;
 }

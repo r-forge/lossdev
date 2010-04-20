@@ -33,8 +33,10 @@
 #include <iostream>
 #include "Knots.h"
 #include <JAGS/JRmath.h>
+#include <JAGS/distribution/Distribution.h>
 #include <vector>
 #include <set>
+
 
 using std::vector;
 using std::set;
@@ -63,6 +65,7 @@ unsigned int Knots::calcMaxDelta(unsigned int const &K, TypeOfUpdate type) const
 	
   if(type == Birth)
     return std::min(_maxK - K, static_cast<unsigned int>(7));
+
 	
   if(type == Death)
     return std::min(K - _minK, static_cast<unsigned int>(7));
@@ -181,16 +184,27 @@ double Knots::removeFromProposedT(unsigned int const &T)
 
 
 
-Knots::Knots(unsigned int nchain, double const * PriorForT, unsigned int const * KLimits, double const * TLimits):
+Knots::Knots(unsigned int nchain, double const * PriorForT, StochasticNode const * knotsNode, double const * TLimits):
   _nchain(nchain),
   _aPriorForT(PriorForT[0]),  //a and b for beta prior of Knots
   _bPriorForT(PriorForT[1]),
-  _minK(KLimits[0]), //min and max number of knots
-  _maxK(KLimits[1]),
   _minT(TLimits[0]),    //min and max interval on which the Knots can fall //like in WinBUGS minT is also the position of Knot0 (which is not deemed to be part of _...T)	
   _maxT(TLimits[1])
   
 {
+
+    _knotsNode = knotsNode;
+
+    double tmpDMinK;
+    double tmpDMaxK;
+
+    support(&tmpDMinK, &tmpDMaxK, 1,
+	    knotsNode, 0);
+
+    _minK = static_cast<unsigned int>(tmpDMinK);
+    _maxK = static_cast<unsigned int>(tmpDMaxK);
+    //std::cout << "Lower: " << _minK << " Upper: " << _maxK << std::endl;
+
 
   //std::cout << "beta priors are: " << _aPriorForT << " and " << _bPriorForT << std::endl;
   //number of knots
@@ -369,7 +383,23 @@ double Knots::acceptProbBalance(unsigned int const &chain, TypeOfUpdate type) co
   double ans = 0;
 	
   //K
-  ans += std::log(1.0 / (_maxK - _minK)) - std::log(1.0 / (_maxK - _minK));
+  
+  //ans += std::log(1.0 / (_maxK - _minK)) - std::log(1.0 / (_maxK - _minK));
+  double tmpKnots = _proposedK;
+  ans += _knotsNode->distribution()->logLikelihood( &tmpKnots,
+						    1,
+						    _knotsNode->parameters(chain),
+						    _knotsNode->parameterDims(),
+						    _knotsNode->lowerLimit(chain),
+						    _knotsNode->upperLimit(chain));
+
+  tmpKnots = _currentK[chain];
+  ans -= _knotsNode->distribution()->logLikelihood( &tmpKnots,
+						    1,
+						    _knotsNode->parameters(chain),
+						    _knotsNode->parameterDims(),
+						    _knotsNode->lowerLimit(chain),
+						    _knotsNode->upperLimit(chain));
 	
 	
 	
@@ -557,6 +587,12 @@ double Knots::minT() const
 {
   return _minT;
 }
+
+unsigned int Knots::maxK() const
+{
+  return _maxK;
+}
+
 
 void Knots::acceptProposedValues(unsigned int const &chain)
 {

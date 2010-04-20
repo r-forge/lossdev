@@ -34,6 +34,7 @@
 #include <JAGS/sampler/Linear.h>
 #include <vector>
 #include <set>
+#include <iostream>
 
 using std::set;
 using std::vector;
@@ -92,11 +93,50 @@ const
 	return true;
 }
 
-Sampler * RJumpSplineFactory::makeSingletonSampler(StochasticNode *node,
-				  Graph const &graph) const
+void RJumpSplineFactory::makeSampler(std::set<StochasticNode*> &nodes, Graph const &graph,
+				     std::vector<Sampler*> &samplers) const
 {
-	std::vector<StochasticNode*> vnode;
-	vnode.push_back(node);	
-	return  new RJumpSpline(vnode, graph);
+    std::set<StochasticNode*> nodesThatWillBeSampled;
+    for(set<StochasticNode*>::iterator p(nodes.begin()); p != nodes.end(); ++p)
+    {
+	if(canSample(*p, graph) && nodesThatWillBeSampled.find(*p) == nodesThatWillBeSampled.end())
+	{
+	    StochasticNode *n = *p;
+	    StochasticNode *tmpNode = 0;
+	    
+	    std::vector<StochasticNode*> vnode;
+	    vnode.push_back(n);
+	    nodesThatWillBeSampled.insert(n);
+	    
+	    
+	    if(n->parents()[1]->dim()[0] == 2)
+	    {
+		tmpNode = const_cast<StochasticNode *>(dynamic_cast<StochasticNode const *>(n->parents()[1]->parents()[0]));
+		vnode.push_back(tmpNode);
+		nodesThatWillBeSampled.insert(tmpNode);
+		
+		tmpNode = const_cast<StochasticNode *>(dynamic_cast<StochasticNode const *>(n->parents()[1]->parents()[1]));
+		vnode.push_back(tmpNode);
+	       	nodesThatWillBeSampled.insert(tmpNode);
+	    } else {
+		
+		tmpNode = const_cast<StochasticNode *>(dynamic_cast<StochasticNode const *>(n->parents()[1]));
+		vnode.push_back(tmpNode);
+		nodesThatWillBeSampled.insert(tmpNode);
+	    }
+
+	    samplers.push_back(new RJumpSpline(vnode, graph));
+	    vnode.clear();
+	    
+	}
+    }
+    
+    for(set<StochasticNode*>::iterator p(nodesThatWillBeSampled.begin()); p != nodesThatWillBeSampled.end();)
+    {
+	nodes.erase(*p);
+	++p;
+    }   
+
+
 }
 
