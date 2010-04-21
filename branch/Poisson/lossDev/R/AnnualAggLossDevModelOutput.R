@@ -267,38 +267,39 @@ setMethod('finalCumulativeDiff',
               for(i in seq_along(expYearRange.seq))
               {
                   year.i <- expYearRange.seq[i]
+                  i. <- match(year.i, object@input@exposureYears)
 
                   ##draw median to make it thick
                   off.set <- .45
                   lines(x=c(year.i-off.set, year.i+off.set),
-                        y=rep(cumulative.resi.stats['50%',i],2),
+                        y=rep(cumulative.resi.stats['50%',i.],2),
                         lwd=2)
 
                   ##upper 25%
                   off.set <- .45
                   upper.lower <- c('75%','50%')
                   lines(x=c(year.i-off.set, year.i+off.set, year.i+off.set, year.i-off.set, year.i-off.set),
-                        y=cumulative.resi.stats[upper.lower[c(1,1,2,2,1)],i])
+                        y=cumulative.resi.stats[upper.lower[c(1,1,2,2,1)],i.])
 
                   ##lower 25%
                   off.set <- .45
                   upper.lower <- c('50%','25%')
                   lines(x=c(year.i-off.set, year.i+off.set, year.i+off.set, year.i-off.set, year.i-off.set),
-                        y=cumulative.resi.stats[upper.lower[c(1,1,2,2,1)],i])
+                        y=cumulative.resi.stats[upper.lower[c(1,1,2,2,1)],i.])
 
 
                   ##lower%
                   off.set <- .25
                   upper.lower <- c('25%','10%')
                   lines(x=c(year.i-off.set, year.i+off.set, year.i+off.set, year.i-off.set, year.i-off.set),
-                        y=cumulative.resi.stats[upper.lower[c(1,1,2,2,1)],i])
+                        y=cumulative.resi.stats[upper.lower[c(1,1,2,2,1)],i.])
 
 
                   ##upper%
                   off.set <- .25
                   upper.lower <- c('90%','75%')
                   lines(x=c(year.i-off.set, year.i+off.set, year.i+off.set, year.i-off.set, year.i-off.set),
-                        y=cumulative.resi.stats[upper.lower[c(1,1,2,2,1)],i])
+                        y=cumulative.resi.stats[upper.lower[c(1,1,2,2,1)],i.])
 
 
               }
