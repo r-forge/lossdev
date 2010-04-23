@@ -259,9 +259,8 @@ model
     #k <- S.[1,2] + 0
     
     beta.prec <- 0.0001
-    L.spline <- trunc(K/2)+1
-    k ~ dpois(kappa.spline)T(,L.spline)
-    kappa.spline ~ dgamma(2.25,0.75)
+    k ~ dpois(mu.number.of.knots)T(,number.of.knots.ubound)
+    mu.number.of.knots ~ dgamma(mu.number.of.knots.prior[1], mu.number.of.knots.prior[2])
 
 
     ## Relative changes in incremental payments

@@ -376,8 +376,8 @@ model
 
     for(i in 1:2)
         {
-        k[i] ~ dpois(kappa.spline[i])T(,L.spline[i])
-        kappa.spline[i] ~ dgamma(2.25,0.75)
+        k[i] ~ dpois(mu.number.of.knots[i])T(,number.of.knots.ubound[i])
+        mu.number.of.knots[i] ~ dgamma(mu.number.of.knots.prior[1,i], mu.number.of.knots.prior[2,i])
         }
 
     beta.prec <- 0.0001

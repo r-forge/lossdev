@@ -300,7 +300,8 @@ makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.paym
 ##'   \item{\code{break.row.priors}}{The parameters for the beta distribution which serves as the prior for the location of the structural break.}
 ##'   \item{\code{K.trim}}{The maximum number of columns in the post-break triangle.}
 ##'   \item{\code{beta.prior}}{A matrix giving the prior for the location of knots.  First column is for the pre-break spline.  Second is for the post-break spline.}
-##'
+##'   \item{\code{mu.number.of.knots.prior}}{A matrix giving the prior for the mean of the number of knots.  First column is for the pre-break spline.  Second is for the post-break spline}
+##'   \item{\code{number.of.knots.ubound}}{A vector giving the upper bound for the number of knots.  First is for the pre-break spline.  Second is for the post-break spline}
 ##' }
 ##' @name getJagsData,BreakAnnualLossDevModelInput-method
 ##' @param object An object of type \code{BreakAnnualAggLossDevModelInput} from which to collect the needed model input.
@@ -355,6 +356,13 @@ setMethod(
           ans$beta.prior <- array(NA, c(2,2))
           ans$beta.prior[,1] <- c(1,object@priorForKnotPositionsPreBreak)
           ans$beta.prior[,2] <- c(1,object@priorForKnotPositionsPostBreak)
+
+          ans$mu.number.of.knots.prior <- array(NA, c(2, 2))
+          ans$mu.number.of.knots.prior[,1] <- c(4, 5)
+          ans$mu.number.of.knots.prior[,2] <- c(4, 5)
+          ans$number.of.knots.ubound <- numeric(2)
+          ans$number.of.knots.ubound[1] <- trunc(ans$K/2) + 1
+          ans$number.of.knots.ubound[2] <- trunc(ans$K.trim/2) + 1
 
           return(ans)
       })

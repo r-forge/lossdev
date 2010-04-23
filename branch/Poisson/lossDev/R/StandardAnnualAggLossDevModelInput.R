@@ -858,6 +858,8 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
 ##'   \item{\code{x.0}}{A single value. The lower bound for the location of knots.}
 ##'   \item{\code{x.r}}{A single value. The upper bound for the location of knots.}
 ##'   \item{\code{beta.prior}}{A vector giving the prior for the location of knots.}
+##'   \item{\code{mu.number.of.knots.prior}}{The priors for the mean of the number of knots.}
+##'   \item{\code{number.of.knots.ubound}}{The upper bound for the number of knots.}
 ##' }
 ##' @name getJagsData,StandardAnnualLossDevModelInput-method
 ##' @param object An object of type \code{StandardAnnualAggLossDevModelInput} from which to collect the needed model input.
@@ -896,6 +898,9 @@ setMethod(
           ans$x.0 <- 1
           ans$x.r <- x.r()
           ans$beta.prior <- c(1,object@priorForKnotPositions)
+
+          ans$mu.number.of.knots.prior <- c(4, 5)
+          ans$number.of.knots.ubound <- trunc(ans$K/2) + 1
           return(ans)
 
 
