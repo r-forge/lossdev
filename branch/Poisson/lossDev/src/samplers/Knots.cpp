@@ -82,7 +82,7 @@ unsigned int Knots::rPoisT(double const &lambda, unsigned int const &T, RNG * co
   if(T == 1)
     return 1;
 	
-  double p[T];
+  vector<double> p(T);
 	
 	
   p[0] = std::exp(- lambda);

@@ -281,16 +281,16 @@ setMethod('tailFactor',
 
           if(plot)
           {
+              expYearRange.seq <- seq(expYearRange[1], expYearRange[2])
+
               plot(x=range(total.exp.years),
-                   y=range(tail.matrix[,attachment.adj]),
+                   y=range(tail.matrix[as.character(expYearRange.seq), attachment.adj]),
                    xlab=getExposureYearLabel(object@input),
                    ylab=paste(attachment,"th to Ultimate Tail Factor",sep=""),
                    type='n',
                    cex.axis=1.25,
                    cex.lab=1.25)
 
-
-              expYearRange.seq <- seq(expYearRange[1], expYearRange[2])
               lines(x=expYearRange.seq,
                     y=tail.matrix[as.character(expYearRange.seq),attachment.adj],
                     type='b')
@@ -361,7 +361,8 @@ setMethod('numberOfKnots',
                       xright = x,
                       ytop = y,
                       density = -1,
-                      col=col)
+                      col=col,
+                      border=NA)
 
          }
 

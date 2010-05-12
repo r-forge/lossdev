@@ -252,9 +252,11 @@ setMethod('finalCumulativeDiff',
 
           if(plot)
           {
+
+              expYearRange.seq <- seq(expYearRange[1], expYearRange[2])
               plot(
                    x=range(exp.years) + c(-1, +1),
-                   y=range(0, cumulative.resi.stats, na.rm=TRUE),
+                   y=range(as.vector(cumulative.resi.stats[,as.character(expYearRange.seq) ]), na.rm=TRUE),
                    type='n',
                    xlab=getExposureYearLabel(object@input),
                    ylab="Relative Difference Between Actual and Estimated Cumulatives",
@@ -263,7 +265,6 @@ setMethod('finalCumulativeDiff',
 
               abline(h=0,col='gray23',lwd=2,lty='dashed')
 
-              expYearRange.seq <- seq(expYearRange[1], expYearRange[2])
               for(i in seq_along(expYearRange.seq))
               {
                   year.i <- expYearRange.seq[i]

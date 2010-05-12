@@ -365,9 +365,12 @@ setMethod('tailFactor',
 
               plot.f <- function()
               {
+
+                  expYearRange.seq <- seq(expYearRange[1], expYearRange[2])
+
                   y.range <- NA
                   for(i in names(tail.list))
-                      y.range <- range(y.range, tail.list[[i]][,attachment.adj], na.rm=TRUE)
+                      y.range <- range(y.range, tail.list[[i]][as.character(expYearRange.seq), attachment.adj], na.rm=TRUE)
 
                   plot(x=range(total.exp.years),
                        y=y.range,
@@ -378,7 +381,7 @@ setMethod('tailFactor',
                        cex.lab=1.25)
 
 
-                  expYearRange.seq <- seq(expYearRange[1], expYearRange[2])
+
 
 
                   lines(x=expYearRange.seq,
@@ -487,7 +490,8 @@ setMethod('numberOfKnots',
                    xright = x,
                    ytop = y,
                    density = -1,
-                   col=col)
+                   col=col,
+                   border=NA)
 
           }
 

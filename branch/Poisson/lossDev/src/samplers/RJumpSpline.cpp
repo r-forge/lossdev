@@ -375,7 +375,7 @@ RJumpSpline::RJumpSpline(vector<StochasticNode *> const &nodes, Graph const &gra
   //unsigned int KLimits[2];
   double TLimits[2];
 
-  unsigned int maxK[_numberOfSplines];
+  vector<unsigned int> maxK(_numberOfSplines);
   for(unsigned int i = 0; i < _numberOfSplines; ++i)
     {
 
@@ -711,7 +711,7 @@ void RJumpSpline::setSplineValue(bool const &current, unsigned int const &chain)
   const unsigned int &nrow = _TriDim;
   const unsigned int ncol = _numberOfSplines == 1 ? 4 : 6;
 
-  double value[nrow * ncol + _numberOfSplines];
+  double * value = new double[nrow * ncol + _numberOfSplines];
 
   //first spline
   if(current || _updatingKnotsI != 0)
@@ -819,6 +819,8 @@ void RJumpSpline::setSplineValue(bool const &current, unsigned int const &chain)
   const_cast<RJumpSpline* const>(this)->setValue(value, nrow * ncol + _numberOfSplines, chain);
 
    //std::cout << "end setSplineValue" << std::endl;
+
+  delete [] value;
 }
 
 unsigned int RJumpSpline::betaLength(bool const &current, unsigned int const& chain) const

@@ -12,6 +12,7 @@
 
 using std::vector;
 using std::string;
+using std::fabs;
 
 #define MIN_ADAPT_OV 100
 #define MIN_OV MIN_ADAPT_OV / 2
