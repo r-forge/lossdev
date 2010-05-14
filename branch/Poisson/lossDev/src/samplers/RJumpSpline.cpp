@@ -98,16 +98,14 @@ void RJumpSpline::calBeta(double *betas, bool const &current, unsigned int const
   for (unsigned int j = 0; j < nchildren; ++j) 
     {
       StochasticNode const *snode = stoch_children[j];
-      double const *mu = snode->parents()[0]->value(chain);
-      unsigned int nrow_child = snode->length();
-      for (unsigned int k = 0; k < nrow_child; ++k) 
-        {
-          for (unsigned int i = 0; i < nrow; ++i) 
-            {
-              beta_j[nrow * k + i] = -mu[k];
-            }
-        }
-      beta_j += nrow_child * nrow;
+      double const mu = snode->parents()[0]->value(chain)[0];
+      
+      for (unsigned int i = 0; i < nrow; ++i) 
+      {
+	  beta_j[i] = -mu;
+      }
+      
+      beta_j += nrow;
     }
 
     
@@ -120,14 +118,9 @@ void RJumpSpline::calBeta(double *betas, bool const &current, unsigned int const
       for (unsigned int j = 0; j < nchildren; ++j) 
         {
           StochasticNode const *snode = stoch_children[j];
-          double const *mu = snode->parents()[0]->value(chain);
-          unsigned int nrow_child = snode->length();
-	
-          for (unsigned int k = 0; k < nrow_child; ++k) 
-            {
-              beta_j[nrow * k + i] += mu[k];
-            }
-          beta_j += nrow_child * nrow;
+          double const mu = snode->parents()[0]->value(chain)[0];
+	  beta_j[i] += mu;
+          beta_j += nrow;
         }
       coeff[i] -= 1;
     }
@@ -166,21 +159,11 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
   vector<StochasticNode const*> const &stoch_children = stochasticChildren();
   unsigned int nchildren = stoch_children.size();
   
-  unsigned int length_betas = 0;
-  for (unsigned int i = 0; i < nchildren; ++i) 
-    {
-      length_betas += stoch_children[i]->length();
-    }
-  length_betas *= betaLength(current, chain);
+  unsigned int length_betas = nchildren * betaLength(current, chain);
   
   StochasticNode const *snode = _snode;
-  //double const *xold = snode->value(chain);
   double const *xold = coeff;
-  
-  //these are zero and _tau
-  //double const *priormean = snode->parents()[0]->value(chain); 
-  //double const *priorprec = snode->parents()[1]->value(chain);
-  //int nrow = snode->length();
+
   int nrow =   betaLength(current, chain);;
   /* 
      The log of the full conditional density takes the form
@@ -190,8 +173,7 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
      the current value of the node.
   */
   int N = nrow * nrow;
-  //double *b = new double[nrow];
-  //double *A = new double[N];
+
 
   for(unsigned int i = 0; i < nrow; ++i)
   {
@@ -232,18 +214,13 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
           A[i + j * nrow] = 0;
       }
   
-  //for (int i = 0; i < N; ++i) 
-  //{
-  //A[i] = priorprec[i];
-  //}
   
   /* FORTRAN routines are all call-by-reference, so we need to create
    * these constants */
   double zero = 0;
   double d1 = 1;
   int i1 = 1;
-  
-  //double *betas = 0;
+
   _calPost_betas->makeSufficientWithoutCopy(length_betas);
   double* betas=_calPost_betas->value(); //betas = new double[length_betas];
   calBeta(betas, current, chain);
@@ -252,18 +229,10 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
   //Chris Laws Changed this from JAGS because it looked like a bug
   //My answer will be >= original so should be safe
   //Need to double check
-  unsigned int max_nrow_child = nrow;
-  for (unsigned int j = 0; j < nchildren; ++j) 
-    {
-      if (stoch_children[j]->length() > max_nrow_child) 
-        {
-          max_nrow_child = stoch_children[j]->length();
-        }
-    }
-  
-  _calPost_C->makeSufficientWithoutCopy(nrow * max_nrow_child);
+  unsigned int max_nrow_child = nrow;  
+  _calPost_C->makeSufficientWithoutCopy(nrow * nrow);
   double *C = _calPost_C->value();//new double[nrow * max_nrow_child];
-  _calPost_delta->makeSufficientWithoutCopy(max_nrow_child);
+  _calPost_delta->makeSufficientWithoutCopy(nrow);
   double *delta = _calPost_delta->value();//new double[max_nrow_child];
   
   /* Now add the contribution of each term to A, b 
@@ -292,36 +261,15 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
       int nrow_child = snode->length();
       
       
-      if (nrow_child == 1) 
-        {
-          double alpha = tau[0];
-          F77_DSYR("L", &nrow, &alpha, beta_j, &i1, A, &nrow);
-          alpha *= (Y[0] - mu[0]);
-          F77_DAXPY(&nrow, &alpha, beta_j, &i1, b, &i1);
-        }
-      else 
-        {
-          double alpha = 1;
-          
-          F77_DSYMM("R", "L", &nrow, &nrow_child, &alpha, tau,
-                    &nrow_child, beta_j, &nrow, &zero, C, &nrow);
-          
-          for (int i = 0; i < nrow_child; ++i) 
-            {
-              delta[i] = Y[i] - mu[i];
-            }
-          
-          F77_DGEMV("N", &nrow, &nrow_child, &d1, C, &nrow,
-                    delta, &i1, &d1, b, &i1);
-          F77_DGEMM("N","T", &nrow, &nrow, &nrow_child,
-                    &d1, C, &nrow, beta_j, &nrow, &d1, A, &nrow);
-        }
-      beta_j += nrow_child * nrow;
+      double alpha = tau[0];
+      F77_DSYR("L", &nrow, &alpha, beta_j, &i1, A, &nrow);
+      alpha *= (Y[0] - mu[0]);
+      F77_DAXPY(&nrow, &alpha, beta_j, &i1, b, &i1);
+        
+
+      beta_j += nrow;
       
     }
-  
-  //delete [] C;
-  //delete [] delta;
  
   
   
@@ -333,8 +281,7 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
 
   _calPost_Acopy->makeSufficientWithoutCopy(N);
   double* Acopy=_calPost_Acopy->value();
-  for (int i = 0; i < N; ++i) 
-    Acopy[i] = A[i];
+  memcpy(Acopy, A, sizeof(double) * N);
   
   int one = 1;
   int info;
@@ -348,15 +295,7 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
   //Shift origin back to original scale
   for (int i = 0; i < nrow; ++i) 
     b[i] += xold[i];
-  
-  //double *xnew = new double[nrow];
-  //FIXME. This must use lower triangle of A!!!!
-  
-  //delete [] A;
-  //delete [] Acopy;
-  //delete [] b;
-  //delete [] xnew;
-	
+  	
 }
 
 
