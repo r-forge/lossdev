@@ -164,7 +164,8 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
   StochasticNode const *snode = _snode;
   double const *xold = coeff;
 
-  int nrow =   betaLength(current, chain);;
+  int nrow =   betaLength(current, chain);
+  unsigned int nrowUS = betaLength(current, chain);
   /* 
      The log of the full conditional density takes the form
      -1/2(t(x) %*% A %*% x - 2 * b %*% x)
@@ -175,7 +176,7 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
   int N = nrow * nrow;
 
 
-  for(unsigned int i = 0; i < nrow; ++i)
+  for(unsigned int i = 0; i < nrowUS; ++i)
   {
       if(i == 0)
 	  b[i] =   _tauOfFirstIn3rdColumn * (0.0 - xold[i]);
@@ -191,8 +192,8 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
         b[i] = _tau * (0.0 - xold[i]);
     }
 
-  for(unsigned int i = 0; i < nrow; ++i)
-    for(unsigned int j = 0; j < nrow; ++j)
+  for(unsigned int i = 0; i < nrowUS; ++i)
+    for(unsigned int j = 0; j < nrowUS; ++j)
       {
         if(i == j) // we are on the diagional
           {
@@ -217,9 +218,7 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
   
   /* FORTRAN routines are all call-by-reference, so we need to create
    * these constants */
-  double zero = 0;
-  double d1 = 1;
-  int i1 = 1;
+   int i1 = 1;
 
   _calPost_betas->makeSufficientWithoutCopy(length_betas);
   double* betas=_calPost_betas->value(); //betas = new double[length_betas];
@@ -229,11 +228,6 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
   //Chris Laws Changed this from JAGS because it looked like a bug
   //My answer will be >= original so should be safe
   //Need to double check
-  unsigned int max_nrow_child = nrow;  
-  _calPost_C->makeSufficientWithoutCopy(nrow * nrow);
-  double *C = _calPost_C->value();//new double[nrow * max_nrow_child];
-  _calPost_delta->makeSufficientWithoutCopy(nrow);
-  double *delta = _calPost_delta->value();//new double[max_nrow_child];
   
   /* Now add the contribution of each term to A, b 
      
@@ -258,7 +252,7 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
       double const *Y = snode->value(chain);
       double const *mu = snode->parents()[0]->value(chain);
       double const *tau = snode->parents()[1]->value(chain);
-      int nrow_child = snode->length();
+   
       
       
       double alpha = tau[0];
@@ -419,8 +413,6 @@ RJumpSpline::RJumpSpline(vector<StochasticNode *> const &nodes, Graph const &gra
 
  
   _calPost_betas = new ExpandableArray;
-  _calPost_C = new ExpandableArray;
-  _calPost_delta = new ExpandableArray;
   _calPost_Acopy = new ExpandableArray;
 	
 }
@@ -460,8 +452,6 @@ RJumpSpline::~RJumpSpline()
   delete _dMNorm;
 
   delete _calPost_betas;
-  delete _calPost_C;
-  delete _calPost_delta;
   delete _calPost_Acopy;
 }
 
@@ -556,11 +546,11 @@ void RJumpSpline::accept(unsigned int const &chain, unsigned int const &spline, 
   double p = llZ(false, chain) - llZ(true, chain);
   p += _knots[spline]->acceptProbBalance(chain, type);
     
-  if(rng->uniform() < p)
+  if(rng->uniform() < std::exp(p))
     {
       unsigned int length = betaLength(false, chain);
       for(unsigned int i = 0; i < length; ++i)
-        _currentBeta[chain][i] == _proposedBeta[i];
+        _currentBeta[chain][i] = _proposedBeta[i];
 
       _knots[_updatingKnotsI] -> acceptProposedValues(chain);
     }

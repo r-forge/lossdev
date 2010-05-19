@@ -100,8 +100,6 @@ class RJumpSpline : public Sampler
   unsigned int _numberOfSplines;
 
   ExpandableArray * _calPost_betas;
-  ExpandableArray * _calPost_C;
-  ExpandableArray * _calPost_delta;
   ExpandableArray * _calPost_Acopy;
 	
  private:
