@@ -32,6 +32,7 @@
 #include <JAGS/graph/Node.h>
 #include <JAGS/graph/ConstantNode.h>
 #include <JAGS/sampler/Linear.h>
+#include <JAGS/sampler/GraphView.h>
 #include <vector>
 #include <set>
 #include <iostream>
@@ -66,37 +67,32 @@ const
 			return false;
 	}
 	
-	
-    vector<StochasticNode const*> stoch_nodes;
-    vector<Node*> dtrm_nodes;
-    Sampler::classifyChildren(vector<StochasticNode*>(1,node), 
-		              graph, stoch_nodes, dtrm_nodes);
-	
+
+    GraphView gv(node, graph);
+    vector<StochasticNode const*> stoch_nodes = gv.stochasticChildren();
 
     // Check stochastic children
     for (unsigned int i = 0; i < stoch_nodes.size(); ++i) 
     {
     	StochasticNode const &sn = *stoch_nodes[i];
     	if(sn.distribution()->name() != "dnorm")
-    		return false;
+	    return false;
     	
     	if (isBounded(&sn))
-    		return false; //Truncated distribution
+	    return false; //Truncated distribution
     }
-
-    // Check linearity of deterministic descendants
-    if (!checkLinear(vector<StochasticNode*>(1, node), graph, false))
-    	return false;
-
-
     
-	return true;
+    // Check linearity of deterministic descendants
+    if (!checkLinear(&gv, false))
+    	return false;
+ 
+    return true;
 }
 
-void RJumpSplineFactory::makeSampler(std::set<StochasticNode*> &nodes, Graph const &graph,
-				     std::vector<Sampler*> &samplers) const
+vector<Sampler*> RJumpSplineFactory::makeSamplers(set<StochasticNode*> const &nodes, Graph const &graph) const
 {
-    std::set<StochasticNode*> nodesThatWillBeSampled;
+    vector<Sampler*> samplers;
+    set<StochasticNode*> nodesThatWillBeSampled;
     for(set<StochasticNode*>::iterator p(nodes.begin()); p != nodes.end(); ++p)
     {
 	if(canSample(*p, graph) && nodesThatWillBeSampled.find(*p) == nodesThatWillBeSampled.end())
@@ -104,7 +100,7 @@ void RJumpSplineFactory::makeSampler(std::set<StochasticNode*> &nodes, Graph con
 	    StochasticNode *n = *p;
 	    StochasticNode *tmpNode = 0;
 	    
-	    std::vector<StochasticNode*> vnode;
+	    vector<StochasticNode*> vnode;
 	    vnode.push_back(n);
 	    nodesThatWillBeSampled.insert(n);
 	    
@@ -124,19 +120,17 @@ void RJumpSplineFactory::makeSampler(std::set<StochasticNode*> &nodes, Graph con
 		vnode.push_back(tmpNode);
 		nodesThatWillBeSampled.insert(tmpNode);
 	    }
-
-	    samplers.push_back(new RJumpSpline(vnode, graph));
+	    
+	    samplers.push_back(new RJumpSpline(new GraphView(vnode, graph, true)));
 	    vnode.clear();
 	    
 	}
     }
-    
-    for(set<StochasticNode*>::iterator p(nodesThatWillBeSampled.begin()); p != nodesThatWillBeSampled.end();)
-    {
-	nodes.erase(*p);
-	++p;
-    }   
 
-
+    return samplers;
 }
 
+std::string RJumpSplineFactory::name() const
+{
+    return "RJumpSplineFactory";
+}

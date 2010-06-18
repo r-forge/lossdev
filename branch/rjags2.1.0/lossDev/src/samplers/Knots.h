@@ -29,7 +29,7 @@
 
 #ifndef KNOTS_H_
 #define KNOTS_H_
-#include <JAGS/distribution/RNG.h>
+#include <JAGS/rng/RNG.h>
 #include <JAGS/graph/StochasticNode.h>
 
 

@@ -35,7 +35,8 @@
 #include <JAGS/distribution/Distribution.h>
 #include <JAGS/function/Function.h>
 #include <JAGS/graph/NodeError.h>
-#include <JAGS/distribution/RNG.h>
+#include <JAGS/rng/RNG.h>
+#include <JAGS/sampler/GraphView.h>
 
 #include <stdexcept>
 
@@ -90,8 +91,8 @@ void RJumpSpline::calBeta(double *betas, bool const &current, unsigned int const
   */
 
   vector<StochasticNode const*> const &stoch_children = 
-    stochasticChildren();
-
+      _mgv->stochasticChildren();
+  
   unsigned long nchildren = stoch_children.size();
   double *beta_j = betas;
 
@@ -156,7 +157,7 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
   //We don't know for sure the value of the node is set to the value we are talking about
   setSplineValue(current, chain);
   
-  vector<StochasticNode const*> const &stoch_children = stochasticChildren();
+  vector<StochasticNode const*> const &stoch_children = _mgv->stochasticChildren();
   unsigned int nchildren = stoch_children.size();
   
   unsigned int length_betas = nchildren * betaLength(current, chain);
@@ -295,132 +296,132 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
 
 
 
-RJumpSpline::RJumpSpline(vector<StochasticNode *> const &nodes, Graph const &graph):
-  Sampler(nodes, graph)
+RJumpSpline::RJumpSpline(GraphView *gv):
+    Sampler(gv),_mgv(gv)
 {
-  _snode = nodes[0];
-  _nchain = _snode->nchain();
-  _numberOfSplines = _snode->parameterDims()[1][0];
-  
-  _knots= new Knots*[_numberOfSplines];
-
-  double PriorForT[2];
-  //unsigned int KLimits[2];
-  double TLimits[2];
-
-  vector<unsigned int> maxK(_numberOfSplines);
-  for(unsigned int i = 0; i < _numberOfSplines; ++i)
+    _snode = gv->nodes()[0];
+    _nchain = _snode->nchain();
+    _numberOfSplines = _snode->parents()[1]->dim()[0];
+    
+    _knots= new Knots*[_numberOfSplines];
+    
+    double PriorForT[2];
+    //unsigned int KLimits[2];
+    double TLimits[2];
+    
+    vector<unsigned int> maxK(_numberOfSplines);
+    for(unsigned int i = 0; i < _numberOfSplines; ++i)
     {
+	
+	PriorForT[0] = _snode->parameters(0)[5][0 + 2 * i];
+	PriorForT[1] = _snode->parameters(0)[5][1 + 2 * i];
+	
+	//KLimits[0] = 0;
+	//KLimits[1] = static_cast<unsigned int>(_snode->parameters(0)[1][i]);
 
-      PriorForT[0] = _snode->parameters(0)[5][0 + 2 * i];
-      PriorForT[1] = _snode->parameters(0)[5][1 + 2 * i];
-
-      //KLimits[0] = 0;
-      //KLimits[1] = static_cast<unsigned int>(_snode->parameters(0)[1][i]);
-
-      TLimits[0] = _snode->parameters(0)[3][i];
-      TLimits[1] = _snode->parameters(0)[4][i];
-      
-      
-      _knots[i] = new Knots(_nchain, //number of chains
-                            PriorForT,//prior for knot positions
-                            nodes[i + 1],//number of knots
-                            TLimits//Limits for knot positions
-                            );
-
-      maxK[i] = _knots[i]->maxK();
+	TLimits[0] = _snode->parameters(0)[3][i];
+	TLimits[1] = _snode->parameters(0)[4][i];
+	
+	
+	_knots[i] = new Knots(_nchain, //number of chains
+			      PriorForT,//prior for knot positions
+			      gv->nodes()[i + 1],//number of knots
+			      TLimits//Limits for knot positions
+	    );
+	
+	maxK[i] = _knots[i]->maxK();
     }
-  
-  
-  //std::cout <<"mid Const1" << std::endl;
+    
+    
+    //std::cout <<"mid Const1" << std::endl;
+    
 
-
-  //values at which spline is to be evaluated
-  //For now assume this is constant
-
-  _n = new unsigned int[_numberOfSplines];
-
-  for(unsigned int i = 0; i < _numberOfSplines; ++i)
-    _n[i] = static_cast<unsigned int>(_snode->parameterDims()[0][0]);
- 
-
-  _TriDim = _n[0];
-  
-  _x = new double*[_numberOfSplines];
-
-  for(unsigned int i = 0; i < _numberOfSplines; ++i)
+    //values at which spline is to be evaluated
+    //For now assume this is constant
+    
+    _n = new unsigned int[_numberOfSplines];
+    
+    for(unsigned int i = 0; i < _numberOfSplines; ++i)
+	_n[i] = static_cast<unsigned int>(_snode->parents()[0]->dim()[0]);
+    
+    
+    _TriDim = _n[0];
+    
+    _x = new double*[_numberOfSplines];
+    
+    for(unsigned int i = 0; i < _numberOfSplines; ++i)
     {
-      _x[i] = new double[_n[i]];
-      for(unsigned int j = 1; j <= _n[i]; ++j)
-        _x[i][j-1] = j;
+	_x[i] = new double[_n[i]];
+	for(unsigned int j = 1; j <= _n[i]; ++j)
+	    _x[i][j-1] = j;
     }
-	
-  //std::cout <<"mid Const2" << std::endl;		
-  //Coefficents
-  //first value is an error term with zero mean and precision defined by the 8th parameter with must be NON-STOCHASTIC (_tauOfFirstIn3rdColumn)
-  //next _TriDim-1 values are for the 3rd column of error terms after the first element
-  //next _TriDim-1 values are for the 4th column of error terms (first value of this column is blank)
-  //next value is intercept
-  //next value is slope
-  //next value is intercept
-  //next value is slope
-  // length of Coefficents is thus = 1 + 2 *(_TriDim-1) + 2 * _numberOfSplines + number of knots {+ number of knots}
-  _currentBeta = new double*[_nchain];
-  unsigned int maxBetaLength = 1 + 2*(_TriDim-1) + 2 * _numberOfSplines;
-  for(unsigned int i = 0; i < _numberOfSplines; ++i)
-    maxBetaLength += maxK[i];
+    
+    //std::cout <<"mid Const2" << std::endl;		
+    //Coefficents
+    //first value is an error term with zero mean and precision defined by the 8th parameter with must be NON-STOCHASTIC (_tauOfFirstIn3rdColumn)
+    //next _TriDim-1 values are for the 3rd column of error terms after the first element
+    //next _TriDim-1 values are for the 4th column of error terms (first value of this column is blank)
+    //next value is intercept
+    //next value is slope
+    //next value is intercept
+    //next value is slope
+    // length of Coefficents is thus = 1 + 2 *(_TriDim-1) + 2 * _numberOfSplines + number of knots {+ number of knots}
+    _currentBeta = new double*[_nchain];
+    unsigned int maxBetaLength = 1 + 2*(_TriDim-1) + 2 * _numberOfSplines;
+    for(unsigned int i = 0; i < _numberOfSplines; ++i)
+	maxBetaLength += maxK[i];
+    
   
-  
-  for(unsigned int i = 0; i < _nchain; ++i)
+    for(unsigned int i = 0; i < _nchain; ++i)
     {
-      
-      _currentBeta[i] = new double[maxBetaLength];
-      for(unsigned int j = 0; j < maxBetaLength; ++j)
-        _currentBeta[i][j] = 0;
+	
+	_currentBeta[i] = new double[maxBetaLength];
+	for(unsigned int j = 0; j < maxBetaLength; ++j)
+	    _currentBeta[i][j] = 0;
     }
-	
-  _proposedBeta = new double[maxBetaLength];
-	
-  //Prior for Betas and intercept
-  _tau = _snode->parameters(0)[2][0];
+    
+    _proposedBeta = new double[maxBetaLength];
+    
+    //Prior for Betas and intercept
+    _tau = _snode->parameters(0)[2][0];
+    
+    //Prior precision for 3rd and 4th column error terms;
+    //initially set these to be the value in the first chain, update will have to reset for each chain;
+    _tauOf3rdColumn = _snode->parameters(0)[6][0];
+    _tauOf4thColumn = _snode->parameters(0)[8][0];
+    
+    //Prior precision for first value in the 3rd column NON-STOCHASTIC
+    _tauOfFirstIn3rdColumn= _snode->parameters(0)[7][0];
 
-  //Prior precision for 3rd and 4th column error terms;
-  //initially set these to be the value in the first chain, update will have to reset for each chain;
-  _tauOf3rdColumn = _snode->parameters(0)[6][0];
-  _tauOf4thColumn = _snode->parameters(0)[8][0];
-
-  //Prior precision for first value in the 3rd column NON-STOCHASTIC
-  _tauOfFirstIn3rdColumn= _snode->parameters(0)[7][0];
-
-  //autoregressive coefficient
-  _rho =  _snode->parameters(0)[9][0];
-  _etaRho =  _snode->parameters(0)[10][0];
-		
-  //posterior parameters for Beta under current and posterior cases
-  _bPostCurrent = new double[maxBetaLength];
-  _APostCurrent = new double[maxBetaLength * maxBetaLength];
+    //autoregressive coefficient
+    _rho =  _snode->parameters(0)[9][0];
+    _etaRho =  _snode->parameters(0)[10][0];
+    
+    //posterior parameters for Beta under current and posterior cases
+    _bPostCurrent = new double[maxBetaLength];
+    _APostCurrent = new double[maxBetaLength * maxBetaLength];
+  
+    _bPostProposed = new double[maxBetaLength];
+    _APostProposed = new double[maxBetaLength * maxBetaLength];
+    
+    //need this to calc ll of MNorm
+    _dMNorm = new DMNorm;
 	
-  _bPostProposed = new double[maxBetaLength];
-  _APostProposed = new double[maxBetaLength * maxBetaLength];
-	
-  //need this to calc ll of MNorm
-  _dMNorm = new DMNorm;
-	
-
-  _updatingKnotsI = 0;
-  for(unsigned int i = 0; i < _nchain; ++i)
-    setSplineValue(true, i);
-
- 
-  _calPost_betas = new ExpandableArray;
-  _calPost_Acopy = new ExpandableArray;
-	
+    
+    _updatingKnotsI = 0;
+    for(unsigned int i = 0; i < _nchain; ++i)
+	setSplineValue(true, i);
+    
+    
+    _calPost_betas = new ExpandableArray;
+    _calPost_Acopy = new ExpandableArray;
+    
 }
 
 RJumpSpline::~RJumpSpline()
 {
-
-  for(unsigned int i = 0; i < _numberOfSplines; ++i)
+    
+   for(unsigned int i = 0; i < _numberOfSplines; ++i)
     delete _knots[i];
    delete[] _knots;
   
@@ -500,7 +501,7 @@ double RJumpSpline::llZ(bool const &current, unsigned int chain) const
         ans  +=  dnorm4(coeff[i], 0.0, std::sqrt(1.0/ _tau), 1);
     }
   
-  vector<StochasticNode const *> const & children = stochasticChildren();
+  vector<StochasticNode const *> const & children = _mgv->stochasticChildren();
   
   for(unsigned int i = 0; i < children.size(); ++i)
     {
@@ -745,7 +746,7 @@ void RJumpSpline::setSplineValue(bool const &current, unsigned int const &chain)
   }
     
   
-  const_cast<RJumpSpline* const>(this)->setValue(value, nrow * ncol + _numberOfSplines, chain);
+  const_cast<RJumpSpline* const>(this)->_mgv->setValue(value, nrow * ncol + _numberOfSplines, chain);
 
    //std::cout << "end setSplineValue" << std::endl;
 

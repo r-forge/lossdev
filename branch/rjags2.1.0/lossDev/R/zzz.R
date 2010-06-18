@@ -85,7 +85,7 @@ myLibPath <- function() return(get('myLibPath', env=mutableState, inherits=FALSE
     fp <- ifelse(nzchar(rarch),
                  file.path(myLibPath(), myPkgName(), 'libs', rarch),
                  file.path(myLibPath(), myPkgName(), 'libs'))
-    jags.module('lossDev', normalizePath(fp))
+    load.module('lossDev', normalizePath(fp))
 
 
     wd <- getwd()

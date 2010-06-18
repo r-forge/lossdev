@@ -56,8 +56,10 @@ public:
      * Returns a dynamically allocated Sampler for a given node. This
      * function is called by SingletonFactory#makeSampler.
      */
-    virtual void makeSampler(std::set<StochasticNode*> &nodes, Graph const &graph,
-			     std::vector<Sampler*> &samplers) const;
+    virtual std::vector<Sampler*> makeSamplers(std::set<StochasticNode*> const &nodes, 
+					       Graph const &graph) const;
+
+    virtual std::string name() const;
 };
 
 #endif /*RJUMPSPLINEFACTORY_H_*/

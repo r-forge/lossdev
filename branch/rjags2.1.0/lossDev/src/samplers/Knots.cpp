@@ -34,6 +34,7 @@
 #include "Knots.h"
 #include <JAGS/JRmath.h>
 #include <JAGS/distribution/Distribution.h>
+#include <JAGS/distribution/ScalarDist.h>
 #include <vector>
 #include <set>
 
@@ -198,8 +199,7 @@ Knots::Knots(unsigned int nchain, double const * PriorForT, StochasticNode const
     double tmpDMinK;
     double tmpDMaxK;
 
-    support(&tmpDMinK, &tmpDMaxK, 1,
-	    knotsNode, 0);
+    _knotsNode->support(&tmpDMinK, &tmpDMaxK, 1, 0);
 
     _minK = static_cast<unsigned int>(tmpDMinK);
     _maxK = static_cast<unsigned int>(tmpDMaxK);
@@ -386,20 +386,18 @@ double Knots::acceptProbBalance(unsigned int const &chain, TypeOfUpdate type) co
   
   //ans += std::log(1.0 / (_maxK - _minK)) - std::log(1.0 / (_maxK - _minK));
   double tmpKnots = _proposedK;
-  ans += _knotsNode->distribution()->logLikelihood( &tmpKnots,
-						    1,
-						    _knotsNode->parameters(chain),
-						    _knotsNode->parameterDims(),
-						    _knotsNode->lowerLimit(chain),
-						    _knotsNode->upperLimit(chain));
+  ans += static_cast<ScalarDist const *>(_knotsNode->distribution())->logLikelihood( tmpKnots,
+										     _knotsNode->parameters(chain),
+										     _knotsNode->lowerLimit(chain),
+										     _knotsNode->upperLimit(chain));
 
   tmpKnots = _currentK[chain];
-  ans -= _knotsNode->distribution()->logLikelihood( &tmpKnots,
-						    1,
-						    _knotsNode->parameters(chain),
-						    _knotsNode->parameterDims(),
-						    _knotsNode->lowerLimit(chain),
-						    _knotsNode->upperLimit(chain));
+
+
+  ans -= static_cast<ScalarDist const *>(_knotsNode->distribution())->logLikelihood( tmpKnots,
+										     _knotsNode->parameters(chain),
+										     _knotsNode->lowerLimit(chain),
+										     _knotsNode->upperLimit(chain));
 	
 	
 	

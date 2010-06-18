@@ -43,6 +43,8 @@ class DMNorm;
  */
 class RJumpSpline : public Sampler
 {
+
+    GraphView * _mgv;
 	
   //which node do does the sampler update
   StochasticNode const* _snode;
@@ -132,7 +134,7 @@ class RJumpSpline : public Sampler
 	
 	
  public:
-  RJumpSpline(std::vector<StochasticNode *> const &nodes, Graph const &graph);
+  RJumpSpline(GraphView *gv);
   virtual ~RJumpSpline();
   /**
    * Every sampler must update the vector of nodes and its immediate
