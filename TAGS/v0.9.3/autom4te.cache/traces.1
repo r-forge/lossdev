@@ -1,0 +1,435 @@
+m4trace:m4/acx_blas.m4:35: -1- AC_DEFUN([ACX_BLAS], [
+AC_PREREQ(2.50)
+AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
+acx_blas_ok=no
+
+AC_ARG_WITH(blas,
+	[AC_HELP_STRING([--with-blas=<lib>], [use BLAS library <lib>])])
+case $with_blas in
+	yes | "") ;;
+	no) acx_blas_ok=disable ;;
+	-* | */* | *.a | *.so | *.so.* | *.o) BLAS_LIBS="$with_blas" ;;
+	*) BLAS_LIBS="-l$with_blas" ;;
+esac
+
+# Get fortran linker names of BLAS functions to check for.
+AC_F77_FUNC(sgemm)
+AC_F77_FUNC(dgemm)
+
+acx_blas_save_LIBS="$LIBS"
+LIBS="$LIBS $FLIBS"
+
+# First, check BLAS_LIBS environment variable
+if test $acx_blas_ok = no; then
+if test "x$BLAS_LIBS" != x; then
+	save_LIBS="$LIBS"; LIBS="$BLAS_LIBS $LIBS"
+	AC_MSG_CHECKING([for $sgemm in $BLAS_LIBS])
+	AC_TRY_LINK_FUNC($sgemm, [acx_blas_ok=yes], [BLAS_LIBS=""])
+	AC_MSG_RESULT($acx_blas_ok)
+	LIBS="$save_LIBS"
+fi
+fi
+
+# BLAS linked to by default?  (happens on some supercomputers)
+if test $acx_blas_ok = no; then
+	save_LIBS="$LIBS"; LIBS="$LIBS"
+	AC_CHECK_FUNC($sgemm, [acx_blas_ok=yes])
+	LIBS="$save_LIBS"
+fi
+
+# BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
+if test $acx_blas_ok = no; then
+	AC_CHECK_LIB(atlas, ATL_xerbla,
+		[AC_CHECK_LIB(f77blas, $sgemm,
+		[AC_CHECK_LIB(cblas, cblas_dgemm,
+			[acx_blas_ok=yes
+			 BLAS_LIBS="-lcblas -lf77blas -latlas"],
+			[], [-lf77blas -latlas])],
+			[], [-latlas])])
+fi
+
+# BLAS in Apple vecLib framework? (Mac OS X)
+if test $acx_blas_ok = no; then
+	vlib_flags="-framework vecLib"
+	save_LIBS="$LIBS"; LIBS="$vlib_flags $LIBS"
+	AC_MSG_CHECKING([for $sgemm in $vlib_flags])
+	AC_TRY_LINK_FUNC($sgemm, [acx_blas_ok=yes; BLAS_LIBS="$vlib_flags"],
+			 [BLAS_LIBS=""])
+	AC_MSG_RESULT($acx_blas_ok)
+	LIBS="$save_LIBS"
+fi
+
+# BLAS in PhiPACK libraries? (requires generic BLAS lib, too)
+if test $acx_blas_ok = no; then
+	AC_CHECK_LIB(blas, $sgemm,
+		[AC_CHECK_LIB(dgemm, $dgemm,
+		[AC_CHECK_LIB(sgemm, $sgemm,
+			[acx_blas_ok=yes; BLAS_LIBS="-lsgemm -ldgemm -lblas"],
+			[], [-lblas])],
+			[], [-lblas])])
+fi
+
+# BLAS in Alpha CXML library?
+if test $acx_blas_ok = no; then
+	AC_CHECK_LIB(cxml, $sgemm, [acx_blas_ok=yes;BLAS_LIBS="-lcxml"])
+fi
+
+# BLAS in Alpha DXML library? (now called CXML, see above)
+if test $acx_blas_ok = no; then
+	AC_CHECK_LIB(dxml, $sgemm, [acx_blas_ok=yes;BLAS_LIBS="-ldxml"])
+fi
+
+# BLAS in Sun Performance library?
+if test $acx_blas_ok = no; then
+	if test "x$GCC" != xyes; then # only works with Sun CC
+		AC_CHECK_LIB(sunmath, acosp,
+			[AC_CHECK_LIB(sunperf, $sgemm,
+        			[BLAS_LIBS="-lsunperf -lsunmath"
+                                 acx_blas_ok=yes],[],[-lsunperf -lsunmath])])
+	fi
+fi
+
+# BLAS in SCSL library?  (SGI/Cray Scientific Library)
+if test $acx_blas_ok = no; then
+	AC_CHECK_LIB(scs, $sgemm, [acx_blas_ok=yes; BLAS_LIBS="-lscs"])
+fi
+
+# BLAS in SGIMATH library?
+if test $acx_blas_ok = no; then
+	AC_CHECK_LIB(complib.sgimath, $sgemm,
+		     [acx_blas_ok=yes; BLAS_LIBS="-lcomplib.sgimath"])
+fi
+
+# BLAS in IBM ESSL library? (requires generic BLAS lib, too)
+if test $acx_blas_ok = no; then
+	AC_CHECK_LIB(blas, $sgemm,
+		[AC_CHECK_LIB(essl, $sgemm,
+			[acx_blas_ok=yes; BLAS_LIBS="-lessl -lblas"],
+			[], [-lblas $FLIBS])])
+fi
+
+# Generic BLAS library?
+if test $acx_blas_ok = no; then
+	AC_CHECK_LIB(blas, $sgemm, [acx_blas_ok=yes; BLAS_LIBS="-lblas"])
+fi
+
+AC_SUBST(BLAS_LIBS)
+
+LIBS="$acx_blas_save_LIBS"
+
+# Finally, execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND:
+if test x"$acx_blas_ok" = xyes; then
+        ifelse([$1],,AC_DEFINE(HAVE_BLAS,1,[Define if you have a BLAS library.]),[$1])
+        :
+else
+        acx_blas_ok=no
+        $2
+fi
+])
+m4trace:m4/acx_fortran.m4:33: -1- AC_DEFUN([_ACX_FC_LIBRARY_LDFLAGS], [_AC_FORTRAN_ASSERT()dnl
+_AC_PROG_FC_V
+AC_CACHE_CHECK([for Fortran libraries of $[]_AC_FC[]], ac_cv_[]_AC_LANG_ABBREV[]_libs,
+[if test "x$[]_AC_LANG_PREFIX[]LIBS" != "x"; then
+  ac_cv_[]_AC_LANG_ABBREV[]_libs="$[]_AC_LANG_PREFIX[]LIBS" # Let the user override the test.
+else
+
+_AC_PROG_FC_V_OUTPUT
+
+ac_cv_[]_AC_LANG_ABBREV[]_libs=
+
+# Save positional arguments (if any)
+ac_save_positional="$[@]"
+
+set X $ac_[]_AC_LANG_ABBREV[]_v_output
+while test $[@%:@] != 1; do
+  shift
+  ac_arg=$[1]
+  case $ac_arg in
+        [[\\/]]*.a | ?:[[\\/]]*.a)
+          _AC_LIST_MEMBER_IF($ac_arg, $ac_cv_[]_AC_LANG_ABBREV[]_libs, ,
+              ac_cv_[]_AC_LANG_ABBREV[]_libs="$ac_cv_[]_AC_LANG_ABBREV[]_libs $ac_arg")
+          ;;
+        -bI:*)
+          _AC_LIST_MEMBER_IF($ac_arg, $ac_cv_[]_AC_LANG_ABBREV[]_libs, ,
+             [_AC_LINKER_OPTION([$ac_arg], ac_cv_[]_AC_LANG_ABBREV[]_libs)])
+          ;;
+          # Ignore these flags.
+        -lang* | -lcrt* | -lc | -lgcc* | -lSystem | -libmil | -LANG:=*)
+          ;;
+        -lkernel32)
+          test x"$CYGWIN" != xyes && ac_cv_[]_AC_LANG_ABBREV[]_libs="$ac_cv_[]_AC_LANG_ABBREV[]_libs $ac_arg"
+          ;;
+        -[[LRuY]])
+          # These flags, when seen by themselves, take an argument.
+          # We remove the space between option and argument and re-iterate
+          # unless we find an empty arg or a new option (starting with -)
+	  case $[2] in
+	     "" | -*);;
+	     *)
+		ac_arg="$ac_arg$[2]"
+		shift; shift
+		set X $ac_arg "$[@]"
+		;;
+	  esac
+          ;;
+        -YP,*)
+          for ac_j in `echo $ac_arg | sed -e 's/-YP,/-L/;s/:/ -L/g'`; do
+            _AC_LIST_MEMBER_IF($ac_j, $ac_cv_[]_AC_LANG_ABBREV[]_libs, ,
+                               [ac_arg="$ac_arg $ac_j"
+                               ac_cv_[]_AC_LANG_ABBREV[]_libs="$ac_cv_[]_AC_LANG_ABBREV[]_libs $ac_j"])
+          done
+          ;;
+        -[[lLR]]*)
+          _AC_LIST_MEMBER_IF($ac_arg, $ac_cv_[]_AC_LANG_ABBREV[]_libs, ,
+                             ac_cv_[]_AC_LANG_ABBREV[]_libs="$ac_cv_[]_AC_LANG_ABBREV[]_libs $ac_arg")
+          ;;
+          # Ignore everything else.
+  esac
+done
+# restore positional arguments
+set X $ac_save_positional; shift
+
+# We only consider "LD_RUN_PATH" on Solaris systems.  If this is seen,
+# then we insist that the "run path" must be an absolute path (i.e. it
+# must begin with a "/").
+case `(uname -sr) 2>/dev/null` in
+   "SunOS 5"*)
+      ac_ld_run_path=`echo $ac_[]_AC_LANG_ABBREV[]_v_output |
+                        sed -n 's,^.*LD_RUN_PATH *= *\(/[[^ ]]*\).*$,-R\1,p'`
+      test "x$ac_ld_run_path" != x &&
+        _AC_LINKER_OPTION([$ac_ld_run_path], ac_cv_[]_AC_LANG_ABBREV[]_libs)
+      ;;
+esac
+fi # test "x$[]_AC_LANG_PREFIX[]LIBS" = "x"
+])
+[]_AC_LANG_PREFIX[]LIBS="$ac_cv_[]_AC_LANG_ABBREV[]_libs"
+AC_SUBST([]_AC_LANG_PREFIX[]LIBS)
+])
+m4trace:m4/acx_fortran.m4:117: -1- AC_DEFUN([ACX_F77_LIBRARY_LDFLAGS], [AC_REQUIRE([AC_PROG_F77])dnl
+AC_LANG_PUSH(Fortran 77)dnl
+_ACX_FC_LIBRARY_LDFLAGS
+AC_LANG_POP(Fortran 77)dnl
+])
+m4trace:m4/acx_fortran.m4:127: -1- AC_DEFUN([ACX_FC_LIBRARY_LDFLAGS], [AC_REQUIRE([AC_PROG_FC])dnl
+AC_LANG_PUSH(Fortran)dnl
+_ACX_FC_LIBRARY_LDFLAGS
+AC_LANG_POP(Fortran)dnl
+])
+m4trace:m4/acx_fortran.m4:136: -1- AC_DEFUN([_ACX_F77_NAME_MANGLING], [AC_REQUIRE([ACX_F77_LIBRARY_LDFLAGS])dnl
+AC_REQUIRE([AC_F77_DUMMY_MAIN])dnl
+AC_LANG_PUSH(Fortran 77)dnl
+__AC_FC_NAME_MANGLING
+AC_LANG_POP(Fortran 77)dnl
+])
+m4trace:m4/acx_fortran.m4:147: -1- AC_DEFUN([_ACX_FC_NAME_MANGLING], [AC_REQUIRE([ACX_FC_LIBRARY_LDFLAGS])dnl
+AC_REQUIRE([AC_FC_DUMMY_MAIN])dnl
+AC_LANG_PUSH(Fortran)dnl
+__AC_FC_NAME_MANGLING
+AC_LANG_POP(Fortran)dnl
+])
+m4trace:m4/acx_fortran.m4:157: -1- AC_DEFUN([ACX_F77_WRAPPERS], [AC_REQUIRE([_ACX_F77_NAME_MANGLING])dnl
+AC_LANG_PUSH(Fortran 77)dnl
+_AC_FC_WRAPPERS
+AC_LANG_POP(Fortran 77)dnl
+])
+m4trace:m4/acx_fortran.m4:167: -1- AC_DEFUN([ACX_FC_WRAPPERS], [AC_REQUIRE([_ACX_FC_NAME_MANGLING])dnl
+AC_LANG_PUSH(Fortran)dnl
+_AC_FC_WRAPPERS
+AC_LANG_POP(Fortran)dnl
+])
+m4trace:m4/acxx_lapack.m4:38: -1- AC_DEFUN([ACX_LAPACK], [
+AC_REQUIRE([ACX_BLAS])
+acx_lapack_ok=no
+
+AC_ARG_WITH(lapack,
+        [AC_HELP_STRING([--with-lapack=<lib>], [use LAPACK library <lib>])])
+case $with_lapack in
+        yes | "") ;;
+        no) acx_lapack_ok=disable ;;
+        -* | */* | *.a | *.so | *.so.* | *.o) LAPACK_LIBS="$with_lapack" ;;
+        *) LAPACK_LIBS="-l$with_lapack" ;;
+esac
+
+# Get fortran linker name of LAPACK function to check for.
+AC_F77_FUNC(dgeev)
+
+# We cannot use LAPACK if BLAS is not found
+if test "x$acx_blas_ok" != xyes; then
+        acx_lapack_ok=noblas
+fi
+
+# First, check LAPACK_LIBS environment variable
+if test "x$LAPACK_LIBS" != x; then
+        save_LIBS="$LIBS"; LIBS="$LAPACK_LIBS $BLAS_LIBS $LIBS $FLIBS"
+        AC_MSG_CHECKING([for $dgeev in $LAPACK_LIBS])
+        AC_TRY_LINK_FUNC($dgeev, [acx_lapack_ok=yes], [LAPACK_LIBS=""])
+        AC_MSG_RESULT($acx_lapack_ok)
+        LIBS="$save_LIBS"
+        if test acx_lapack_ok = no; then
+                LAPACK_LIBS=""
+        fi
+fi
+
+# LAPACK linked to by default?  (is sometimes included in BLAS lib)
+if test $acx_lapack_ok = no; then
+        save_LIBS="$LIBS"; LIBS="$LIBS $BLAS_LIBS $FLIBS"
+        AC_CHECK_FUNC($dgeev, [acx_lapack_ok=yes])
+        LIBS="$save_LIBS"
+fi
+
+# Generic LAPACK library?
+for lapack in lapack lapack_rs6k; do
+        if test $acx_lapack_ok = no; then
+                save_LIBS="$LIBS"; LIBS="$BLAS_LIBS $LIBS"
+                AC_CHECK_LIB($lapack, $dgeev,
+                    [acx_lapack_ok=yes; LAPACK_LIBS="-l$lapack"], [], [$FLIBS])
+                LIBS="$save_LIBS"
+        fi
+done
+
+AC_SUBST(LAPACK_LIBS)
+
+# Finally, execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND:
+if test x"$acx_lapack_ok" = xyes; then
+        ifelse([$1],,AC_DEFINE(HAVE_LAPACK,1,[Define if you have LAPACK library.]),[$1])
+        :
+else
+        acx_lapack_ok=no
+        $2
+fi
+])
+m4trace:configure.ac:1: -1- m4_pattern_forbid([^_?A[CHUM]_])
+m4trace:configure.ac:1: -1- m4_pattern_forbid([_AC_])
+m4trace:configure.ac:1: -1- m4_pattern_forbid([^LIBOBJS$], [do not use LIBOBJS directly, use AC_LIBOBJ (see section `AC_LIBOBJ vs LIBOBJS'])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^AS_FLAGS$])
+m4trace:configure.ac:1: -1- m4_pattern_forbid([^_?m4_])
+m4trace:configure.ac:1: -1- m4_pattern_forbid([^dnl$])
+m4trace:configure.ac:1: -1- m4_pattern_forbid([^_?AS_])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^SHELL$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^PATH_SEPARATOR$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^PACKAGE_NAME$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^PACKAGE_TARNAME$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^PACKAGE_VERSION$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^PACKAGE_STRING$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^PACKAGE_BUGREPORT$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^exec_prefix$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^prefix$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^program_transform_name$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^bindir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^sbindir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^libexecdir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^datarootdir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^datadir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^sysconfdir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^sharedstatedir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^localstatedir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^includedir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^oldincludedir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^docdir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^infodir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^htmldir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^dvidir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^pdfdir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^psdir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^libdir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^localedir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^mandir$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^PACKAGE_NAME$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^PACKAGE_TARNAME$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^PACKAGE_VERSION$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^PACKAGE_STRING$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^PACKAGE_BUGREPORT$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^DEFS$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^ECHO_C$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^ECHO_N$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^ECHO_T$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^LIBS$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^build_alias$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^host_alias$])
+m4trace:configure.ac:1: -1- m4_pattern_allow([^target_alias$])
+m4trace:configure.ac:7: -1- m4_pattern_allow([^ac_prefix_program$])
+m4trace:configure.ac:13: -2- _m4_warn([obsolete], [The macro `AC_HELP_STRING' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:209: AC_HELP_STRING is expanded from...
+configure.ac:13: the top level])
+m4trace:configure.ac:50: -2- _m4_warn([obsolete], [The macro `AC_HELP_STRING' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:209: AC_HELP_STRING is expanded from...
+configure.ac:50: the top level])
+m4trace:configure.ac:68: -1- ACX_F77_WRAPPERS
+m4trace:configure.ac:68: -1- _ACX_F77_NAME_MANGLING
+m4trace:configure.ac:68: -1- ACX_F77_LIBRARY_LDFLAGS
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^FFLAGS$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^LDFLAGS$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^LIBS$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^ac_ct_F77$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^EXEEXT$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^OBJEXT$])
+m4trace:configure.ac:68: -1- _ACX_FC_LIBRARY_LDFLAGS
+m4trace:configure.ac:68: -1- m4_pattern_allow([^FLIBS$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^FLIBS$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^CFLAGS$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^LDFLAGS$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^LIBS$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^CPPFLAGS$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^CC$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^ac_ct_CC$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_DUMMY_MAIN$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^FC_DUMMY_MAIN_EQ_F77$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC_(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC_(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC_(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC_(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC_(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC_(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC_(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC(name,NAME)$])
+m4trace:configure.ac:68: -1- m4_pattern_allow([^F77_FUNC_(name,NAME)$])
+m4trace:configure.ac:69: -1- ACX_F77_LIBRARY_LDFLAGS
+m4trace:configure.ac:69: -1- _ACX_FC_LIBRARY_LDFLAGS
+m4trace:configure.ac:69: -1- m4_pattern_allow([^FLIBS$])
+m4trace:configure.ac:70: -1- ACX_LAPACK([], [
+	AC_MSG_ERROR("You need to install the LAPACK library")
+])
+m4trace:configure.ac:70: -1- ACX_BLAS
+m4trace:configure.ac:70: -1- _m4_warn([obsolete], [The macro `AC_HELP_STRING' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:209: AC_HELP_STRING is expanded from...
+../../lib/autoconf/general.m4:1382: AC_ARG_WITH is expanded from...
+m4/acx_blas.m4:35: ACX_BLAS is expanded from...
+m4/acxx_lapack.m4:38: ACX_LAPACK is expanded from...
+configure.ac:70: the top level])
+m4trace:configure.ac:70: -1- m4_pattern_allow([^BLAS_LIBS$])
+m4trace:configure.ac:70: -2- m4_pattern_allow([^HAVE_BLAS$])
+m4trace:configure.ac:70: -1- _m4_warn([obsolete], [The macro `AC_HELP_STRING' is obsolete.
+You should run autoupdate.], [../../lib/autoconf/general.m4:209: AC_HELP_STRING is expanded from...
+../../lib/autoconf/general.m4:1382: AC_ARG_WITH is expanded from...
+m4/acxx_lapack.m4:38: ACX_LAPACK is expanded from...
+configure.ac:70: the top level])
+m4trace:configure.ac:70: -1- m4_pattern_allow([^LAPACK_LIBS$])
+m4trace:configure.ac:70: -2- m4_pattern_allow([^HAVE_LAPACK$])
+m4trace:configure.ac:74: -1- m4_pattern_allow([^JAGS_INCLUDE$])
+m4trace:configure.ac:75: -1- m4_pattern_allow([^JAGS_LIB$])
+m4trace:configure.ac:76: -1- m4_pattern_allow([^LAPACK_LIBS$])
+m4trace:configure.ac:77: -1- m4_pattern_allow([^BLAS_LIBS$])
+m4trace:configure.ac:78: -1- m4_pattern_allow([^LIBS$])
+m4trace:configure.ac:79: -1- m4_pattern_allow([^FLIBS$])
+m4trace:configure.ac:83: -1- m4_pattern_allow([^Windows$])
+m4trace:configure.ac:84: -1- _m4_warn([obsolete], [AC_OUTPUT should be used without arguments.
+You should run autoupdate.], [])
+m4trace:configure.ac:84: -1- m4_pattern_allow([^LIB@&t@OBJS$])
+m4trace:configure.ac:84: -1- m4_pattern_allow([^LTLIBOBJS$])
+m4trace:configure.ac:85: -1- _m4_warn([obsolete], [AC_OUTPUT should be used without arguments.
+You should run autoupdate.], [])
+m4trace:configure.ac:85: -1- m4_pattern_allow([^LIB@&t@OBJS$])
+m4trace:configure.ac:85: -1- m4_pattern_allow([^LTLIBOBJS$])
