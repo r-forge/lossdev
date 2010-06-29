@@ -345,6 +345,8 @@ setClass(
 ##'   use.ar1.in.calendar.year=FALSE,
 ##'   use.ar1.in.exposure.growth=TRUE,
 ##'   projected.rate.of.decay=NA)
+##'
+##'
 makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.payments),
                                     extra.dev.years=1,
                                     extra.exp.years=1,

@@ -27,11 +27,11 @@
 
 #PKG_CXXFLAGS=@CXXFLAGS@
 
-#PKG_CPPFLAGS=-I../jags-win32/include/ -I../jags-win32/include/JAGS -DMATHLIB_STANDALONE
-PKG_CPPFLAGS=-I../jags-win64/include/ -I../jags-win64/include/JAGS -DMATHLIB_STANDALONE
+PKG_CPPFLAGS=-I../jags-win32/include/ -I../jags-win32/include/JAGS -DMATHLIB_STANDALONE
+#PKG_CPPFLAGS=-I../jags-win64/include/ -I../jags-win64/include/JAGS -DMATHLIB_STANDALONE
 
-#PKG_LIBS=-L../jags-win32/lib/ -llapack -lblas -ljrmath -ljags -lbasemod -lbugs
-PKG_LIBS=-L../jags-win64/lib/ -llapack -lblas -ljrmath -ljags -lbasemod -lbugs
+PKG_LIBS=-L../jags-win32/lib/ -llapack -lblas -ljrmath -ljags -lbasemod -lbugs
+#PKG_LIBS=-L../jags-win64/lib/ -llapack -lblas -ljrmath -ljags -lbasemod -lbugs
 
 OBJECTS.samplers=samplers/ExpandableArray.o samplers/Knots.o samplers/RJumpSpline.o  samplers/RJumpSplineFactory.o samplers/RealSlicerOV.o  samplers/SliceFactoryOV.o 
 OBJECTS.distributions=distributions/DSpline.o distributions/DChisqrOV.o distributions/DTOV.o distributions/DNormOV.o distributions/DUnifOV.o

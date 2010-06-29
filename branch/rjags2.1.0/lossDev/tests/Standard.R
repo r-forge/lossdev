@@ -55,24 +55,24 @@ standardDeviationVsDevelopmentTime(mo, plot=FALSE)
 
 ##exposure time
 exposureGrowth(mo, plot=FALSE)
-exposureGrowthTracePlot(mo, plot=FALSE)
-meanExposureGrowth(mo, plot=FALSE)
+##exposureGrowthTracePlot(mo, plot=FALSE)
+##meanExposureGrowth(mo, plot=FALSE)
 
 ##calendar time
 calendarYearEffect(mo, restrictedSize=TRUE, plot=FALSE)
 calendarYearEffectErrors(mo, plot=FALSE)
-calendarYearEffectErrorTracePlot(mo, plot=FALSE)
+##calendarYearEffectErrorTracePlot(mo, plot=FALSE)
 
 ##inflation
-stochasticInflationRhoParameter(mo, plot=FALSE)
-stochasticInflationStationaryMean(mo, plot=FALSE)
-stochasticInflation(mo, plot=FALSE)
+##stochasticInflationRhoParameter(mo, plot=FALSE)
+##stochasticInflationStationaryMean(mo, plot=FALSE)
+##stochasticInflation(mo, plot=FALSE)
 
 
 ##extra
-skewnessParameter(mo, plot=FALSE)
-degreesOfFreedom(mo, plot=FALSE)
-scaleParameter(mo, plot=FALSE)
+##skewnessParameter(mo, plot=FALSE)
+##degreesOfFreedom(mo, plot=FALSE)
+##scaleParameter(mo, plot=FALSE)
 
 
 

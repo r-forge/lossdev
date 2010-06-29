@@ -335,7 +335,7 @@ setMethod('tailFactor',
           {
               K <- getTriDim(object@input)[1]
               inc <- object@input@incrementals
-              for(i in length(inc.pred))
+              for(i in 1:length(inc.pred))
                   inc.pred[[i]][1:K,1:K,,][!is.na(inc)] <- inc[!is.na(inc)]
           }
 

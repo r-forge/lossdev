@@ -186,11 +186,12 @@ double Knots::removeFromProposedT(unsigned int const &T)
 
 
 Knots::Knots(unsigned int nchain, double const * PriorForT, StochasticNode const * knotsNode, double const * TLimits):
-  _nchain(nchain),
+
   _aPriorForT(PriorForT[0]),  //a and b for beta prior of Knots
   _bPriorForT(PriorForT[1]),
   _minT(TLimits[0]),    //min and max interval on which the Knots can fall //like in WinBUGS minT is also the position of Knot0 (which is not deemed to be part of _...T)	
-  _maxT(TLimits[1])
+  _maxT(TLimits[1]),
+  _nchain(nchain)
   
 {
 
