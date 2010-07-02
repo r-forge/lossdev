@@ -33,10 +33,10 @@
 #include <vector>
 #include <set>
 
-#include <JAGS/graph/Node.h>
-#include <JAGS/distribution/Distribution.h>
-#include <JAGS/graph/StochasticNode.h>
-#include <JAGS/sampler/SamplerFactory.h>
+#include <graph/Node.h>
+#include <distribution/Distribution.h>
+#include <graph/StochasticNode.h>
+#include <sampler/SamplerFactory.h>
 
 
 class RJumpSplineFactory : public SamplerFactory

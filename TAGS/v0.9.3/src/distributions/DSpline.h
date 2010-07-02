@@ -30,7 +30,7 @@
 #ifndef DSPLINE_H_
 #define DSPLINE_H_
 
-#include <JAGS/distribution/ArrayDist.h>
+#include <distribution/ArrayDist.h>
 
 class DSpline : public ArrayDist
 {

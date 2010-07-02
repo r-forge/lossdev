@@ -2,8 +2,8 @@
 #include <graph/NodeError.h>
 #include <distribution/Distribution.h>
 #include <sampler/SampleMethod.h>
-#include <JAGS/rng/RNG.h>
-#include <JAGS/util/nainf.h>
+#include <RNG.h>
+#include <util/nainf.h>
 
 #include "RealSlicerOV.h"
 

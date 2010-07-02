@@ -10,7 +10,6 @@ SystemRequirements: JAGS (== 2.1.0)
 Lazyload: yes
 Description: Loss Development for Insurance Triangles
 License: GPL (>=3)
-Packaged: Wed Feb 4 09:48:17 2009; cocwl
 Collate: 'zzz.R' 'LossDevModelInput.R' 'AnnualAggLossDevModelInput.R'
     'LossDevModelOutput.R' 'NodeOutput.R'
     'AnnualAggLossDevModelOutput.R'

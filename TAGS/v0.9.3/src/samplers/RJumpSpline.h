@@ -30,8 +30,7 @@
 #ifndef RJUMPSPLINE_H_
 #define RJUMPSPLINE_H_
 
-#include <JAGS/sampler/Sampler.h>
-//#include <BUGS/distributions/DMNorm.h>
+#include <sampler/Sampler.h>
 #include "Knots.h"
 #include "ExpandableArray.h"
 class DMNorm;

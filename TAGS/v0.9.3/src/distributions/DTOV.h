@@ -1,7 +1,7 @@
 #ifndef DTOV_H_
 #define DTOV_H_
 
-#include <BUGS/distributions/RScalarDist.h>
+#include "RScalarDist.h"
 
 /**
  * t-distribution on k degrees of freedom, with median mu and

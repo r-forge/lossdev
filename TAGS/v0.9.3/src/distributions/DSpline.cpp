@@ -32,8 +32,8 @@
 #include <stdexcept>
 #include <vector>
 
-#include <JAGS/util/nainf.h>
-#include <JAGS/JRmath.h>
+#include <util/nainf.h>
+#include <JRmath.h>
 
 #include <cmath>
 

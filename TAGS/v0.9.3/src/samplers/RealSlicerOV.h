@@ -1,8 +1,8 @@
 #ifndef REAL_SLICER_OV_H_
 #define REAL_SLICER_OV_H_
 
-#include <JAGS/sampler/SampleMethod.h>
-#include <JAGS/sampler/GraphView.h>
+#include <sampler/SampleMethod.h>
+#include <sampler/GraphView.h>
 
 class StochasticNode;
 

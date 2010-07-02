@@ -27,36 +27,35 @@
 ##################################################################################################
 */
 
-#include <JAGS/graph/Node.h>
-#include <JAGS/graph/StochasticNode.h>
-#include <JAGS/graph/DeterministicNode.h>
-#include <JAGS/graph/StochasticNode.h>
-#include <JAGS/graph/LogicalNode.h>
-#include <JAGS/distribution/Distribution.h>
-#include <JAGS/function/Function.h>
-#include <JAGS/graph/NodeError.h>
-#include <JAGS/rng/RNG.h>
-#include <JAGS/sampler/GraphView.h>
+#include <graph/Node.h>
+#include <graph/StochasticNode.h>
+#include <graph/DeterministicNode.h>
+#include <graph/StochasticNode.h>
+#include <graph/LogicalNode.h>
+#include <distribution/Distribution.h>
+#include <function/Function.h>
+#include <graph/NodeError.h>
+#include <RNG.h>
+#include <sampler/GraphView.h>
 
-#include <stdexcept>
-
-#include <BUGS/distributions/DMNorm.h>
-#include "lapack.h"
+#include "MNorm.h"
 
 #include <cmath>
 
 #include "RJumpSpline.h"
 
-#include <JAGS/JRmath.h>
-
+#include <JRmath.h>
 
 #include <vector>
 #include <set>
-
 #include <iostream>
+#include <cstring>
+
+#include <R_ext/Lapack.h>
 
 using std::vector;
 using std::set;
+using std::memcpy;
 
 //calcBeta for 
 //this is taken from JAGS/bus/MNormal
@@ -257,9 +256,9 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
       
       
       double alpha = tau[0];
-      F77_DSYR("L", &nrow, &alpha, beta_j, &i1, A, &nrow);
+      F77_NAME(dsyr)("L", &nrow, &alpha, beta_j, &i1, A, &nrow);
       alpha *= (Y[0] - mu[0]);
-      F77_DAXPY(&nrow, &alpha, beta_j, &i1, b, &i1);
+      F77_NAME(daxpy)(&nrow, &alpha, beta_j, &i1, b, &i1);
         
 
       beta_j += nrow;
@@ -277,10 +276,10 @@ void RJumpSpline::calPost(bool const &current, unsigned int chain)
   _calPost_Acopy->makeSufficientWithoutCopy(N);
   double* Acopy=_calPost_Acopy->value();
   memcpy(Acopy, A, sizeof(double) * N);
-  
+
   int one = 1;
   int info;
-  F77_DPOSV ("L", &nrow, &one, Acopy, &nrow, b, &nrow, &info);
+  F77_NAME(dposv) ("L", &nrow, &one, Acopy, &nrow, b, &nrow, &info);
   if (info != 0) 
     {
       throw NodeError(snode,
@@ -404,10 +403,6 @@ RJumpSpline::RJumpSpline(GraphView *gv):
     _bPostProposed = new double[maxBetaLength];
     _APostProposed = new double[maxBetaLength * maxBetaLength];
     
-    //need this to calc ll of MNorm
-    _dMNorm = new DMNorm;
-	
-    
     _updatingKnotsI = 0;
     for(unsigned int i = 0; i < _nchain; ++i)
 	setSplineValue(true, i);
@@ -450,8 +445,6 @@ RJumpSpline::~RJumpSpline()
   delete [] _bPostProposed;
   delete [] _APostProposed;
 	
-  delete _dMNorm;
-
   delete _calPost_betas;
   delete _calPost_Acopy;
 }
@@ -527,10 +520,10 @@ double RJumpSpline::llZ(bool const &current, unsigned int chain) const
   d.push_back(per);
   
   //assume the coeff are areally set
-  ans -= _dMNorm->logLikelihood(coeff, length,
-                                par,
-                                d,
-                                NULL,NULL);
+  ans -= MNorm_logLikelihood(coeff, length,
+			     par,
+			     d,
+			     NULL,NULL);
   
   
   //setSplineValue(*K, coeff, T, chain);
@@ -587,15 +580,15 @@ void RJumpSpline::update(std::vector<RNG *> const &rng)
           if(type == Knots::Nothing)
             {
               calPost(true, c);
-              DMNorm::randomsample(_currentBeta[c], _bPostCurrent, _APostCurrent, true, betaLength(true, c), r);
+              MNorm_randomsample(_currentBeta[c], _bPostCurrent, _APostCurrent, true, betaLength(true, c), r);
               setSplineValue(true, c);
               continue;
             }
 
           calPost(true, c);
-          DMNorm::randomsample(_currentBeta[c], _bPostCurrent, _APostCurrent, true, betaLength(true, c), r);
+          MNorm_randomsample(_currentBeta[c], _bPostCurrent, _APostCurrent, true, betaLength(true, c), r);
           calPost(false, c);
-          DMNorm::randomsample(_proposedBeta, _bPostProposed, _APostProposed, true, betaLength(false, c), r);
+          MNorm_randomsample(_proposedBeta, _bPostProposed, _APostProposed, true, betaLength(false, c), r);
           accept(c, i, type, r);
         }
     }

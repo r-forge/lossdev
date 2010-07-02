@@ -1,7 +1,7 @@
 //#include <config.h>
 #include "DNormOV.h"
 
-#include <rng/TruncatedNormal.h>
+#include <TruncatedNormal.h>
 
 #include <cmath>
 

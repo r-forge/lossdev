@@ -32,9 +32,9 @@
 
 #include <iostream>
 #include "Knots.h"
-#include <JAGS/JRmath.h>
-#include <JAGS/distribution/Distribution.h>
-#include <JAGS/distribution/ScalarDist.h>
+#include <JRmath.h>
+#include <distribution/Distribution.h>
+#include <distribution/ScalarDist.h>
 #include <vector>
 #include <set>
 

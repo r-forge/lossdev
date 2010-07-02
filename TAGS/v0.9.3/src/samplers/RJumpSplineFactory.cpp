@@ -29,10 +29,10 @@
 
 #include "RJumpSplineFactory.h"
 #include "RJumpSpline.h"
-#include <JAGS/graph/Node.h>
-#include <JAGS/graph/ConstantNode.h>
-#include <JAGS/sampler/Linear.h>
-#include <JAGS/sampler/GraphView.h>
+#include <graph/Node.h>
+#include <graph/ConstantNode.h>
+#include <sampler/Linear.h>
+#include <sampler/GraphView.h>
 #include <vector>
 #include <set>
 #include <iostream>

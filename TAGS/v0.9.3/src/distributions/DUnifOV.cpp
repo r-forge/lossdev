@@ -2,7 +2,7 @@
 #include "DUnifOV.h"
 
 #include <cmath>
-#include <rng/RNG.h>
+#include <RNG.h>
 
 using std::vector;
 using std::log;

@@ -1,7 +1,7 @@
 #ifndef DCHISQOV_H_
 #define DCHISQOV_H_
 
-#include <BUGS/distributions/RScalarDist.h>
+#include "RScalarDist.h"
 
 /**
  * @short Chi square distribution
