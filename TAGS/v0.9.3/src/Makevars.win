@@ -38,3 +38,12 @@ OBJECTS.root=RJump.o
 
 OBJECTS= $(OBJECTS.samplers) $(OBJECTS.distributions) $(OBJECTS.root)
 
+all: before $(SHLIB) after
+
+clean:
+	rm -f $(OBJECTS)
+
+before: clean
+
+after:
+#	mv lossDev.so rjump.so
