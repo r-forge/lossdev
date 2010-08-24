@@ -7,7 +7,6 @@ The consumption path is (on a log scale) the trajectory of incremental payments 
 Note that the measurement error term is (possibly) a skewed \eqn{t} and as such (possibly) has a non zero mean.   The consumption path is absent any such shifts due to skewness.
 This is a generic function that allows for the retrieval and illustration of this consumption path.}
 \value{Mainly called for the side effect of plotting.  Also returns the plotted statistics.  Returned invisibly.}
-\docType{genericFunction}
 \seealso{\code{\link[=consumptionPath,StandardAnnualAggLossDevModelOutput-method]{consumptionPath("StandardAnnualAggLossDevModelOutput")}}}
 \seealso{\code{\link[=consumptionPath,BreakAnnualAggLossDevModelOutput-method]{consumptionPath("BreakAnnualAggLossDevModelOutput")}}}
 \seealso{\code{\link{consumptionPathTracePlot}}}

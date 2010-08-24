@@ -3,7 +3,6 @@
 \title{A generic function to plot and/or return the posterior of the autoregressive parameter for models in lossDev.}
 \description{A generic function to plot and/or return the posterior of the autoregressive parameter for models in \pkg{lossDev}.}
 \value{Mainly called for the side effect of plotting.}
-\docType{genericFunction}
 \seealso{\code{\link[=autoregressiveParameter,AnnualAggLossDevModelOutput-method]{autoregressiveParameter("AnnualAggLossDevModelOutput")}}}
 \seealso{\code{\link{standardDeviationOfCalendarYearEffect}}}
 \seealso{\code{\link{calendarYearEffect}}}

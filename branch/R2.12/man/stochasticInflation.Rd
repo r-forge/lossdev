@@ -8,7 +8,6 @@ This function plots the median of the posterior predictive distribution for stoc
 Values are returned prior to the application of any limits or weights.
 Note that for years where observed values are supplied, the model takes those values at face value.}
 \value{Mainly called for the side effect of plotting.}
-\docType{genericFunction}
 \seealso{\code{\link[=stochasticInflation,AnnualAggLossDevModelOutput-method]{stochasticInflation("AnnualAggLossDevModelOutput")}}}
 \seealso{\code{\link{stochasticInflationRhoParameter}}}
 \seealso{\code{\link{stochasticInflationStationaryMean}}}

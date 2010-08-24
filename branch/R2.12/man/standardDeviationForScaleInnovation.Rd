@@ -5,7 +5,6 @@
 \details{Changes in the scale parameter (see \code{\link{scaleParameter}}) are assumed to follow a second-order random walk on the log scale.
 This function plots the posterior standard deviation for this random walk.}
 \value{Mainly called for the side effect of plotting.}
-\docType{genericFunction}
 \seealso{\code{\link[=standardDeviationForScaleInnovation,AnnualAggLossDevModelOutput-method]{standardDeviationForScaleInnovation("AnnualAggLossDevModelOutput")}}}
 \seealso{\code{\link{standardDeviationVsDevelopmentTime}}}
 \arguments{\item{object}{The object from which to plot and/or return the standard deviation for the innovation in the log of the scale parameter.}

@@ -6,7 +6,6 @@
 (The autoregressive process of order 1 is the discrete equivalent to an Ornstein-Uhlenbeck process.)
 This function plots the posterior for the \eqn{rho} parameter, assuming one was estimated.}
 \value{Mainly called for the side effect of plotting.}
-\docType{genericFunction}
 \seealso{\code{\link[=stochasticInflationRhoParameter,AnnualAggLossDevModelOutput-method]{stochasticInflationRhoParameter("AnnualAggLossDevModelOutput")}}}
 \seealso{\code{\link{stochasticInflationStationaryMean}}}
 \seealso{\code{\link{stochasticInflation}}}

@@ -3,7 +3,6 @@
 \title{A generic function to plot and/or return the posterior of the standard deviation of the calendar year effect for models in lossDev.}
 \description{A generic function to plot and/or return the posterior of the standard deviation of the calendar year effect for models in \pkg{lossDev}.}
 \value{Mainly called for the side effect of plotting.}
-\docType{genericFunction}
 \seealso{\code{\link[=standardDeviationOfCalendarYearEffect,AnnualAggLossDevModelOutput-method]{standardDeviationOfCalendarYearEffect("AnnualAggLossDevModelOutput")}}}
 \seealso{\code{\link{calendarYearEffect}}}
 \seealso{\code{\link{calendarYearEffectErrors}}}

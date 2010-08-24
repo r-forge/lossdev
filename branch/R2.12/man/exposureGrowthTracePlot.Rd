@@ -3,7 +3,6 @@
 \title{A generic function to generate the trace plots for select exposure growth rates.}
 \description{A generic function to generate the trace plots for select exposure growth rates.}
 \value{NULL invisibly.  Only called for the side effect of plotting.}
-\docType{genericFunction}
 \seealso{\code{\link[=exposureGrowthTracePlot,AnnualAggLossDevModelOutput-method]{exposureGrowthTracePlot("AnnualAggLossDevModelOutput")}}}
 \seealso{\code{\link{exposureGrowth}}}
 \arguments{\item{object}{The object from which to generate the trace plots.}

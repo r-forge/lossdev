@@ -5,7 +5,6 @@
 \details{The calendar year effect is comprised of two components: 1) a prior expected value which may be unique to every cell (subject to weights and bounds) and 2) a diagonal-specific error term.
 This function only plots and returns the error term, which includes an autoregressive component if the model is estimated with such a feature.}
 \value{Mainly called for the side effect of plotting.}
-\docType{genericFunction}
 \seealso{\code{\link[=calendarYearEffectErrors,AnnualAggLossDevModelOutput-method]{calendarYearEffectErrors("AnnualAggLossDevModelOutput")}}}
 \seealso{\code{\link{calendarYearEffect}}}
 \seealso{\code{\link{autoregressiveParameter}}}

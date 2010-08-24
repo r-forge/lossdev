@@ -8,7 +8,6 @@ This function plots and returns the factor resulting from the combined effect of
 The first cell is \code{NA}. Values in the first column represent the rate of inflation/escalation to the corresponding cell from the cell in the same column but previous row.
 Values in the 2nd column and beyond represent the rate of inflation/escalation to the corresponding cell from the cell in the same row but previous column.}
 \value{Mainly called for the side effect of plotting.}
-\docType{genericFunction}
 \seealso{\code{\link[=calendarYearEffect,AnnualAggLossDevModelOutput-method]{calendarYearEffect("AnnualAggLossDevModelOutput")}}}
 \seealso{\code{\link{calendarYearEffectErrors}}}
 \seealso{\code{\link{autoregressiveParameter}}}

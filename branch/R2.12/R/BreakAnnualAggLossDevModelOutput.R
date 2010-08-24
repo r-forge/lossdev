@@ -714,7 +714,6 @@ setMethod('mcmcACF',
 ##' @param object The object from which to plot and/or return the posterior change point estimate.
 ##' @param plot A logical value. If \code{TRUE}, the plot is generated and the statistics are returned; otherwise only the statistics are returned.
 ##' @return Mainly called for the side effect of plotting.
-##' @docType genericFunction
 ##' @seealso \code{\link[=firstYearInNewRegime,BreakAnnualAggLossDevModelOutput-method]{firstYearInNewRegime("BreakAnnualAggLossDevModelOutput")}}
 ##' @seealso \code{\link{firstYearInNewRegimeTracePlot}}
 ##' @exportMethod  firstYearInNewRegime
@@ -824,7 +823,6 @@ setMethod('firstYearInNewRegime',
 ##' @name firstYearInNewRegimeTracePlot
 ##' @param object The object from which to generate the trace plot for the change point estimate.
 ##' @return Only called for the side effect of plotting.
-##' @docType genericFunction
 ##' @seealso \code{\link[=firstYearInNewRegimeTracePlot,BreakAnnualAggLossDevModelOutput-method]{firstYearInNewRegimeTracePlot("BreakAnnualAggLossDevModelOutput")}}
 ##' @seealso \code{\link{firstYearInNewRegimeTracePlot}}
 ##' @exportMethod  firstYearInNewRegimeTracePlot

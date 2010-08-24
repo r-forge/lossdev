@@ -520,7 +520,6 @@ setMethod('predictedPayments',
 ##' @name probablityOfPayment
 ##' @seealso \code{\link{accountForZeroPayments}}
 ##' @exportMethod probablityOfPayment
-##' @docType genericFunction
 setGenericVerif('probablityOfPayment',
                 function(object, plot=TRUE)
             {
@@ -609,7 +608,6 @@ setMethod('probablityOfPayment',
 ##' @param plotDensity A logical value. If \code{TRUE}, then the density is plotted. If \code{plotTrace} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
 ##' @param plotTrace A logical value. If \code{TRUE}, then the trace is plotted. If \code{plotDensity} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
 ##' @return Mainly called for the side effect of plotting.
-##' @docType genericFunction
 ##' @seealso \code{\link{gompertzParameters,AnnualAggLossDevModelOutputWithZeros-method}}
 ##' @exportMethod gompertzParameters
 setGenericVerif('gompertzParameters',
@@ -634,7 +632,6 @@ setGenericVerif('gompertzParameters',
 ##' @param plotDensity A logical value. If \code{TRUE}, then the density is plotted. If \code{plotTrace} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
 ##' @param plotTrace A logical value. If \code{TRUE}, then the trace is plotted. If \code{plotDensity} is also \code{TRUE}, then two plots are generated.  If they are both \code{FALSE}, then only the statistics are returned.
 ##' @return Mainly called for the side effect of plotting.
-##' @docType genericFunction
 ##' @seealso \code{\link{gompertzParameters}}
 setMethod('gompertzParameters',
           signature(object='AnnualAggLossDevModelOutputWithZeros'),
