@@ -149,16 +149,19 @@ class RJumpSpline : public Sampler
    * to the correct target distribution. This function turns off
    * adaptive mode, so that valid samples can be collected from the
    * sampler.
-   *
-   * The adaptOff function may be called at any time. Premature ending
+   */
+
+  virtual void adaptOff();
+  
+  /** The adaptOff function may be called at any time. Premature ending
    * of adaptive mode may result in an extremely inefficient sampler.
-   * Therefore, any implementation of the adaptOff function must
-   * include an efficiency test to ensure that it has not been called
+   * The checkAdaptation function includes
+   * an efficiency test to ensure that it has not been called
    * prematurely.  The return value is true if the efficiency test 
    * passes, and false otherwise.  Samplers that have no adaptive mode
    * should simply return true.
    */
-  virtual bool adaptOff();
+  virtual bool checkAdaptation() const;
   /**
    * Indicates whether the sampler has an adaptive mode.
    */

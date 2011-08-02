@@ -1,12 +1,12 @@
 Package: lossDev
-Version: 0.9.5-2
-Date: 2010-11-17
+Version: 3.0.0-1
+Date: 2011-8-1
 Title: Robust Loss Development Using MCMC
 Author: Christopher W. Laws, Frank A. Schmid
 Maintainer: Christopher W. Laws <chris_laws@ncci.com>
-Depends: R (>= 2.11.1), methods, rjags (>= 2.1.0-5), filehash,
+Depends: R (>= 2.13.1), methods, rjags (>= 3-3), filehash,
     logspline, utils
-SystemRequirements: JAGS (== 2.1.0)
+SystemRequirements: JAGS (>= 3.0.0)
 Lazyload: yes
 Description: Loss Development for Insurance Triangles
 License: GPL (>=3)

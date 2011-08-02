@@ -54,6 +54,7 @@ void ExpandableArray::makeSufficientWithCopy(unsigned int const & length)
     if(length > _length)
     {
 	double *tmp = _value;
+        delete [] _value;
 	_value = new double[length];
 
 	for(unsigned int i = 0; i < _length; ++i)
