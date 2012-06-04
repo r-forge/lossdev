@@ -78,11 +78,11 @@ getExposureYearLabel <- function(object)
     if(length(object@triangleType) != 1)
         stop('length(object@triangleType) must be 1')
 
-    i <- match(object@triangleType, c('ambiguous', 'py', 'ay'))
+    i <- match(object@triangleType, c('ambiguous', 'py', 'ay', 'py.with.folded.half'))
     if(is.na(i))
         stop('object@triangleType must be one of "ambiguous", "py", or "ay"')
 
-    return(c('Exposure Year', 'Policy Year', 'Accident Year')[i])
+    return(c('Exposure Year', 'Policy Year', 'Accident Year', 'Policy Year')[i])
 }
 
 ##' A function to return the index non-missing values of a 2d container.
@@ -260,7 +260,7 @@ setMethod(
               ans$P <- getTriDim(object)[1] - 1
               N <- ans$H + max(ans$L.vec) - 1
               ans$stoch.log.inf.c <- c(0, rep(NA, ans$P - 1), rep(NA, N))
-
+              
               ans$w.stoch.pct.inf <- array(0, c(object@totalExpYears, object@totalDevYears))
               ans$stoch.log.inf.upper.bound <- array(3000, c(object@totalExpYears, object@totalDevYears))
               ans$stoch.log.inf.lower.bound <- array(-3000, c(object@totalExpYears, object@totalDevYears))
@@ -277,7 +277,13 @@ setMethod(
               ##we are guaranteed that stochInflationRate will cover exposureYears
               ##we just have to caclulate P
               ##we don't have to worry if stochInflationRate is too long because the model file will take care of that
-              ans$P <- match(max(object@exposureYears), object@stochInflationYears)
+              
+              if(object@triangleType == 'py.with.folded.half'){
+                ans$P <- match(max(object@exposureYears) + 1, object@stochInflationYears)
+              } else {
+                ans$P <- match(max(object@exposureYears), object@stochInflationYears)
+              }
+              
               ##number of diagionals beyond the last observed diagional (K+1) for which to simulate rates of inflation
               N <- ans$H + max(ans$L.vec) - 1
               times <- N - (length(ans$stoch.log.inf.c) - ans$P)
@@ -368,3 +374,91 @@ setMethod(
                    )
           }
       })
+
+
+
+##' A generic function to fold the half-report of a PY triangle.
+##'
+##'
+##' @name foldHalfReport
+##' @param object The object to fold the half-report.
+##' @return A copy the input, but with the first report folded.
+setGenericVerif('foldHalfReport',
+                 function(object)
+                 standardGeneric('foldHalfReport'))
+
+##' A method to fold the half-report of a PY triangle.
+##'
+##' @name foldHalfReport,AnnualAggLossDevModelInput-method
+##' @param object An object of type \code{AnnualLossDevModelInput}.
+##' @return A copy the input, but with the first report folded.
+##' @docType methods
+##' @seealso \code{\link{foldHalfReport}}
+setMethod('foldHalfReport',
+          signature(object='AnnualAggLossDevModelInput'),
+          function(object)
+          {
+
+              N.old <- dim(object@cumulatives)[1]
+              object.copy <- object
+              object.copy@triangleType <- 'py.with.folded.half'
+              object.copy@cumulatives <- object@cumulatives[-N.old,-1]
+              object.copy@incrementals <- object@incrementals[-N.old,-1]
+              object.copy@incrementals[,1] <- object.copy@incrementals[,1] + object@incrementals[-N.old,1]
+              object.copy@exposureYears <-  object.copy@exposureYears[-N.old]
+              object.copy@totalDevYears <-  object.copy@totalDevYears - 1L
+
+              if(!identical(object.copy@stochInflationRate, 0)){
+                  object.copy@stochInflationWeight <- object.copy@stochInflationWeight[,-(1:2)]
+                  object.copy@stochInflationWeight <- cbind(0,object.copy@stochInflationWeight)
+
+                  object.copy@stochInflationUpperBound <- cbind(NA,object.copy@stochInflationUpperBound[,-(1:2)])
+                  object.copy@stochInflationLowerBound <- cbind(NA,object.copy@stochInflationLowerBound[,-(1:2)])
+
+                  ##TODO: this ignores the fact that the cumulative first report is (on average) at 18 (instead of 12) months
+                  ##object.copy@stochInflationYears <- object.copy@stochInflationYears - 1L
+              }
+
+              object.copy@lastNonZeroPayment <- object.copy@lastNonZeroPayment - 1L
+
+              object.copy@nonStochInflationWeight <- object.copy@nonStochInflationWeight[,-(1:2)]
+              object.copy@nonStochInflationWeight <- cbind(0,object.copy@nonStochInflationWeight)
+              object.copy@nonStochInflationRate <- object.copy@nonStochInflationRate[,-(1:2)]
+              object.copy@nonStochInflationRate <- cbind(0,object.copy@nonStochInflationRate)
+
+
+              object.copy@noChangeInScaleParameterAfterColumn <- object.copy@noChangeInScaleParameterAfterColumn - 1L
+
+              warning("STILL WORK TO DO IN foldHalfReport")
+
+              ## representation(
+              ##                triangleType='character',                 #The type of triangle loaded.
+              ##                totalDevYears='integer',                  #The total number of columns including the projection period.
+              ##                totalExpYears='integer',                  #The total number of rows including the projection period.
+              ##                incrementals='matrix',                    #the incremental triangle, must be square
+              ##                cumulatives='matrix',                     #the cumulative triangle, must be square
+              ##                exposureYears='integer',                  #a vector of years which correspond to the rows in the triangel
+              ##                stochInflationRate='numeric',             #The normal inflation rate.  (x[i] / x[i-1] - 1)
+              ##                knownStochInflationMean='numeric',        #The normal inflation rate.  (x[i] / x[i-1] - 1)
+              ##                knownStochInflationPersistence='numeric',
+              ##                stochInflationWeight='matrix',            #The normal inflation rate.  (x[i] / x[i-1] - 1)
+              ##                stochInflationUpperBound='matrix',        #The normal inflation rate.  (x[i] / x[i-1] - 1)
+              ##                stochInflationLowerBound='matrix',        #The normal inflation rate.  (x[i] / x[i-1] - 1)
+              ##                stochInflationYears='integer',            #The corresponding years of elements in inflationRate and logInflationRate.
+              ##                nonStochInflationRate='matrix',           #The normal inflation rate.  (x[i] / x[i-1] - 1)
+              ##                nonStochInflationWeight='matrix',         #The normal inflation rate.  (x[i] / x[i-1] - 1)
+              ##                lastNonZeroPayment='integer',
+              ##                finalRateOfDecayMean='numeric',
+              ##                finalRateOfDecaySD='numeric',
+              ##                finalRateOfDecayWeight='matrix',
+              ##                allowForSkew='logical',                   #should the skewed-t be turned on?
+              ##                skewnessParameterBounds='numeric',
+              ##                ar1InCalendarYearEffect='logical',        #should the calendar year effect include an ar1 or white-noise error term?
+              ##                ar1InExposureGrowth='logical',            #should the exposure growth include an ar1 or white-noise error term?
+              ##                noChangeInScaleParameterAfterColumn='integer', #valid values are 1 through K, 1 means all columns have same scale, K means all have different, acutal value will be truncated to last observed column
+
+              if(!validObject(object.copy))
+                  stop('Unable to create a valid object.')
+
+              return(object.copy)
+          })

@@ -49,7 +49,7 @@ setClass(
 ##' A method to plot and/or return the estimated consumption path vs development year time for standard models.
 ##'
 ##' At the heart of aggregate loss development models in \pkg{lossDev} is the consumption path.
-##' The consumption path is (on a log scale) the trajectory of incremental payments absent any calendar year effects and wisht exposure normalized to the first row.
+##' The consumption path is (on a log scale) the trajectory of incremental payments absent any calendar year effects and wish exposure normalized to the first row.
 ##' Note that the measurement error term is (possibly) a skewed \eqn{t} and as such (possibly) has a non zero mean.   The consumption path is absent any such shifts due to skewness.
 ##' This is a method that allows for the retrieval and illustration of this consumption path.
 ##'
