@@ -65,6 +65,7 @@ setClass(
                         ar1InCalendarYearEffect='logical',        #should the calendar year effect include an ar1 or white-noise error term?
                         ar1InExposureGrowth='logical',            #should the exposure growth include an ar1 or white-noise error term?
                         noChangeInScaleParameterAfterColumn='integer', #valid values are 1 through K, 1 means all columns have same scale, K means all have different, acutal value will be truncated to last observed column
+                        includeKappaLogErrorInFirstColumn='logical',
                         'VIRTUAL'),
          contains='LossDevModelInput')
 
@@ -186,6 +187,7 @@ setMethod('getTriDim',
 ##'   \item{\code{estimate.b.ou}}{Single value (zero or one). Should the stochastic rate of inflation have an estimated constant term or should \code{fixed.b.ou} be used?}
 ##'   \item{\code{fixed.b.ou}}{Single value. Possible non-stochastic constant term for stochastic inflation rate.}
 ##'   \item{\code{stoch.log.inf.known.mu}}{Single value.  Added to the log stochastic inflation rate after the ar1 estimation process.}
+##'   \item{\code{include.kappa.log.error.in.first.column}}{0 or 1. Should the first column include the calendar year error term?}
 ##' }
 ##' @name getJagsData,AnnualLossDevModelInput-method
 ##' @param object An object of type \code{AnnualAggLossDevModelInput} from which to collect the needed model input.
@@ -198,6 +200,11 @@ setMethod(
       {
           ans <- list()
 
+          if(object@includeKappaLogErrorInFirstColumn == TRUE){
+            ans$include.kappa.log.error.in.first.column <- 1
+          } else {
+             ans$include.kappa.log.error.in.first.column <- 0
+          }
           ans$log.inc <- object@incrementals
           ans$log.inc[ans$log.inc <= 0] <- NA
           ans$log.inc <- log(ans$log.inc)
@@ -417,6 +424,77 @@ setMethod('foldHalfReport',
 
               if(!identical(object.copy@stochInflationRate, 0)){
 
+                ##strip (old) first column, ensure that (old) second column is zero
+                object.copy@stochInflationWeight <- object.copy@stochInflationWeight[,-(1:2)]
+                object.copy@stochInflationWeight <- cbind(0,object.copy@stochInflationWeight)
+                
+                object.copy@stochInflationUpperBound <- cbind(NA,object.copy@stochInflationUpperBound[,-(1:2)])
+                object.copy@stochInflationLowerBound <- cbind(NA,object.copy@stochInflationLowerBound[,-(1:2)])
+                
+                  ##TODO: this ignores the fact that the cumulative first report is (on average) at 18 (instead of 12) months
+                  ##object.copy@stochInflationYears <- object.copy@stochInflationYears - 1L
+              }
+
+              
+              object.copy@lastNonZeroPayment <- object.copy@lastNonZeroPayment - 1L
+
+              ##strip (old) first column, ensure that (old) second column is zero
+              object.copy@nonStochInflationWeight <- object.copy@nonStochInflationWeight[,-(1:2)]
+              object.copy@nonStochInflationWeight <- cbind(0,object.copy@nonStochInflationWeight)
+              object.copy@nonStochInflationRate <- object.copy@nonStochInflationRate[,-(1:2)]
+              object.copy@nonStochInflationRate <- cbind(0,object.copy@nonStochInflationRate)
+
+
+              object.copy@noChangeInScaleParameterAfterColumn <- object.copy@noChangeInScaleParameterAfterColumn - 1L
+
+            ##no change needed to rateOfDecayWeight; dim to tri reduced by one totalDevYears also reduced by 1
+
+              warning("TODO: MIGHT STILL HAVE WORK TO DO IN foldHalfReport")
+
+
+              if(!validObject(object.copy))
+                  stop('Unable to create a valid object.')
+
+              return(object.copy)
+          })
+
+##' Gets the calendar years of
+##'
+##' @name foldHalfReport
+##' @param object The object to fold the half-report.
+##' @return A copy the input, but with the first report folded.
+setGenericVerif('foldHalfReport',
+                 function(object)
+                 standardGeneric('foldHalfReport'))
+
+##' A method to fold the half-report of a PY triangle.
+##'
+##' @name foldHalfReport,AnnualAggLossDevModelInput-method
+##' @param object An object of type \code{AnnualLossDevModelInput}.
+##' @return A copy the input, but with the first report folded.
+##' @docType methods
+##' @seealso \code{\link{foldHalfReport}}
+setMethod('foldHalfReport',
+          signature(object='AnnualAggLossDevModelInput'),
+          function(object)
+          {
+            if(object@triangleType != 'py')
+              stop('Can only call foldHalfReport if triangleType is \'py\'')
+
+            
+
+            N.old <- dim(object@cumulatives)[1]
+            object.copy <- object
+            object.copy@includeKappaLogErrorInFirstColumn <- FALSE
+            object.copy@triangleType <- 'py.with.folded.half'
+            object.copy@cumulatives <- object@cumulatives[-N.old,-1]
+            object.copy@incrementals <- object@incrementals[-N.old,-1]
+            object.copy@incrementals[,1] <- object.copy@incrementals[,1] + object@incrementals[-N.old,1]
+            object.copy@exposureYears <-  object.copy@exposureYears[-N.old]
+            object.copy@totalDevYears <-  object.copy@totalDevYears - 1L
+
+            if(!identical(object.copy@stochInflationRate, 0)){
+              
                 ##strip (old) first column, ensure that (old) second column is zero
                 object.copy@stochInflationWeight <- object.copy@stochInflationWeight[,-(1:2)]
                 object.copy@stochInflationWeight <- cbind(0,object.copy@stochInflationWeight)

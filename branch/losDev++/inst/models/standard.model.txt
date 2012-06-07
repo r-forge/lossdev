@@ -93,8 +93,8 @@ model
                 w.stoch.pct.inf[i,1] * (exp(min(max(stoch.log.inf[(i+1)+(P-K)-1], stoch.log.inf.lower.bound[i,1]), stoch.log.inf.upper.bound[i,1])) - 1) +
                 w.non.stoch.pct.inf[i,1] * (exp(non.stoch.log.inf[i,1]) - 1))
 
-    kappa.log[i,1] <- expert.kappa.log.prior[i,1] + kappa.log.error[i + 1]
-    kappa[i,1] <- exp(kappa.log[i,1]) - 1
+        kappa.log[i,1] <- expert.kappa.log.prior[i,1] + kappa.log.error[i + 1] * (include.kappa.log.error.in.first.column == 1) 
+        kappa[i,1] <- exp(kappa.log[i,1]) - 1
                 
         cumulative.kappa.log[i,1] <- kappa.log[i,1] + cumulative.kappa.log[i-1,1]
         }

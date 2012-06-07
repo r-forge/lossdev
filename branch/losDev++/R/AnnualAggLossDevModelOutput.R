@@ -433,6 +433,10 @@ setMethod('triResi',
           } else if(identical(timeAxis, 'cy')) {
 
               cal.years <- object@input@exposureYears
+
+              ##calendar year is offset from ey if we folded the half report
+              if(object@input@triangleType == 'py.with.folded.half')
+                cal.years <- cal.years + 1
               f.plot <- function()
               {
                   plot(x=range(cal.years),
@@ -1417,10 +1421,18 @@ setMethod('calendarYearEffectErrors',
           ##the median holds up under log and exp so we don't have to calculate this draw by draw
           kappa.error <- exp(object@kappa.log.error@median[-(1:2)]) - 1 #first value is for diagonal not in the triangle, second is for the first diagonal in the triangle which has no identifiable effect
           total.years <- length(kappa.error)
-          years <- min(object@input@exposureYears) + 1 - 1 + 1:total.years
+          years <- min(object@input@exposureYears) +  1:total.years ## first calendar year effect is the second diagonal
+          ##calendar year is offset from ey if we folded the half report
+          if(object@input@triangleType == 'py.with.folded.half')
+            years <- years + 1
+          
           names(kappa.error) <- years
 
-          observed.years <- object@input@exposureYears[-1]
+          observed.years <- object@input@exposureYears[-1] ## first calendar year effect is the second diagonal
+          ##calendar year is offset from ey if we folded the half report
+          if(object@input@triangleType == 'py.with.folded.half')
+            observed.years <- observed.years + 1
+
           total.observed.years <- length(observed.years)
 
           if(total.observed.years >= total.years)
@@ -2217,7 +2229,8 @@ setGenericVerif('rateOfDecay',
 ##' \code{firstIsHalfReport} can be \code{NA} (the default)
 ##' if the exposure year type was specified to be one of \dQuote{policy year} or \dQuote{accident year} at the time the input object was constructed (see \code{\link{makeStandardAnnualInput}}
 ##' or \code{\link{makeBreakAnnualInput}}).  An exposure year type of \dQuote{policy year} corresponds to \code{firstIsHalfReport=TRUE},
-##' and an exposure year type of \dQuote{accident year} corresponds to \code{firstIsHalfReport=FALSE}.  Setting \code{firstIsHalfReport} to a non-missing value will override this default.
+##' and an exposure year type of \dQuote{accident year} corresponds to \code{firstIsHalfReport=FALSE}.  
+##' If the input is a result of calling \code{foldHalfReport}, then \code{firstIsHalfReport=TRUE}. Setting \code{firstIsHalfReport} to a non-missing value will override this default behavior.
 ##'
 ##' If \code{expYearRange} is \dQuote{fullyObs}, then only exposure years with a non missing value in the first column will be plotted.
 ##'

@@ -381,6 +381,9 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
     ans@modelFile <- 'standard.model.txt'
     ans@outputType <- 'StandardAnnualAggLossDevModelOutput'
 
+    ##TODO allow users to modify this via makeStandard(Break)AnnualInput
+    ans@includeKappaLogErrorInFirstColumn <- FALSE
+
     ##we shouldn't have to check incrementals.payments because validObject will do that for us
     ##but we do some tests so we can make sure to supply meaningful error messages
 
