@@ -46,6 +46,7 @@ setClass(
 
 
 
+
 ##' A method to plot and/or return the estimated consumption path vs development year time for standard models.
 ##'
 ##' At the heart of aggregate loss development models in \pkg{lossDev} is the consumption path.
@@ -216,8 +217,10 @@ setMethod('tailFactor',
                   firstIsHalfReport <- TRUE
               else if(ey.type == 'ay')
                   firstIsHalfReport <- FALSE
+              else if(ey.type == 'py.with.folded.half')
+                  firstIsHalfReport <- FALSE
               else
-                  stop('"firstIshalfReport" is missing and the exposure year type is not one of "policy year" or "accident year." Please set a value for "firstIsHalfReport".')
+                  stop('"firstIsHalfReport" is missing and the exposure year type is not one of "policy year" or "accident year." Please set a value for "firstIsHalfReport".')
           }
 
           attachment.adj <- ifelse(firstIsHalfReport, attachment + 1, attachment)

@@ -520,7 +520,7 @@ setMethod('foldHalfReport',
 
             ##no change needed to rateOfDecayWeight; dim to tri reduced by one totalDevYears also reduced by 1
 
-              warning("TODO: MIGHT STILL HAVE WORK TO DO IN foldHalfReport")
+            ##TODO:Double check changes made in foldHalfReport
 
 
               if(!validObject(object.copy))
