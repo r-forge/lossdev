@@ -1,6 +1,6 @@
 Package: lossDev
-Version: 3.0.0-2
-Date: 2012-1-11
+Version: 3.0.0-2-777
+Date: 2012-6-8
 Title: Robust Loss Development Using MCMC
 Author: Christopher W. Laws, Frank A. Schmid
 Maintainer: Christopher W. Laws <chris_laws@ncci.com>

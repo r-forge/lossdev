@@ -383,7 +383,6 @@ setMethod(
       })
 
 
-
 ##' A generic function to fold the half-report of a PY triangle.
 ##'
 ##' The half report of a PY triangle can be noisy. Including in the estimation can add to uncertainty.
@@ -391,74 +390,6 @@ setMethod(
 ##' The data in the new object should also reflect the folding.
 ##'
 ##' TODO: Add documentation on how this impacts other functions.
-##'
-##' @name foldHalfReport
-##' @param object The object to fold the half-report.
-##' @return A copy the input, but with the first report folded.
-setGenericVerif('foldHalfReport',
-                 function(object)
-                 standardGeneric('foldHalfReport'))
-
-##' A method to fold the half-report of a PY triangle.
-##'
-##' @name foldHalfReport,AnnualAggLossDevModelInput-method
-##' @param object An object of type \code{AnnualLossDevModelInput}.
-##' @return A copy the input, but with the first report folded.
-##' @docType methods
-##' @seealso \code{\link{foldHalfReport}}
-setMethod('foldHalfReport',
-          signature(object='AnnualAggLossDevModelInput'),
-          function(object)
-          {
-            if(object.copy@triangleType != 'py')
-              stop('Can only call foldHalfReport if triangleType is \'py\'')
-
-              N.old <- dim(object@cumulatives)[1]
-              object.copy <- object
-              object.copy@triangleType <- 'py.with.folded.half'
-              object.copy@cumulatives <- object@cumulatives[-N.old,-1]
-              object.copy@incrementals <- object@incrementals[-N.old,-1]
-              object.copy@incrementals[,1] <- object.copy@incrementals[,1] + object@incrementals[-N.old,1]
-              object.copy@exposureYears <-  object.copy@exposureYears[-N.old]
-              object.copy@totalDevYears <-  object.copy@totalDevYears - 1L
-
-              if(!identical(object.copy@stochInflationRate, 0)){
-
-                ##strip (old) first column, ensure that (old) second column is zero
-                object.copy@stochInflationWeight <- object.copy@stochInflationWeight[,-(1:2)]
-                object.copy@stochInflationWeight <- cbind(0,object.copy@stochInflationWeight)
-                
-                object.copy@stochInflationUpperBound <- cbind(NA,object.copy@stochInflationUpperBound[,-(1:2)])
-                object.copy@stochInflationLowerBound <- cbind(NA,object.copy@stochInflationLowerBound[,-(1:2)])
-                
-                  ##TODO: this ignores the fact that the cumulative first report is (on average) at 18 (instead of 12) months
-                  ##object.copy@stochInflationYears <- object.copy@stochInflationYears - 1L
-              }
-
-              
-              object.copy@lastNonZeroPayment <- object.copy@lastNonZeroPayment - 1L
-
-              ##strip (old) first column, ensure that (old) second column is zero
-              object.copy@nonStochInflationWeight <- object.copy@nonStochInflationWeight[,-(1:2)]
-              object.copy@nonStochInflationWeight <- cbind(0,object.copy@nonStochInflationWeight)
-              object.copy@nonStochInflationRate <- object.copy@nonStochInflationRate[,-(1:2)]
-              object.copy@nonStochInflationRate <- cbind(0,object.copy@nonStochInflationRate)
-
-
-              object.copy@noChangeInScaleParameterAfterColumn <- object.copy@noChangeInScaleParameterAfterColumn - 1L
-
-            ##no change needed to rateOfDecayWeight; dim to tri reduced by one totalDevYears also reduced by 1
-
-              warning("TODO: MIGHT STILL HAVE WORK TO DO IN foldHalfReport")
-
-
-              if(!validObject(object.copy))
-                  stop('Unable to create a valid object.')
-
-              return(object.copy)
-          })
-
-##' Gets the calendar years of
 ##'
 ##' @name foldHalfReport
 ##' @param object The object to fold the half-report.
