@@ -64,6 +64,7 @@ setClass(
                         skewnessParameterBounds='numeric',
                         ar1InCalendarYearEffect='logical',        #should the calendar year effect include an ar1 or white-noise error term?
                         ar1InExposureGrowth='logical',            #should the exposure growth include an ar1 or white-noise error term?
+                        N.ActiveDeltaLogErrors='integer',
                         noChangeInScaleParameterAfterColumn='integer', #valid values are 1 through K, 1 means all columns have same scale, K means all have different, acutal value will be truncated to last observed column
                         includeKappaLogErrorInFirstColumn='logical',
                         'VIRTUAL'),
@@ -189,6 +190,7 @@ setMethod('getTriDim',
 ##'   \item{\code{stoch.log.inf.known.mu}}{Single value.  Added to the log stochastic inflation rate after the ar1 estimation process.}
 ##'   \item{\code{include.kappa.log.error.in.first.column}}{0 or 1. Should the first column include the calendar year error term?}
 ##'   \item{\code{N.active.delta.error}}{Last column with an active delta error. Min value is 2. Max value is K.}
+##'   \item{\code{use.delta.error}}{1 or 0. If 1, then we should use delta error; otherwise, we do not.}
 ##' }
 ##' @name getJagsData,AnnualLossDevModelInput-method
 ##' @param object An object of type \code{AnnualAggLossDevModelInput} from which to collect the needed model input.
@@ -200,7 +202,16 @@ setMethod(
           function(object)
       {
           ans <- list()
-          ans$N.active.delta.error <- 4
+
+          if(object@N.ActiveDeltaLogErrors == 1)
+          {
+              ans$N.active.delta.error <- 2
+              ans$use.delta.error <- 0
+          } else {
+
+              ans$N.active.delta.error <- object@N.ActiveDeltaLogErrors + 1
+              ans$use.delta.error <- 1
+          }
 
           if(object@includeKappaLogErrorInFirstColumn == TRUE){
             ans$include.kappa.log.error.in.first.column <- 1

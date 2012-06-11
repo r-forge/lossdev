@@ -114,7 +114,7 @@ setClass(
 ##' @param last.column.with.scale.innovation A single integer must be at least 1 and at most the number of columns in \code{incremental.payments}.  See \emph{Measurment Error-Second Order Random Walk} in Details.
 ##' @param use.ar1.in.calendar.year A logical value.  The calendar year effect errors may (at the users digression) include an autoregressive process of order 1.  \code{TRUE} turns on the ar1 process, \code{FALSE} turns it off.
 ##' @param use.ar1.in.exposure.growth A logical value.  The exposure growth errors may (at the users discretion) include an autoregressive process of order 1.  \code{TRUE} (the Default) turns on the ar1 process, \code{FALSE} turns it off.
-##'
+##' @param n.active.delta.errors Single Integer value. At least 0 at most dim(triangle) - 2. TODO add info to details.
 ##' @param projected.rate.of.decay  May be one of three types (See \emph{Projected Rate of Decay} in Details). 1) \code{NA}. 2) A matrix of numerics (of specific dim). 3) A named list.
 
 ##'
@@ -154,6 +154,7 @@ setClass(
 ##'   last.column.with.scale.innovation=dim(incremental.payments)[2],
 ##'   use.ar1.in.calendar.year=FALSE,
 ##'   use.ar1.in.exposure.growth=TRUE,
+##'   n.active.delta.errors=0,
 ##'   projected.rate.of.decay=NA)
 makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.payments),
                                  first.year.in.new.regime=trunc(median(as.integer(dimnames(incremental.payments)[[1]]))),
@@ -181,6 +182,7 @@ makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.paym
                                  last.column.with.scale.innovation=dim(incremental.payments)[2],
                                  use.ar1.in.calendar.year=FALSE,
                                  use.ar1.in.exposure.growth=TRUE,
+                                 n.active.delta.errors=0,
                                  projected.rate.of.decay=NA)
 {
 
@@ -205,6 +207,7 @@ makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.paym
                                             last.column.with.scale.innovation=last.column.with.scale.innovation,
                                             use.ar1.in.calendar.year=use.ar1.in.calendar.year,
                                             use.ar1.in.exposure.growth=use.ar1.in.exposure.growth,
+                                            n.active.delta.errors=n.active.delta.errors,
                                             projected.rate.of.decay=projected.rate.of.decay)
 
     ans <- new('BreakAnnualAggLossDevModelInput')

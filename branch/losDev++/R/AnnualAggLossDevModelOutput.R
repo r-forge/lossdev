@@ -2346,3 +2346,130 @@ setGenericVerif('mcmcACF',
             {
                 standardGeneric('mcmcACF')
             })
+
+
+
+##TODO Review naming of these functions and documentation.
+##' A generic function to generate the trace plots for rho.delta.log.error.
+##'
+##'
+##' @name rhoDeltaErrorTracePlot
+##' @param object The object from which to generate the trace plots.
+##' @return NULL invisibly.  Only called for the side effect of plotting.
+##' @seealso \code{\link[=rhoDeltaErrorTracePlot,AnnualAggLossDevModelOutput-method]{rhoDeltaErrorTracePlot("AnnualAggLossDevModelOutput")}}
+##' @exportMethod rhoDeltaErrorTracePlot
+setGenericVerif('rhoDeltaErrorTracePlot',
+                function(object)
+                standardGeneric('rhoDeltaErrorTracePlot'))
+
+
+##' A method to generate the trace plots for rho.delta.log.error.
+##'
+##'
+##' @name rhoDeltaErrorTracePlot
+##' @param object The object from which to generate the trace plots.
+##' @return NULL invisibly.  Only called for the side effect of plotting.
+##' @seealso \code{\link[=rhoDeltaErrorTracePlot,AnnualAggLossDevModelOutput-method]{rhoDeltaErrorTracePlot("AnnualAggLossDevModelOutput")}}
+##' @exportMethod rhoDeltaErrorTracePlot
+setMethod('rhoDeltaErrorTracePlot',
+          signature(object='AnnualAggLossDevModelOutput'),
+          function(object)
+      {
+
+          if(object@input@N.ActiveDeltaLogErrors == 0)
+          {
+              warning('Cannot call rhoDeltaErrorTracePlot unless input was created with n.active.delta.errors > 0')
+              return(invisible(NULL))
+          }
+          elements <- seq(from=2, to=object@input@N.ActiveDeltaLogErrors + 1)
+
+          plot.trace.plots(slot(object@rho.delta.log.error, 'value')[elements,,],
+                           paste('Rho Delta Log Error :', elements, sep=''))
+
+
+      })
+
+
+##' A generic function to generate the trace plots for rho.delta.log.sig.
+##'
+##'
+##' @name sigDeltaErrorTracePlot
+##' @param object The object from which to generate the trace plots.
+##' @return NULL invisibly.  Only called for the side effect of plotting.
+##' @seealso \code{\link[=sigDeltaErrorTracePlot,AnnualAggLossDevModelOutput-method]{sigDeltaErrorTracePlot("AnnualAggLossDevModelOutput")}}
+##' @exportMethod sigDeltaErrorTracePlot
+setGenericVerif('sigDeltaErrorTracePlot',
+                function(object)
+                standardGeneric('sigDeltaErrorTracePlot'))
+
+
+##' A method to generate the trace plots for delta.log.error.sig.
+##'
+##'
+##' @name sigDeltaErrorTracePlot
+##' @param object The object from which to generate the trace plots.
+##' @return NULL invisibly.  Only called for the side effect of plotting.
+##' @seealso \code{\link[=sigDeltaErrorTracePlot,AnnualAggLossDevModelOutput-method]{sigDeltaErrorTracePlot("AnnualAggLossDevModelOutput")}}
+##' @exportMethod sigDeltaErrorTracePlot
+setMethod('sigDeltaErrorTracePlot',
+          signature(object='AnnualAggLossDevModelOutput'),
+          function(object)
+      {
+
+          if(object@input@N.ActiveDeltaLogErrors == 0)
+          {
+              warning('Cannot call sigDeltaErrorTracePlot unless input was created with n.active.delta.errors > 0')
+              return(invisible(NULL))
+          }
+          elements <- seq(from=2, to=object@input@N.ActiveDeltaLogErrors + 1)
+
+          plot.trace.plots(slot(object@delta.log.error.sig, 'value')[elements,,],
+                           paste('Sig Delta Log Error :', elements, sep=''))
+
+
+      })
+
+
+
+##' A generic function to generate plots for delta.log.error.
+##'
+##'
+##' @name deltaError
+##' @param object The object from which to generate the plots.
+##' @return NULL invisibly.  Only called for the side effect of plotting.
+##' @seealso \code{\link[=deltaError,AnnualAggLossDevModelOutput-method]{deltaError("AnnualAggLossDevModelOutput")}}
+##' @exportMethod deltaError
+setGenericVerif('deltaError',
+                function(object)
+                standardGeneric('deltaError'))
+
+
+##' A method to generate plots for delta.log.error.
+##'
+##' Each line in the plot represents a column in the triangle.
+##'
+##' @name deltaError
+##' @param object The object from which to generate the trace plots.
+##' @return NULL invisibly.  Only called for the side effect of plotting.
+##' @seealso \code{\link[=deltaError,AnnualAggLossDevModelOutput-method]{deltaError("AnnualAggLossDevModelOutput")}}
+##' @exportMethod deltaError
+setMethod('deltaError',
+          signature(object='AnnualAggLossDevModelOutput'),
+          function(object)
+      {
+
+          if(object@input@N.ActiveDeltaLogErrors == 0)
+          {
+              warning('Cannot call deltaError unless input was created with n.active.delta.errors > 0')
+              return(invisible(NULL))
+          }
+          elements <- seq(from=2, to=object@input@N.ActiveDeltaLogErrors + 1)
+
+          y <- slot(object@delta.log.error, 'median')[,elements]
+          matplot(x=seq(from=min(object@input@exposureYears), length.out=dim(y)[1]),
+                  y=y,
+                  xlab=getExposureYearLabel(object@input),
+                  ylab=paste('delta.log.error', 2, 'through', object@input@N.ActiveDeltaLogErrors + 1),
+                  type='l')
+
+      })

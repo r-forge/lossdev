@@ -308,7 +308,7 @@ setClass(
 ##' @param last.column.with.scale.innovation A single integer. Must be at least 1 and at most the number of columns in \code{incremental.payments}.  See \emph{Measurment Error-Second Order Random Walk} in Details.
 ##' @param use.ar1.in.calendar.year A logical value.  The calendar year effect errors may (at the users discretion) include an autoregressive process of order 1.  \code{TRUE} turns on the ar1 process, \code{FALSE} (the Default) turns it off.
 ##' @param use.ar1.in.exposure.growth A logical value.  The exposure growth errors may (at the users discretion) include an autoregressive process of order 1.  \code{TRUE} (the Default) turns on the ar1 process, \code{FALSE} turns it off.
-##'
+##' @param n.active.delta.errors Single Integer value. At least 0 at most dim(triangle) - 2. TODO add info to details.
 ##' @param projected.rate.of.decay  May be one of three types (See \emph{Projected Rate of Decay} in Details): 1) \code{NA}; 2) a matrix of numerics (of specific dim); 3) a named list.
 
 ##'
@@ -344,6 +344,7 @@ setClass(
 ##'   last.column.with.scale.innovation=dim(incremental.payments)[2],
 ##'   use.ar1.in.calendar.year=FALSE,
 ##'   use.ar1.in.exposure.growth=TRUE,
+##'   n.active.delta.errors=0,
 ##'   projected.rate.of.decay=NA)
 ##'
 ##'
@@ -369,6 +370,7 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
                                     last.column.with.scale.innovation=dim(incremental.payments)[2],
                                     use.ar1.in.calendar.year=FALSE,
                                     use.ar1.in.exposure.growth=TRUE,
+                                    n.active.delta.errors=0,
                                     projected.rate.of.decay=NA)
 {
 
@@ -383,6 +385,15 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
 
     ##TODO allow users to modify this via makeStandard(Break)AnnualInput
     ans@includeKappaLogErrorInFirstColumn <- FALSE
+
+
+    if(length(n.active.delta.errors) != 1 || as.integer(n.active.delta.errors) != n.active.delta.errors)
+        stop('n.active.delta.errors must be an integer of length 1')
+
+    if(n.active.delta.errors < 0 || n.active.delta.errors > dim(incremental.payments)[2] - 2)
+        stop('n.active.delta.errors out of bounds')
+
+    ans@N.ActiveDeltaLogErrors <- as.integer(n.active.delta.errors)
 
     ##we shouldn't have to check incrementals.payments because validObject will do that for us
     ##but we do some tests so we can make sure to supply meaningful error messages
