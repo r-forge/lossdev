@@ -188,6 +188,7 @@ setMethod('getTriDim',
 ##'   \item{\code{fixed.b.ou}}{Single value. Possible non-stochastic constant term for stochastic inflation rate.}
 ##'   \item{\code{stoch.log.inf.known.mu}}{Single value.  Added to the log stochastic inflation rate after the ar1 estimation process.}
 ##'   \item{\code{include.kappa.log.error.in.first.column}}{0 or 1. Should the first column include the calendar year error term?}
+##'   \item{\code{N.active.delta.error}}{Last column with an active delta error. Min value is 2. Max value is K.}
 ##' }
 ##' @name getJagsData,AnnualLossDevModelInput-method
 ##' @param object An object of type \code{AnnualAggLossDevModelInput} from which to collect the needed model input.
@@ -199,6 +200,7 @@ setMethod(
           function(object)
       {
           ans <- list()
+          ans$N.active.delta.error <- 4
 
           if(object@includeKappaLogErrorInFirstColumn == TRUE){
             ans$include.kappa.log.error.in.first.column <- 1
@@ -267,7 +269,7 @@ setMethod(
               ans$P <- getTriDim(object)[1] - 1
               N <- ans$H + max(ans$L.vec) - 1
               ans$stoch.log.inf.c <- c(0, rep(NA, ans$P - 1), rep(NA, N))
-              
+
               ans$w.stoch.pct.inf <- array(0, c(object@totalExpYears, object@totalDevYears))
               ans$stoch.log.inf.upper.bound <- array(3000, c(object@totalExpYears, object@totalDevYears))
               ans$stoch.log.inf.lower.bound <- array(-3000, c(object@totalExpYears, object@totalDevYears))
@@ -284,13 +286,13 @@ setMethod(
               ##we are guaranteed that stochInflationRate will cover exposureYears
               ##we just have to caclulate P
               ##we don't have to worry if stochInflationRate is too long because the model file will take care of that
-              
+
               if(object@triangleType == 'py.with.folded.half'){
                 ans$P <- match(max(object@exposureYears) + 1, object@stochInflationYears)
               } else {
                 ans$P <- match(max(object@exposureYears), object@stochInflationYears)
               }
-              
+
               ##number of diagionals beyond the last observed diagional (K+1) for which to simulate rates of inflation
               N <- ans$H + max(ans$L.vec) - 1
               times <- N - (length(ans$stoch.log.inf.c) - ans$P)
@@ -412,7 +414,7 @@ setMethod('foldHalfReport',
             if(object@triangleType != 'py')
               stop('Can only call foldHalfReport if triangleType is \'py\'')
 
-            
+
 
             N.old <- dim(object@cumulatives)[1]
             object.copy <- object
@@ -425,19 +427,19 @@ setMethod('foldHalfReport',
             object.copy@totalDevYears <-  object.copy@totalDevYears - 1L
 
             if(!identical(object.copy@stochInflationRate, 0)){
-              
+
                 ##strip (old) first column, ensure that (old) second column is zero
                 object.copy@stochInflationWeight <- object.copy@stochInflationWeight[,-(1:2)]
                 object.copy@stochInflationWeight <- cbind(0,object.copy@stochInflationWeight)
-                
+
                 object.copy@stochInflationUpperBound <- cbind(NA,object.copy@stochInflationUpperBound[,-(1:2)])
                 object.copy@stochInflationLowerBound <- cbind(NA,object.copy@stochInflationLowerBound[,-(1:2)])
-                
+
                   ##TODO: this ignores the fact that the cumulative first report is (on average) at 18 (instead of 12) months
                   ##object.copy@stochInflationYears <- object.copy@stochInflationYears - 1L
               }
 
-              
+
               object.copy@lastNonZeroPayment <- object.copy@lastNonZeroPayment - 1L
 
               ##strip (old) first column, ensure that (old) second column is zero

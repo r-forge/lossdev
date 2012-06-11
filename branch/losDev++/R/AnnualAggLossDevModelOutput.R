@@ -61,6 +61,10 @@ setClass(
                         stoch.log.inf.pred='NodeOutput',
                         kappa='NodeOutput',
                         delta.tail='NodeOutput',
+                        delta.log.error='NodeOutput',
+                        delta.log.error.sig='NodeOutput',
+                        rho.delta.log.error='NodeOutput',
+
                         #omega.obs='NodeOutput',
                         'VIRTUAL'),
          contains='LossDevModelOutput')
@@ -1425,7 +1429,7 @@ setMethod('calendarYearEffectErrors',
           ##calendar year is offset from ey if we folded the half report
           if(object@input@triangleType == 'py.with.folded.half')
             years <- years + 1
-          
+
           names(kappa.error) <- years
 
           observed.years <- object@input@exposureYears[-1] ## first calendar year effect is the second diagonal
@@ -2229,7 +2233,7 @@ setGenericVerif('rateOfDecay',
 ##' \code{firstIsHalfReport} can be \code{NA} (the default)
 ##' if the exposure year type was specified to be one of \dQuote{policy year} or \dQuote{accident year} at the time the input object was constructed (see \code{\link{makeStandardAnnualInput}}
 ##' or \code{\link{makeBreakAnnualInput}}).  An exposure year type of \dQuote{policy year} corresponds to \code{firstIsHalfReport=TRUE},
-##' and an exposure year type of \dQuote{accident year} corresponds to \code{firstIsHalfReport=FALSE}.  
+##' and an exposure year type of \dQuote{accident year} corresponds to \code{firstIsHalfReport=FALSE}.
 ##' If the input is a result of calling \code{foldHalfReport}, then \code{firstIsHalfReport=TRUE}. Setting \code{firstIsHalfReport} to a non-missing value will override this default behavior.
 ##'
 ##' If \code{expYearRange} is \dQuote{fullyObs}, then only exposure years with a non missing value in the first column will be plotted.

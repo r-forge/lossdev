@@ -44,32 +44,32 @@ data
 }
 model
 {
-    
+
     ## Ornstein-Uhlenbeck process
     #.c stands for the fact that stoch.inf may be centered on a fixed, non-stochastic value (stoch.inf.known.mu)
     #stationary mean
     stoch.log.inf.c.init[1] <- b.ou / (1 - a.ou)
     #stationary precision
     stoch.log.inf.c.init[2] <- tau.ou*(1 - a.ou*a.ou)
-    
+
     stoch.log.inf.c.pred[1] ~ dnorm(stoch.log.inf.c.init[1], stoch.log.inf.c.init[2])
-    stoch.log.inf.c[1] ~ dnorm(stoch.log.inf.c.init[1], stoch.log.inf.c.init[2]) 
-            
+    stoch.log.inf.c[1] ~ dnorm(stoch.log.inf.c.init[1], stoch.log.inf.c.init[2])
+
     #add back the possibly non zero mean
     stoch.log.inf[1] <- stoch.log.inf.c[1] + stoch.log.inf.known.mu
     stoch.log.inf.pred[1] <- stoch.log.inf.c.pred[1] + stoch.log.inf.known.mu
-    
+
     for(i in 2:P+N) #inf.m[P] is the rate of inflation that comes with the final diagonal (that is diagional K+1)
         {
         #move the possibly centered inflation rate forward
         stoch.log.inf.c[i] ~ dnorm(stoch.log.inf.c.mu[i],tau.ou)
         stoch.log.inf.c.pred[i] ~ dnorm(stoch.log.inf.c.mu[i],tau.ou)
         stoch.log.inf.c.mu[i] <- a.ou * stoch.log.inf.c[i-1] + b.ou
-        
+
         #add back the possibly non zero mean
         stoch.log.inf[i] <- stoch.log.inf.c[i] + stoch.log.inf.known.mu
         stoch.log.inf.pred[i] <- stoch.log.inf.c.pred[i] + stoch.log.inf.known.mu
-        }    
+        }
 
     ## Priors for Ornstein-Uhlenbeck process
     a.ou.stoch ~ dbeta(a.ou.prior[1],a.ou.prior[2])#this dist is drawn in R, changes here need to be accompanied by changes in R code
@@ -82,8 +82,8 @@ model
     #the user must also set "estimate.b.ou" to zero and set "fixed.b.ou" to zero
     #Otherwise "stoch.log.inf.known.mu" should be set to zero
     b.ou <- b.ou.stoch * (estimate.b.ou != 0) + fixed.b.ou * ( estimate.b.ou == 0)
-    
-    cumulative.kappa.log[1,1] <- 0    
+
+    cumulative.kappa.log[1,1] <- 0
     expert.kappa.log.prior[1,1] <- 0
     kappa.log[1,1] <- 0
     kappa[1,1] <- 0
@@ -93,12 +93,12 @@ model
                 w.stoch.pct.inf[i,1] * (exp(min(max(stoch.log.inf[(i+1)+(P-K)-1], stoch.log.inf.lower.bound[i,1]), stoch.log.inf.upper.bound[i,1])) - 1) +
                 w.non.stoch.pct.inf[i,1] * (exp(non.stoch.log.inf[i,1]) - 1))
 
-        kappa.log[i,1] <- expert.kappa.log.prior[i,1] + kappa.log.error[i + 1] * (include.kappa.log.error.in.first.column == 1) 
+        kappa.log[i,1] <- expert.kappa.log.prior[i,1] + kappa.log.error[i + 1] * (include.kappa.log.error.in.first.column == 1)
         kappa[i,1] <- exp(kappa.log[i,1]) - 1
-                
+
         cumulative.kappa.log[i,1] <- kappa.log[i,1] + cumulative.kappa.log[i-1,1]
         }
-    
+
     for(i in 1:(K+H))
         {
         for(j in 2:L.vec[i])
@@ -109,7 +109,7 @@ model
 
             kappa.log[i,j] <- expert.kappa.log.prior[i,j] + kappa.log.error[i + j]
             kappa[i,j] <- exp(kappa.log[i,j]) - 1
-                
+
             cumulative.kappa.log[i,j] <- kappa.log[i,j] + cumulative.kappa.log[i,j-1]
             }
 
@@ -118,18 +118,18 @@ model
             kappa[i,j] <- 0
             }
         }
-   
+
     ## Likelihood
     for(i in 1:log.inc.index.length)
         {
         log.inc[log.inc.index[i,1],log.inc.index[i,2]] ~ dnorm(mu.shifted.obs[i], theta.obs[i]) #t distribution (scale mixture of Chi-squared)
-        
+
         mu.shifted.obs[i] <- mu[log.inc.index[i,1],log.inc.index[i,2]] + beta / theta.obs[i]
         theta.obs[i] <- omega.obs[i] / df / pow(h[log.inc.index[i,2]], 2)
         omega.obs[i] ~ dchisqrOV(df)
         }
 
- 
+
    for(i in 1:K)
     {
     for(j in 1:K)
@@ -137,22 +137,65 @@ model
          mu.upper.left[i,j] <- mu[i,j]
          }
     }
- 
-        
+
+    #########
+    ##delta.error
+
+    ##priors
+    delta.log.error.sig[1] <- 0
+    delta.log.error.tau[1] <- 0
+    rho.delta.log.error[1] <- 0
+    for(j in 2:N.active.delta.error)
+    {
+        delta.log.error.sig[j] ~ dunif(0, 2)
+        delta.log.error.tau[j] <- delta.log.error.sig[j] ^ -2
+        rho.delta.log.error[j] ~ dbeta(2,1)T(,0.95)
+    }
+
+    ##first row
+    delta.log.error[1,1] <- 0
+    for(j in 2:N.active.delta.error)
+    {
+        delta.log.error[1,j] ~ dnorm(0,delta.log.error.tau[j] * (1 - rho.delta.log.error[j] ^ 2))
+    }
+    for(j in (N.active.delta.error+1):K)
+    {
+        delta.log.error[1,j] <- 0
+    }
+
+    ##subsequent rows
+    for(i in 2:(K+H))
+    {
+        delta.log.error[i,1] <- 0
+        for(j in 2:N.active.delta.error)
+        {
+            delta.log.error[i,j] ~ dnorm(rho.delta.log.error[j] * delta.log.error[i-1,j],delta.log.error.tau[j])
+        }
+        for(j in (N.active.delta.error+1):K)
+        {
+            delta.log.error[i,j] <- 0
+        }
+    }
+
+
+
+
    for(i in 1:K)
         {
         for(j in 1:K)
             {
             log.inc.pred[i,j] ~ dnorm(mu.shifted.pred[i,j], theta.pred[i,j])
             inc.pred[i,j] <- exp(log.inc.pred[i,j])
-            
+
             mu.shifted.pred[i,j] <- mu[i,j] + beta / theta.pred[i,j]
             theta.pred[i,j] <- omega.pred[i,j] / df / pow(h[j], 2)
             omega.pred[i,j] ~ dchisqr(df)
-            
+
             mu[i,j] <-  cumulative.kappa.log[i,j]
                         + sum(eta.log[1:i]) #does not include calendar year effect
                         + S[j]
+                        + delta.log.error[i,j]
+
             }
         }
 
@@ -165,17 +208,17 @@ model
             ##otherwise log.inc.pred would not be square, or have to contain dummy values
             log.inc.pred[i,j] ~ dnorm(mu.shifted.pred[i,j], theta.pred[i,j])
             inc.pred[i,j] <- exp(log.inc.pred[i,j])
-            
+
             mu.shifted.pred[i,j] <- mu[i,j] + beta / theta.pred[i,j]
             theta.pred[i,j] <- omega.pred[i,j] / df / pow(h[K], 2)
-            omega.pred[i,j] ~ dchisqr(df)            
-            
+            omega.pred[i,j] ~ dchisqr(df)
+
             mu[i,j] <-  cumulative.kappa.log[i,j]
                         + sum(eta.log[1:i]) #does not include calendar year effect
                         + S[K]
                         + sum(delta.tail.log[i,(K+1):j])
             }
-            
+
         for(j in (L.vec[i]+1):max.L.vec.plus.1)
             {
             inc.pred[i,j] <- 0
@@ -189,11 +232,11 @@ model
             {
             log.inc.pred[i,j] ~ dnorm(mu.shifted.pred[i,j], theta.pred[i,j])
             inc.pred[i,j] <- exp(log.inc.pred[i,j])
-            
+
             mu.shifted.pred[i,j] <- mu[i,j] + beta / theta.pred[i,j]
             theta.pred[i,j] <- omega.pred[i,j] / df / pow(h[j], 2)
             omega.pred[i,j] ~ dchisqr(df)
-            
+
             mu[i,j] <-  cumulative.kappa.log[i,j]
                         + sum(eta.log[1:i]) #does not include calendar year effect
                         + S[j]
@@ -209,11 +252,11 @@ model
             ##otherwise log.inc.pred would not be square, or have to contain dummy values
             log.inc.pred[i,j] ~ dnorm(mu.shifted.pred[i,j], theta.pred[i,j])
             inc.pred[i,j] <- exp(log.inc.pred[i,j])
-            
+
             mu.shifted.pred[i,j] <- mu[i,j] + beta / theta.pred[i,j]
             theta.pred[i,j] <- omega.pred[i,j] / df / pow(h[K], 2)
-            omega.pred[i,j] ~ dchisqr(df)    
-            
+            omega.pred[i,j] ~ dchisqr(df)
+
             mu[i,j] <-  cumulative.kappa.log[i,j]
                         + sum(eta.log[1:i]) #does not include calendar year effect
                         + S[K]
@@ -230,7 +273,7 @@ model
     ## Spline
     #first column is spline values evaluated at z[1:K]
     #second column is number of knots in first column
- 
+
     #fourth column is AR1 process with AR1 coeff of 10th parameter and inovation precision of 9th
     S.[1:K,1:4] ~ dspline(
                 z[1:K], #values a which to evaluate the spline
@@ -249,15 +292,15 @@ model
         {
         z[i] <- i
         }
-                
+
     eta.mu <- S.[1,3] + 0
     tau.eta.mu <- precision.for.eta.mu
-    
+
 
 
     S[1:K] <- S.[1:K,1]
     #k <- S.[1,2] + 0
-    
+
     beta.prec <- 0.0001
     k ~ dpois(mu.number.of.knots)T(,number.of.knots.ubound)
     mu.number.of.knots ~ dgamma(mu.number.of.knots.prior[1], mu.number.of.knots.prior[2])
@@ -267,13 +310,13 @@ model
     delta.log[K] <- S[K]-S[K-1]
 
     for(i in 1:(K+H))
-        {      
+        {
         for(j in (K+1):L.vec[i])
             {
             delta.tail.log[i,j] <- (1-v[i,j-K])*delta.log[K] + v[i,j-K]*delta.log.pen[i]
             delta.tail[i,j-K] <- exp(delta.tail.log[i,j])-1
             }
-        
+
         for(j in (L.vec[i]+1):max.L.vec.plus.1)
             {
             delta.tail[i,j-K] <- 0
@@ -325,33 +368,33 @@ model
     ## Priors
     beta.stoch ~ dtOV(0, precision.for.skewness, df.for.skewness)T(bounds.for.skewness[1], bounds.for.skewness[2]) #this dist is drawn in R, changes here need to be accompanied by changes in R code
     #beta.stoch ~ dt(0, precision.for.skewness, df.for.skewness)T(bounds.for.skewness[1], bounds.for.skewness[2]) #this dist is drawn in R, changes here need to be accompanied by changes in R code
-    beta <- beta.stoch * (allow.for.skew != 0) + 0 * (allow.for.skew == 0)    
-    
+    beta <- beta.stoch * (allow.for.skew != 0) + 0 * (allow.for.skew == 0)
+
     #this dist is drawn in R, changes here need to be accompanied by changes in R code
     df ~ dchisqrOV(df.k) T(df.bounds[1], df.bounds[2]) #degrees of freedom of Student's t
- 
+
     ## Standard deviations
     sigma.kappa ~ dunif(sigma.kappa.bounds[1], sigma.kappa.bounds[2])#this dist is drawn in R, changes here need to be accompanied by changes in R code
     sigma.eta ~ dunif(sigma.eta.bounds[1], sigma.eta.bounds[2])#this dist is drawn in R, changes here need to be accompanied by changes in R code
     tau.kappa <- pow(sigma.kappa,-2)
     tau.eta <- pow(sigma.eta,-2)
-     
+
 
     ## shift in variance mechanism
     ## the inverse of the scale parameter for the t measurement distribution
     ## follows a second order random walk in log space
-    
+
     ##initial values
     for(t in 1:2)
         {
-        h.stoch[t] ~ dunifOV(0, 10)   
-        #h.stoch[t] ~ dunif(0, 10)                                       
+        h.stoch[t] ~ dunifOV(0, 10)
+        #h.stoch[t] ~ dunif(0, 10)
         h.2.log[t] <- log(h.2[t])
-        h.2[t] <- pow(h[t], 2)      
+        h.2[t] <- pow(h[t], 2)
         }
      h[1] <- h.stoch[1]
      h[2] <- (h.same.as.last[2] != 0) * h[1] + (h.same.as.last[2] == 0) * h.stoch[2]
-    
+
     ##RW2
     for(t in 3:K)
         {
@@ -360,7 +403,7 @@ model
         #h.2.log.stoch[t] ~ dnorm(h.2.log.mu[t], tau.h.2.log.innov)
         h.2.log.mu[t] <- 2 * h.2.log[t-1] - h.2.log[t-2]
         h.2.log[t] <- (h.same.as.last[t] != 0) * h.2.log[t-1] + (h.same.as.last[t] == 0) * h.2.log.stoch[t]
-        h.2[t] <- exp(h.2.log[t])         
+        h.2[t] <- exp(h.2.log[t])
         }
 
 
