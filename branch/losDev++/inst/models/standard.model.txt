@@ -158,7 +158,7 @@ model
     for(j in 2:N.active.delta.error)
     {
         delta.log.error[1,j] ~ dnorm(0,delta.log.error.tau[j] * (1 - rho.delta.log.error[j] ^ 2))
-        delta.log.error.[1,j] <- delta.log.error[1,j] 
+        delta.log.error.[1,j] <- delta.log.error[1,j]
     }
     for(j in (N.active.delta.error+1):K)
     {
@@ -173,7 +173,7 @@ model
         for(j in 2:N.active.delta.error)
         {
             delta.log.error[i,j] ~ dnorm(rho.delta.log.error[j] * delta.log.error[i-1,j],delta.log.error.tau[j])
-            delta.log.error.[i,j] <- delta.log.error[i,j] 
+            delta.log.error.[i,j] <- delta.log.error[i,j]
         }
         for(j in (N.active.delta.error+1):K)
         {
@@ -245,6 +245,7 @@ model
             mu[i,j] <-  cumulative.kappa.log[i,j]
                         + sum(eta.log[1:i]) #does not include calendar year effect
                         + S[j]
+                        + delta.log.error.[i,j] * use.delta.error
             }
         }
 
