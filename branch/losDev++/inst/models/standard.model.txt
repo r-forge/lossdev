@@ -145,11 +145,13 @@ model
     delta.log.error.sig[1] <- 0
     delta.log.error.tau[1] <- 0
     rho.delta.log.error[1] <- 0
+    delta.log.error.master.sig ~ dunif(0, 2)
     for(j in 2:N.active.delta.error)
     {
-        delta.log.error.sig[j] ~ dunif(0, 2)
+        ##delta.log.error.sig[j] ~ dunif(0, 2)
+        delta.log.error.sig[j] <- delta.log.error.master.sig
         delta.log.error.tau[j] <- delta.log.error.sig[j] ^ -2
-        rho.delta.log.error[j] ~ dbeta(2,1)T(,0.95)
+        rho.delta.log.error[j] ~ dbeta(1,2)T(,0.95)
     }
 
     ##first row
@@ -157,7 +159,7 @@ model
     delta.log.error.[1,1] <- delta.log.error[1,1]
     for(j in 2:N.active.delta.error)
     {
-        delta.log.error[1,j] ~ dnorm(0,delta.log.error.tau[j] * (1 - rho.delta.log.error[j] ^ 2))
+        delta.log.error[1,j] ~ dnormOV(0,delta.log.error.tau[j] * (1 - rho.delta.log.error[j] ^ 2))
         delta.log.error.[1,j] <- delta.log.error[1,j]
     }
     for(j in (N.active.delta.error+1):K)
@@ -172,7 +174,7 @@ model
         delta.log.error.[i,1] <- delta.log.error[i,1]
         for(j in 2:N.active.delta.error)
         {
-            delta.log.error[i,j] ~ dnorm(rho.delta.log.error[j] * delta.log.error[i-1,j],delta.log.error.tau[j])
+            delta.log.error[i,j] ~ dnormOV(rho.delta.log.error[j] * delta.log.error[i-1,j],delta.log.error.tau[j])
             delta.log.error.[i,j] <- delta.log.error[i,j]
         }
         for(j in (N.active.delta.error+1):K)
@@ -199,7 +201,7 @@ model
             mu[i,j] <-  cumulative.kappa.log[i,j]
                         + sum(eta.log[1:i]) #does not include calendar year effect
                         + S[j]
-                        + delta.log.error.[i,j] * use.delta.error
+                        + sum(delta.log.error.[i,1:j]) * use.delta.error
 
             }
         }
@@ -222,6 +224,7 @@ model
                         + sum(eta.log[1:i]) #does not include calendar year effect
                         + S[K]
                         + sum(delta.tail.log[i,(K+1):j])
+                        + sum(delta.log.error.[i,1:K]) * use.delta.error
             }
 
         for(j in (L.vec[i]+1):max.L.vec.plus.1)
@@ -245,7 +248,7 @@ model
             mu[i,j] <-  cumulative.kappa.log[i,j]
                         + sum(eta.log[1:i]) #does not include calendar year effect
                         + S[j]
-                        + delta.log.error.[i,j] * use.delta.error
+                        + sum(delta.log.error.[i,1:j]) * use.delta.error
             }
         }
 
@@ -267,6 +270,7 @@ model
                         + sum(eta.log[1:i]) #does not include calendar year effect
                         + S[K]
                         + sum(delta.tail.log[i,(K+1):j])
+                        + sum(delta.log.error.[i,1:K]) * use.delta.error
             }
 
         for(j in (L.vec[i]+1):max.L.vec.plus.1)
