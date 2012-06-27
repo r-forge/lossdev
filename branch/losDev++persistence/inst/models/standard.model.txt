@@ -145,13 +145,14 @@ model
     delta.log.error.sig[1] <- 0
     delta.log.error.tau[1] <- 0
     rho.delta.log.error[1] <- 0
-    delta.log.error.master.sig ~ dunif(0, 1)
+    delta.log.error.master.sig ~ dbeta(1, 2) ##favor small inovations
     for(j in 2:N.active.delta.error)
     {
         ##delta.log.error.sig[j] ~ dunif(0, 2)
         delta.log.error.sig[j] <- delta.log.error.master.sig
         delta.log.error.tau[j] <- delta.log.error.sig[j] ^ -2
-        rho.delta.log.error[j] ~ dbeta(1,2)T(,0.9)
+        rho.delta.log.error[j] <- rw.delta.log.error[j]
+        rw.delta.log.error[j] ~ dbern(0.25)
     }
 
     ##first row
@@ -159,7 +160,9 @@ model
     delta.log.error.[1,1] <- delta.log.error[1,1]
     for(j in 2:N.active.delta.error)
     {
-        delta.log.error[1,j] ~ dnormOV(0,delta.log.error.tau[j] * (1 - rho.delta.log.error[j] ^ 2))T(-0.15, 0.15)
+        delta.log.error..[1,j] ~ dnormOV(0,delta.log.error.tau[j])T(-0.15, 0.15)
+        delta.log.error[1,j] <- delta.log.error..[1,j] * (rw.delta.log.error[j] != 1) +
+                                                     0 * (rw.delta.log.error[j] == 1)  ##if it's not a random walk, then include the error term.
         delta.log.error.[1,j] <- delta.log.error[1,j]
     }
     for(j in (N.active.delta.error+1):K)
