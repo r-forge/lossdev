@@ -2381,7 +2381,7 @@ setMethod('rhoDeltaErrorTracePlot',
               warning('Cannot call rhoDeltaErrorTracePlot unless input was created with n.active.delta.errors > 0')
               return(invisible(NULL))
           }
-          elements <- seq(from=2, to=object@input@N.ActiveDeltaLogErrors + 1)
+          elements <- seq(from=2, to=max(object@input@N.ActiveDeltaLogErrors + 1, 4))
 
           plot.trace.plots(slot(object@rho.delta.log.error, 'value')[elements,,],
                            paste('Rho Delta Log Error :', elements, sep=''))
@@ -2421,7 +2421,7 @@ setMethod('sigDeltaErrorTracePlot',
               warning('Cannot call sigDeltaErrorTracePlot unless input was created with n.active.delta.errors > 0')
               return(invisible(NULL))
           }
-          elements <- seq(from=2, to=object@input@N.ActiveDeltaLogErrors + 1)
+          elements <- seq(from=2, to=max(object@input@N.ActiveDeltaLogErrors + 1, 4))
 
           plot.trace.plots(slot(object@delta.log.error.sig, 'value')[elements,,],
                            paste('Sig Delta Log Error :', elements, sep=''))
