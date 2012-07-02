@@ -4,8 +4,7 @@ Date: 2012-1-11
 Title: Robust Loss Development Using MCMC
 Author: Christopher W. Laws, Frank A. Schmid
 Maintainer: Christopher W. Laws <chris_laws@ncci.com>
-Depends: R (>= 2.13.1), methods, rjags (>= 3-3), filehash,
-    logspline, utils
+Depends: R (>= 2.13.1), methods, rjags (>= 3-3), logspline, utils
 SystemRequirements: JAGS (>= 3.0.0)
 Lazyload: yes
 Description: Loss Development for Insurance Triangles
