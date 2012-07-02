@@ -66,7 +66,6 @@ myLibPath <- function() return(get('myLibPath', envir=mutableState, inherits=FAL
 ##' @aliases .onLoad
 ##' @seealso \code{\link{.onLoad}}
 ##' @import rjags
-##' @importFrom utils normalizePath
 .onLoad <- function(libname, pkgname)
 {
     ##Create functions to return the required values. Lexical scoping ensures the correct values are returned.
