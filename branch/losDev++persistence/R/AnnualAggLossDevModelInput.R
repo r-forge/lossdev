@@ -67,6 +67,7 @@ setClass(
                         N.ActiveDeltaLogErrors='integer',
                         noChangeInScaleParameterAfterColumn='integer', #valid values are 1 through K, 1 means all columns have same scale, K means all have different, acutal value will be truncated to last observed column
                         includeKappaLogErrorInFirstColumn='logical',
+                        knotLocationUpperBound='numeric',
                         'VIRTUAL'),
          contains='LossDevModelInput')
 

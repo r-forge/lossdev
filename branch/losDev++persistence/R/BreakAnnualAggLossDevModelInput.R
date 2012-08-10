@@ -108,6 +108,7 @@ setClass(
 ##' @param prior.for.number.of.knots.pre.break A two element vector giving the paramters for the prior number of knots.
 ##' @param prior.for.knot.locations.post.break See \code{prior.for.knot.locations.pre.break}. Large values produce stable consumption paths at high development years.
 ##' @param prior.for.number.of.knots.post.break A two element vector giving the paramters for the prior number of knots.
+##' @param knot.location.upper.bound A postive number. No knot can occur after the \code{knot.location.upper.bound}th column. If this value is NA, a default value will be calculated. This value is for the pre-break consumption path.
 ##'
 ##' @param use.skew.t A logical value.  If \code{TRUE} the model assumes the observed and estimated log incremental payments are realizations from a skewed \eqn{t} distribution; if \code{FALSE} it will assume zero skewness. (See Reference.)
 ##' @param bound.for.skewness.parameter A positive numerical value representing the symetric boundaries for the skewness parameter.  In most cases, the default should be sufficient. Ignored if \code{use.skew.t=FALSE}.
@@ -149,6 +150,7 @@ setClass(
 ##'   prior.for.number.of.knots.pre.break=c(3, 1/7),
 ##'   prior.for.knot.locations.post.break=NA,
 ##'   prior.for.number.of.knots.post.break=c(3, 1/7),
+##'   knot.location.upper.bound=NA,
 ##'   use.skew.t=FALSE,
 ##'   bound.for.skewness.parameter=10,
 ##'   last.column.with.scale.innovation=dim(incremental.payments)[2],
@@ -177,6 +179,7 @@ makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.paym
                                  prior.for.number.of.knots.pre.break=c(3,1/7),
                                  prior.for.knot.locations.post.break=NA,
                                  prior.for.number.of.knots.post.break=c(3,1/7),
+                                 knot.location.upper.bound=NA,
                                  use.skew.t=FALSE,
                                  bound.for.skewness.parameter=10,
                                  last.column.with.scale.innovation=dim(incremental.payments)[2],
@@ -202,6 +205,7 @@ makeBreakAnnualInput <- function(incremental.payments=decumulate(cumulative.paym
                                             cumulative.payments=cumulative.payments,
                                             exp.year.type=exp.year.type,
 
+                                            knot.location.upper.bound=knot.location.upper.bound,
                                             use.skew.t=use.skew.t,
                                             bound.for.skewness.parameter=bound.for.skewness.parameter,
                                             last.column.with.scale.innovation=last.column.with.scale.innovation,
@@ -375,7 +379,13 @@ setMethod(
           }
 
           ans$x.0 <- c(1, 1)
-          ans$x.r <- c(x.r(), x.r.post.break())
+
+          if(is.na(object@knotLocationUpperBound)){
+              ans$x.r <- c(x.r(), x.r.post.break())
+          } else {
+              ans$x.r <- c(min(x.r(), object@knotLocationUpperBound),
+                           min(x.r.post.break(), object@knotLocationUpperBound))
+          }
           ans$break.row <- match(object@rangeForFirstYearInNewRegime, object@exposureYears)
           ans$break.row.priors <- object@priorsForFirstYearInNewRegime
           ans$K.trim <- ans$K - ans$break.row[1] + 1

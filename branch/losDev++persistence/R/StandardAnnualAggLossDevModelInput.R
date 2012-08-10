@@ -303,6 +303,7 @@ setClass(
 ##' @param exp.year.type A single character value indicating the type of exposure years:  \sQuote{ambiguous}, \sQuote{py}, and \sQuote{ay} mean \sQuote{Exposure Year}, \sQuote{Policy Year}, and \sQuote{Accident Year}; respectively.
 ##' @param prior.for.knot.locations A single numeric value of at least 1.  The prior for the location of knots is a scaled beta with parameters \code{c(1,prior.for.knot.locations)}.  Large values produce stable consumption paths at high development years.
 ##' @param prior.for.number.of.knots A two element vector giving the paramters for the prior number of knots. (See \emph{Number of Knots} in Details)
+##' @param knot.location.upper.bound A postive number. No knot can occur after the \code{knot.location.upper.bound}th column. If this value is NA, a default value will be calculated.
 ##' @param use.skew.t A logical value.  If \code{TRUE}, the model assumes that the observed and estimated log incremental payments are realizations from a skewed \eqn{t} distribution; if \code{FALSE} it assumes zero skewness. (See Reference.)
 ##' @param bound.for.skewness.parameter A positive numerical value representing the symetric boundaries for the skewness parameter.  In most cases, the default should be sufficient. Ignored if \code{use.skew.t=FALSE}.
 ##' @param last.column.with.scale.innovation A single integer. Must be at least 1 and at most the number of columns in \code{incremental.payments}.  See \emph{Measurment Error-Second Order Random Walk} in Details.
@@ -339,6 +340,7 @@ setClass(
 ##'   exp.year.type=c('ambiguous', 'py', 'ay'),
 ##'   prior.for.knot.locations=2,
 ##'   prior.for.number.of.knots=c(3, 1/7),
+##'   knot.location.upper.bound=NA,
 ##'   use.skew.t=FALSE,
 ##'   bound.for.skewness.parameter=10,
 ##'   last.column.with.scale.innovation=dim(incremental.payments)[2],
@@ -364,6 +366,7 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
                                     cumulative.payments=cumulate(incremental.payments),
                                     exp.year.type=c('ambiguous', 'py', 'ay'),
                                     prior.for.knot.locations=2,
+                                    knot.location.upper.bound=NA,
                                     prior.for.number.of.knots=c(3, 1/7),
                                     use.skew.t=FALSE,
                                     bound.for.skewness.parameter=10,
@@ -378,6 +381,14 @@ makeStandardAnnualInput <- function(incremental.payments=decumulate(cumulative.p
     force(cumulative.payments)
 
     ans <- new('StandardAnnualAggLossDevModelInput')
+
+    if(is.na(knot.location.upper.bound)){
+        ans@knotLocationUpperBound <- as.numeric(NA)
+    } else if(!is.numeric(knot.location.upper.bound) || knot.location.upper.bound <= 3) {
+        stop("'knot.location.upper.bound' must either be NA, or a number greater than 3")
+    } else {
+        ans@knotLocationUpperBound <- knot.location.upper.bound
+    }
 
     ##set the model file and output type
     ans@modelFile <- 'standard.model.txt'
@@ -939,7 +950,11 @@ setMethod(
 
 
           ans$x.0 <- 1
-          ans$x.r <- x.r()
+          if(is.na(object@knotLocationUpperBound)){
+              ans$x.r <- x.r()
+          } else {
+              ans$x.r <- min(x.r(), object@knotLocationUpperBound)
+          }
           ans$beta.prior <- c(1,object@priorForKnotPositions)
 
           ans$mu.number.of.knots.prior <- object@priorForNumberOfKnots
